@@ -1,3 +1,4 @@
+<!-- src/components/AppSidebar.vue -->
 <template>
   <q-drawer
     :model-value="isOpen"
@@ -39,8 +40,8 @@
       <div class="location-section">
         <p>
           <q-icon name="place" size="xs" />
-          <span
-            >{{ userName }} 님의 희망 근무지예요. <br />
+          <span>
+            {{ userName }} 님의 희망 근무지예요. <br />
             다른 지역으로 선택해볼까요?</span
           >
         </p>
@@ -238,6 +239,7 @@ function toggleNotificationPopup() {
 function login() {
   isLoggedIn.value = true;
   userName.value = loginData.value.username; // 예시 사용자 이름
+  selectedLocation.value = localStorage.getItem('location'); // 희망 지역 복원
   localStorage.setItem('isLoggedIn', 'true');
   localStorage.setItem('userName', userName.value);
 
@@ -318,6 +320,7 @@ function logout() {
 // 지역 선택
 function selectLocation(location) {
   selectedLocation.value = location;
+  localStorage.setItem('location', location); // 지역 변경 시 저장
 }
 
 // 알림 개수 업데이트
@@ -330,6 +333,7 @@ onMounted(() => {
   if (localStorage.getItem('isLoggedIn') === 'true') {
     isLoggedIn.value = true;
     userName.value = localStorage.getItem('userName') || '';
+    selectedLocation.value = localStorage.getItem('location'); // 희망 지역 복원
     // 로그인 상태일 때 알림 데이터 복원
     notifications.value = [
       {

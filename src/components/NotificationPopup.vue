@@ -25,7 +25,7 @@
             <q-item-label class="notification-text">
               <strong>{{ notification.user }}</strong
               >님이 <strong>{{ notification.target }}</strong
-              >님에게 댓글을 남겼습니다.
+              >에게 알림을 보냈습니다.
             </q-item-label>
             <q-item-label caption>{{ notification.time }}</q-item-label>
           </q-item-section>
