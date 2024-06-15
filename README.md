@@ -1,2 +1,43 @@
-# be05-fin-5team-KnowGet-Frontend-1
-✨ 백지환 서근엽 정유진 정민지 ✨ 🐔Chicken team 의 🍗KnowGet 최종 프로젝트 FE
+# KnowGet (quasar-project)
+
+A Quasar Project
+
+## Install the dependencies
+
+```bash
+yarn
+# or
+npm install
+```
+
+### Start the app in development mode (hot-code reloading, error reporting, etc.)
+
+```bash
+quasar dev
+```
+
+### Lint the files
+
+```bash
+yarn lint
+# or
+npm run lint
+```
+
+### Format the files
+
+```bash
+yarn format
+# or
+npm run format
+```
+
+### Build the app for production
+
+```bash
+quasar build
+```
+
+### Customize the configuration
+
+See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
