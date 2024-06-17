@@ -10,17 +10,17 @@
       :model-value="leftDrawerOpen"
       :staticSidebar="isLargeScreen"
       @update:model-value="setLeftDrawerOpen"
-    />
+      is-open/>
     <q-page-container>
-      <router-view @route-changed="updatePageTitle" />
+      <router-view @route-changed="updatePageTitle"/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useQuasar } from 'quasar';
+import {ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
+import {useQuasar} from 'quasar';
 import AppHeader from 'components/AppHeader.vue';
 import AppSidebar from 'components/AppSidebar.vue';
 
@@ -44,7 +44,7 @@ watch(
   newRoute => {
     updatePageTitle(newRoute);
   },
-  { immediate: true },
+  {immediate: true},
 );
 
 function toggleLeftDrawer() {
@@ -63,6 +63,6 @@ watch(
       leftDrawerOpen.value = true; // 큰 화면일 때 사이드바 항상 열림
     }
   },
-  { immediate: true },
+  {immediate: true},
 );
 </script>

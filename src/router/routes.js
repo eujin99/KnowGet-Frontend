@@ -7,37 +7,43 @@ const routes = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: { title: '너겟, 노숙인 일자리 지식통합서비스' },
+        meta: {title: '너겟, 노숙인 일자리 지식통합서비스'},
       },
       {
         path: 'jobpost',
         component: () => import('pages/JobPost.vue'),
-        meta: { title: '너겟, 일자리 찾기' },
+        meta: {title: '너겟, 일자리 찾기'},
+      },
+      {
+        path: 'post/:id',
+        component: () => import('pages/JobPostDetails.vue'),
+        meta: {title: '너겟, 일자리 찾기'},
+        name: 'JobPostDetails', props: true
       },
       {
         path: 'education',
         component: () => import('pages/EducationPage.vue'),
-        meta: { title: '교육 찾기' },
+        meta: {title: '교육 찾기'},
       },
       {
         path: 'guide',
         component: () => import('pages/GuidePage.vue'),
-        meta: { title: '취업 가이드' },
+        meta: {title: '취업 가이드'},
       },
       {
         path: 'success',
         component: () => import('pages/SuccessPage.vue'),
-        meta: { title: '취업 성공사례' },
+        meta: {title: '취업 성공사례'},
       },
       {
         path: 'consult',
         component: () => import('pages/ConsultPage.vue'),
-        meta: { title: '상담하기' },
+        meta: {title: '상담하기'},
       },
       {
         path: 'signup',
         component: () => import('pages/SignupPage.vue'),
-        meta: { title: '회원 가입' },
+        meta: {title: '회원 가입'},
       },
     ],
   },
