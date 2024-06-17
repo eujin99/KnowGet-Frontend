@@ -33,7 +33,7 @@
             <q-btn-toggle
               v-model="selectedFilter"
               :options="filterOptions"
-              color="primary"
+              color="light-blue-14"
               size="md"
               unelevated
             />
@@ -76,9 +76,9 @@
               <q-item-label caption>정원: {{ course.capacity }}</q-item-label>
               <q-btn
                 :href="course.courseApplyUrl"
-                label="신청하기"
+                label="더 알아보고 신청하기"
                 target="_blank"
-                color="primary"
+                color="blue-grey-6"
                 class="q-mt-sm full-width"
               />
             </q-item-section>
