@@ -1,5 +1,5 @@
 <template>
-  <div class="row justify-center q-pa-md pagination-container">
+  <div class="pagination-container">
     <q-btn
       dense
       flat
@@ -25,7 +25,7 @@
       round
       :label="startPage + n"
       @click="setPage(startPage + n)"
-      :color="currentPage === (startPage + n) ? 'primary' : 'grey'"
+      :color="currentPage === startPage + n ? 'primary' : 'grey'"
     />
 
     <q-btn
@@ -69,12 +69,6 @@ export default {
     pagesInSet() {
       return Math.min(10, this.totalPages - this.startPage);
     },
-    isFirstSet() {
-      return this.startPage === 0;
-    },
-    isLastSet() {
-      return this.startPage + 10 >= this.totalPages;
-    },
   },
   methods: {
     setPage(page) {
@@ -102,9 +96,8 @@ export default {
 
 <style scoped>
 .pagination-container {
-  position: fixed;
-  bottom: 16px;
-  left: 0;
-  right: 0;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
 }
 </style>
