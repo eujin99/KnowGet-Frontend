@@ -4,7 +4,7 @@
       <q-toolbar-title>Job Listings</q-toolbar-title>
     </q-toolbar>
     <q-list bordered>
-      <q-item v-for="post in posts" :key="post.postId" clickable @click="viewDetails(post)">
+      <q-item v-for="post in paginatedPosts" :key="post.postId" clickable @click="viewDetails(post)">
         <q-item-section side>
           <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
         </q-item-section>
@@ -24,24 +24,29 @@
         </q-item-section>
       </q-item>
     </q-list>
-    <q-pagination v-model="page" :max="totalPages" @update:model-value="fetchPosts"/>
+    <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
   </q-page>
 </template>
 
 <script>
-import {onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useQuasar} from 'quasar'
 import {api} from 'boot/axios'
 import {useAuthStore} from 'stores/authStore'
 import {isAfter, parseISO} from 'date-fns'
+import PaginationControl from 'components/PaginationControl.vue'
 
 export default {
+  components: {
+    PaginationControl
+  },
   setup() {
     const $q = useQuasar()
     const posts = ref([])
     const page = ref(1)
-    const totalPages = ref(1)
+    const itemsPerPage = 10
+    const totalPages = computed(() => Math.ceil(posts.value.length / itemsPerPage))
     const authStore = useAuthStore()
     const router = useRouter()
 
@@ -54,8 +59,6 @@ export default {
             ...post,
             isBookmarked: false // 실제 사용자 데이터에서 북마크 여부 가져와야 함
           }))
-          // 페이지네이션 처리를 위한 totalPages 설정
-          totalPages.value = Math.ceil(response.data.length / 10) // 50개씩 페이징
         } else {
           throw new Error('Invalid APi response')
         }
@@ -67,6 +70,12 @@ export default {
         })
       }
     }
+
+    const paginatedPosts = computed(() => {
+      const start = (page.value - 1) * itemsPerPage
+      const end = start + itemsPerPage
+      return posts.value.slice(start, end)
+    })
 
     const viewDetails = (post) => {
       router.push({name: 'JobPostDetails', params: {post}})
@@ -87,16 +96,20 @@ export default {
       return isAfter(closeDate, new Date()) ? '구인중' : '구인 마감'
     }
 
+    watch(page, fetchPosts()) // 페이지가 변경될 때마다 fetchPosts 호출
+
     onMounted(fetchPosts)
 
     return {
       posts,
       page,
       totalPages,
+      paginatedPosts,
       fetchPosts,
       viewDetails,
       toggleBookmark,
-      getRecruitmentStatus
+      getRecruitmentStatus,
+      updatePagination: fetchPosts // 페이지네이션 컨트롤에서 페이지 변경 시 fetchPosts 호출
     }
   }
 }
