@@ -7,12 +7,18 @@ const routes = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: { title: '너겟, 노숙인 일자리 지식통합서비스' },
+        meta: {title: '너겟, 노숙인 일자리 지식통합서비스'},
       },
       {
         path: 'jobpost',
         component: () => import('pages/JobPost.vue'),
-        meta: { title: '너겟, 일자리 찾기' },
+        meta: {title: '너겟, 일자리 찾기'},
+      },
+      {
+        path: 'post/:id',
+        component: () => import('pages/JobPostDetails.vue'),
+        meta: {title: '너겟, 일자리 찾기'},
+        name: 'JobPostDetails', props: true
       },
       {
         path: 'education',
@@ -32,7 +38,7 @@ const routes = [
       {
         path: 'consult',
         component: () => import('pages/ConsultPage.vue'),
-        meta: { title: '상담하기' },
+        meta: {title: '상담하기'},
       },
       {
         path: 'signup',
