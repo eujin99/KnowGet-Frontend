@@ -1,20 +1,20 @@
 <template>
-  <div class="row justify-center q-pa-md">
+  <div class="row justify-center q-pa-md pagination-container">
     <q-btn
       dense
       flat
       round
       icon="first_page"
       @click="toFirstPage"
-      :disable="isFirstSet"
+      :disable="currentPage === 1"
     />
     <q-btn
       dense
       flat
       round
       icon="chevron_left"
-      @click="prevSet"
-      :disable="isFirstSet"
+      @click="prevPage"
+      :disable="currentPage === 1"
     />
 
     <q-btn
@@ -33,8 +33,8 @@
       flat
       round
       icon="chevron_right"
-      @click="nextSet"
-      :disable="isLastSet"
+      @click="nextPage"
+      :disable="currentPage === totalPages"
     />
     <q-btn
       dense
@@ -42,7 +42,7 @@
       round
       icon="last_page"
       @click="toLastPage"
-      :disable="isLastSet"
+      :disable="currentPage === totalPages"
     />
   </div>
 </template>
@@ -80,14 +80,14 @@ export default {
     setPage(page) {
       this.$emit('update:modelValue', page);
     },
-    nextSet() {
-      if (!this.isLastSet) {
-        this.setPage(this.startPage + 11);
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.setPage(this.currentPage + 1);
       }
     },
-    prevSet() {
-      if (!this.isFirstSet) {
-        this.setPage(this.startPage - 9);
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.setPage(this.currentPage - 1);
       }
     },
     toFirstPage() {
@@ -101,7 +101,10 @@ export default {
 </script>
 
 <style scoped>
-.q-btn {
-  margin: 0 4px;
+.pagination-container {
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  right: 0;
 }
 </style>
