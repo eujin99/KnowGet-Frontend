@@ -1,30 +1,39 @@
 <template>
-  <q-page>
-    <q-toolbar>
-      <q-toolbar-title>Job Listings</q-toolbar-title>
-    </q-toolbar>
-    <q-list bordered>
-      <q-item v-for="post in paginatedPosts" :key="post.postId" clickable @click="viewDetails(post)">
-        <q-item-section side>
-          <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ post.joSj }}</q-item-label>
-          <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
-          <q-item-label caption>{{ post.bsnsSumryCn }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-item-label>{{ post.gu }}</q-item-label>
-          <q-item-label caption>경력 : {{ post.careerCndNm }}</q-item-label>
-          <q-item-label caption>학력 : {{ post.acdmcrNm }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn dense round icon="bookmark" :color="post.isBookmarked ? 'yellow' : 'grey'"
-                 @click.stop="toggleBookmark(post)"/>
-        </q-item-section>
-      </q-item>
-    </q-list>
-    <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
+  <q-page class="page-wrapper">
+    <q-card class="page-card">
+      <q-card-section>
+        <div class="header">
+          <div>
+            <div class="text-h5">일자리 정보</div>
+            <p>일자리 정보를 확인하세요.</p>
+          </div>
+        </div>
+      </q-card-section>
+      <q-card-section>
+        <q-list bordered>
+          <q-item v-for="post in paginatedPosts" :key="post.postId" clickable @click="viewDetails(post)">
+            <q-item-section side>
+              <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ post.joSj }}</q-item-label>
+              <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
+              <q-item-label caption>{{ post.bsnsSumryCn }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-item-label>{{ post.gu }}</q-item-label>
+              <q-item-label caption>경력 : {{ post.careerCndNm }}</q-item-label>
+              <q-item-label caption>학력 : {{ post.acdmcrNm }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn dense round icon="bookmark" :color="post.isBookmarked ? 'yellow' : 'grey'"
+                     @click.stop="toggleBookmark(post)"/>
+            </q-item-section>
+          </q-item>
+        </q-list>
+        <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
@@ -60,7 +69,7 @@ export default {
             isBookmarked: false // 실제 사용자 데이터에서 북마크 여부 가져와야 함
           }))
         } else {
-          throw new Error('Invalid APi response')
+          throw new Error('Invalid API response')
         }
       } catch (error) {
         console.error('Error fetching jobs:', error)
@@ -96,7 +105,7 @@ export default {
       return isAfter(closeDate, new Date()) ? '구인중' : '구인 마감'
     }
 
-    watch(page, fetchPosts()) // 페이지가 변경될 때마다 fetchPosts 호출
+    watch(page, fetchPosts) // 페이지가 변경될 때마다 fetchPosts 호출
 
     onMounted(fetchPosts)
 
@@ -116,6 +125,21 @@ export default {
 </script>
 
 <style scoped>
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.page-card {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .q-item-section {
   flex: 1;
 }
