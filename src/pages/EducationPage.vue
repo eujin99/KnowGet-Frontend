@@ -29,15 +29,16 @@
               </div>
             </transition>
           </div>
+          <div class="filters-container">
+            <q-btn-toggle
+              v-model="selectedFilter"
+              :options="filterOptions"
+              color="primary"
+              size="md"
+              unelevated
+            />
+          </div>
         </div>
-        <q-btn-toggle
-          v-model="selectedFilter"
-          :options="filterOptions"
-          color="primary"
-          size="md"
-          class="q-mt-sm"
-          unelevated
-        />
       </q-card-section>
       <q-card-section>
         <q-list>
@@ -83,15 +84,13 @@
             </q-item-section>
           </q-expansion-item>
         </q-list>
-        <q-pagination
-          v-if="filteredCoursesByStatus.length > itemsPerPage"
-          v-model="page"
-          :max="pageCount"
-          class="q-mt-md"
-          boundary-numbers
-          size="sm"
-          color="primary"
-        />
+        <div class="pagination-container">
+          <PaginationControl
+            :totalPages="pageCount"
+            v-model="page"
+            class="q-mt-md"
+          />
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -101,6 +100,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { api } from 'boot/axios';
 import { date } from 'quasar';
+import PaginationControl from 'components/PaginationControl.vue';
 
 const courses = ref([]);
 const searchKeyword = ref('');
@@ -109,14 +109,12 @@ const page = ref(1);
 const itemsPerPage = 10;
 const searchWarning = ref(false);
 
-// 필터 옵션
 const filterOptions = [
   { label: '모집 중', value: '모집 중' },
   { label: '모집 마감', value: '모집 마감' },
   { label: '모집 마감 임박 순', value: '모집 마감 임박 순' },
 ];
 
-// API에서 교육 데이터를 가져오는 함수
 const fetchCourses = async () => {
   try {
     const response = await api.get('/education');
@@ -126,14 +124,12 @@ const fetchCourses = async () => {
   }
 };
 
-// 현재 페이지의 데이터만 계산
 const paginatedCourses = computed(() => {
   const start = (page.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
   return filteredCoursesByStatus.value.slice(start, end);
 });
 
-// 필터링된 데이터에서 상태와 검색어에 따라 추가 필터링
 const filteredCoursesByStatus = computed(() => {
   return courses.value
     .filter(course => {
@@ -162,31 +158,26 @@ const filteredCoursesByStatus = computed(() => {
     });
 });
 
-// 전체 페이지 수 계산
 const pageCount = computed(() =>
   Math.ceil(filteredCoursesByStatus.value.length / itemsPerPage),
 );
 
-// 날짜 형식을 변환하는 함수
 const formatDate = dateString => {
   if (!dateString) return '';
   const dateObj = date.extractDate(dateString, 'YYYYMMDD');
   return date.formatDate(dateObj, 'YYYY-MM-DD');
 };
 
-// 모집 상태를 반환하는 함수
 const getStatus = endDate => {
   const today = new Date();
   const end = date.extractDate(endDate, 'YYYYMMDD');
   return today > end ? '모집 마감' : '모집 중';
 };
 
-// 모집 상태 색상을 반환하는 함수
 const getStatusColor = endDate => {
   return getStatus(endDate) === '모집 마감' ? 'grey' : 'green';
 };
 
-// 검색어 유효성을 확인하고 경고 메시지를 표시
 const validateSearch = () => {
   if (searchKeyword.value.length > 0 && searchKeyword.value.length < 2) {
     searchWarning.value = true;
@@ -204,7 +195,6 @@ onMounted(() => {
   fetchCourses();
 });
 
-// 검색어 변화 감지
 watch(searchKeyword, newKeyword => {
   if (newKeyword.length >= 2) {
     page.value = 1;
@@ -230,7 +220,13 @@ watch(searchKeyword, newKeyword => {
 
 .header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.filters-container {
+  display: flex;
   align-items: center;
 }
 
@@ -244,6 +240,7 @@ watch(searchKeyword, newKeyword => {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .dept-gu {
@@ -252,11 +249,6 @@ watch(searchKeyword, newKeyword => {
 
 .status-chip {
   font-size: 0.85rem;
-}
-
-.q-pagination {
-  display: flex;
-  justify-content: center;
 }
 
 .search-input {
@@ -268,6 +260,12 @@ watch(searchKeyword, newKeyword => {
   font-size: 0.75rem;
   margin-top: 5px;
   animation: shake 0.5s;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
 }
 
 @keyframes shake {
