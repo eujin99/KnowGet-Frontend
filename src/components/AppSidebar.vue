@@ -12,7 +12,6 @@
       <div class="sidebar-header">
         <h2 class="logo-title">KnowGet</h2>
       </div>
-
       <div class="sidebar-login-complete">
         <div class="welcome-message">
           <strong>{{ userName }}</strong> 님, 오늘도 응원합니다.
@@ -21,14 +20,18 @@
               unreadMessages
             }}</q-badge>
           </q-btn>
-          <!-- 알림 팝업 -->
           <NotificationPopup
             :notifications="notifications"
             ref="notificationPopup"
             @notification-updated="updateUnreadMessages"
           />
         </div>
-        <q-btn label="마이페이지" color="primary" class="q-mt-sm full-width" />
+        <q-btn
+          label="마이페이지"
+          color="primary"
+          class="q-mt-sm full-width"
+          @click="openPasswordConfirmPopup"
+        />
         <q-btn
           label="로그아웃"
           flat
@@ -36,38 +39,16 @@
           @click="logout"
         />
       </div>
-
       <div class="location-section">
         <p>
           <q-icon name="place" size="xs" />
-          <span>
-            {{ userName }} 님의 희망 근무지예요. <br />
-            다른 지역으로 선택해볼까요?</span
-          >
+          <span> {{ userName }} 님의 희망 근무지예요. </span>
         </p>
-        <q-btn-dropdown
-          color="primary"
-          label="지역 선택"
-          no-caps
-          class="q-mt-sm full-width"
-        >
-          <q-list>
-            <q-item
-              v-for="location in locations"
-              :key="location.value"
-              clickable
-              v-close-popup
-              @click="selectLocation(location.value)"
-            >
-              <q-item-section>
-                <q-item-label>{{ location.label }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-        <div v-if="selectedLocation" class="selected-location">
-          선택한 지역: {{ selectedLocation }}
-        </div>
+        <SelectBoxComponent
+          v-model="selectedLocation"
+          :options="locations"
+          label="근무 희망 지역"
+        />
       </div>
     </div>
     <div v-else>
@@ -75,7 +56,6 @@
       <div class="sidebar-header">
         <h2 class="logo-title">KnowGet</h2>
       </div>
-
       <div class="sidebar-login">
         <p>로그인 후 너겟을 마음껏 이용해보세요!</p>
         <q-input
@@ -125,13 +105,18 @@
         </q-item>
       </router-link>
     </q-list>
+
+    <!-- 비밀번호 확인 팝업 -->
+    <PasswordConfirmPopup ref="passwordConfirmPopup" />
   </q-drawer>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, getCurrentInstance } from 'vue';
 import NotificationPopup from './NotificationPopup.vue';
+import SelectBoxComponent from './SelectBoxComponent.vue';
+import PasswordConfirmPopup from './PasswordConfirmPopup.vue';
 
 const props = defineProps({
   isOpen: {
@@ -150,15 +135,15 @@ function onUpdateModelValue(value) {
   emit('update:isOpen', value);
 }
 
-const isLoggedIn = ref(false); // 로그인 상태
-const userName = ref(''); // 사용자 이름
-const unreadMessages = ref(4); // 읽지 않은 메시지 수
+const isLoggedIn = ref(false);
+const userName = ref('');
+const unreadMessages = ref(4);
 const loginData = ref({
   username: '',
   password: '',
 });
-const selectedLocation = ref(null); // 초기값 설정
-const notifications = ref([]); // 알림 데이터
+const selectedLocation = ref(null);
+const notifications = ref([]);
 
 const linksList = ref([
   {
@@ -227,7 +212,7 @@ const locations = ref([
   { label: '중랑구', value: '중랑구' },
 ]);
 
-const notificationPopup = ref(null);
+const { proxy } = getCurrentInstance();
 
 function toggleNotificationPopup() {
   if (notificationPopup.value) {
@@ -235,15 +220,17 @@ function toggleNotificationPopup() {
   }
 }
 
-// 로그인 함수 (더미, 삭제 예정)
+function openPasswordConfirmPopup() {
+  proxy.$refs.passwordConfirmPopup.openDialog();
+}
+
 function login() {
   isLoggedIn.value = true;
-  userName.value = loginData.value.username; // 예시 사용자 이름
-  selectedLocation.value = localStorage.getItem('location'); // 희망 지역 복원
+  userName.value = loginData.value.username;
+  selectedLocation.value = localStorage.getItem('location');
   localStorage.setItem('isLoggedIn', 'true');
   localStorage.setItem('userName', userName.value);
 
-  // 로그인 후 알림 데이터 업데이트
   notifications.value = [
     {
       id: 1,
@@ -305,36 +292,31 @@ function login() {
   unreadMessages.value = notifications.value.filter(n => !n.read).length;
 }
 
-// 로그아웃 함수 (더미, 삭제 예정)
 function logout() {
   isLoggedIn.value = false;
   loginData.value = { username: '', password: '' };
   userName.value = '';
   selectedLocation.value = '';
-  notifications.value = []; // 로그아웃 시 알림 데이터 초기화
+  notifications.value = [];
   unreadMessages.value = 0;
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('userName');
 }
 
-// 지역 선택
 function selectLocation(location) {
   selectedLocation.value = location;
-  localStorage.setItem('location', location); // 지역 변경 시 저장
+  localStorage.setItem('location', location);
 }
 
-// 알림 개수 업데이트
 function updateUnreadMessages() {
   unreadMessages.value = notifications.value.filter(n => !n.read).length;
 }
 
-// 컴포넌트가 마운트될 때 로그인 상태 복원
 onMounted(() => {
   if (localStorage.getItem('isLoggedIn') === 'true') {
     isLoggedIn.value = true;
     userName.value = localStorage.getItem('userName') || '';
-    selectedLocation.value = localStorage.getItem('location'); // 희망 지역 복원
-    // 로그인 상태일 때 알림 데이터 복원
+    selectedLocation.value = localStorage.getItem('location');
     notifications.value = [
       {
         id: 1,
@@ -448,11 +430,6 @@ onMounted(() => {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 20px;
-}
-
-.selected-location {
-  margin-top: 10px;
-  font-weight: bold;
 }
 
 .router-link {

@@ -1,30 +1,43 @@
 <template>
   <q-page>
-    <div class="signup-container">
-      <q-card class="signup-card">
+    <div class="mypage-container">
+      <div class="mypage-header">
+        <q-btn @click="selectTab('info')" :outline="selectedTab !== 'info'"
+          >내 정보</q-btn
+        >
+        <q-btn
+          @click="selectTab('history')"
+          :outline="selectedTab !== 'history'"
+          >상담 내역</q-btn
+        >
+        <q-btn @click="selectTab('cases')" :outline="selectedTab !== 'cases'"
+          >취업 성공사례 내역</q-btn
+        >
+        <q-btn
+          @click="selectTab('bookmarks')"
+          :outline="selectedTab !== 'bookmarks'"
+          >북마크</q-btn
+        >
+      </div>
+
+      <q-card v-if="selectedTab === 'info'" class="mypage-card">
         <q-card-section>
-          <div class="text-h5">회원 가입</div>
-          <br />
-          <p class="subtext">
-            당신이 다시 일어설 수 있게 너겟이 함께해요.
-            <br />회원가입 후 너겟의 서비스를 이용해 보세요.
-          </p>
+          <div class="text-h5">나의 정보 변경</div>
         </q-card-section>
 
         <q-card-section>
-          <q-form @submit="onSubmit">
+          <q-form @submit="updateInfo">
             <q-input
               v-model="formData.username"
               label="아이디"
-              :rules="[val => !!val || '아이디를 입력해주세요']"
               dense
               outlined
+              readonly
             />
             <q-input
               v-model="formData.password"
               label="비밀번호"
               type="password"
-              :rules="[val => !!val || '비밀번호를 입력해주세요']"
               dense
               outlined
               class="q-mt-md"
@@ -33,31 +46,28 @@
               v-model="formData.passwordConfirm"
               label="비밀번호 확인"
               type="password"
-              :rules="[
-                val =>
-                  val === formData.password || '비밀번호가 일치하지 않습니다.',
-              ]"
               dense
               outlined
               class="q-mt-md"
             />
-            <p class="subtext">
-              근무 희망 지역과 직종을 선택해주세요.
-              <br />적합한 일자리 공고가 등록되면 알림을 보내드려요.
-            </p>
-            <SelectBoxComponent
+            <q-select
               v-model="formData.location"
               :options="locations"
               label="근무 희망 지역"
+              dense
+              outlined
+              class="q-mt-md"
             />
-            <br />
-            <SelectBoxComponent
+            <q-select
               v-model="formData.job"
               :options="jobs"
               label="희망 직종"
+              dense
+              outlined
+              class="q-mt-md"
             />
             <q-btn
-              label="가입하기"
+              label="변경 사항 저장"
               type="submit"
               color="primary"
               class="q-mt-md full-width"
@@ -65,23 +75,37 @@
           </q-form>
         </q-card-section>
       </q-card>
+
+      <q-card v-if="selectedTab === 'history'" class="mypage-card">
+        <!-- 상담 내역 콘텐츠 -->
+        <q-card-section> 상담 내역을 여기에 표시합니다. </q-card-section>
+      </q-card>
+
+      <q-card v-if="selectedTab === 'cases'" class="mypage-card">
+        <!-- 취업 성공사례 내역 콘텐츠 -->
+        <q-card-section>
+          취업 성공사례 내역을 여기에 표시합니다.
+        </q-card-section>
+      </q-card>
+
+      <q-card v-if="selectedTab === 'bookmarks'" class="mypage-card">
+        <!-- 북마크 콘텐츠 -->
+        <q-card-section> 북마크 내용을 여기에 표시합니다. </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import SelectBoxComponent from 'components/SelectBoxComponent.vue';
 
-const router = useRouter();
-
+const selectedTab = ref('info');
 const formData = ref({
-  username: '',
+  username: 'username',
   password: '',
   passwordConfirm: '',
-  location: null,
-  job: null,
+  location: '동대문구',
+  job: '요식 및 제조',
 });
 
 const locations = [
@@ -116,40 +140,47 @@ const jobs = [
   { label: '관리직', value: '관리직' },
   { label: '사무직', value: '사무직' },
   { label: '기술직', value: '기술직' },
-  // ... 희망 직종 10개 들어가면 됩니덩~
+  { label: '요식 및 제조', value: '요식 및 제조' },
+  { label: '판매 및 서비스', value: '판매 및 서비스' },
+  { label: '의료 및 간호', value: '의료 및 간호' },
+  { label: '교육 및 연구', value: '교육 및 연구' },
+  { label: '예술 및 스포츠', value: '예술 및 스포츠' },
+  { label: '운송 및 물류', value: '운송 및 물류' },
+  { label: '농림 및 어업', value: '농림 및 어업' },
 ];
 
-function onSubmit() {
+function selectTab(tab) {
+  selectedTab.value = tab;
+}
+
+function updateInfo() {
   if (formData.value.password !== formData.value.passwordConfirm) {
     alert('비밀번호가 일치하지 않습니다.');
     return;
   }
-  // 회원가입 로직은 여기 들어가면 됩니다. 이건 임시에요..
-  localStorage.setItem('userName', formData.value.username);
-  localStorage.setItem('location', formData.value.location);
-  alert('회원가입이 완료되었습니다.');
-  router.push('/'); // 회원가입 후 메인 페이지로 이동
+  // 실제 API 호출 로직
+  alert('변경 사항이 저장되었습니다.');
 }
 </script>
 
 <style scoped>
-.signup-container {
+.mypage-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 80px);
-}
-
-.signup-card {
-  width: 400px;
-  max-width: 90%;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.subtext {
-  font-size: 0.9rem;
-  color: gray;
+.mypage-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
   margin-bottom: 20px;
+}
+
+.mypage-card {
+  width: 100%;
+  max-width: 800px;
 }
 </style>
