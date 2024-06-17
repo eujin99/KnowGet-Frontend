@@ -17,17 +17,17 @@ const routes = [
       {
         path: 'education',
         component: () => import('pages/EducationPage.vue'),
-        meta: { title: '교육 찾기' },
+        meta: { title: '너겟, 교육 찾기' },
       },
       {
         path: 'guide',
         component: () => import('pages/GuidePage.vue'),
-        meta: { title: '취업 가이드' },
+        meta: { title: '너겟, 취업 가이드' },
       },
       {
         path: 'success',
         component: () => import('pages/SuccessPage.vue'),
-        meta: { title: '취업 성공사례' },
+        meta: { title: '너겟, 취업 성공사례' },
       },
       {
         path: 'consult',
@@ -37,7 +37,12 @@ const routes = [
       {
         path: 'signup',
         component: () => import('pages/SignupPage.vue'),
-        meta: { title: '회원 가입' },
+        meta: { title: '너겟, 회원 가입' },
+      },
+      {
+        path: 'mypage',
+        component: () => import('pages/MyPage.vue'),
+        meta: { title: '너겟, 마이페이지' },
       },
     ],
   },

@@ -7,4 +7,13 @@ const router = createRouter({
   routes,
 });
 
+//이건 mypage 접근 시 비밀번호 확인
+router.beforeEach((to, from, next) => {
+  if (to.path === '/mypage' && !localStorage.getItem('isLoggedIn')) {
+    next('/');
+  } else {
+    next();
+  }
+});
+
 export default router;
