@@ -1,6 +1,6 @@
 <!-- src/pages/IndexPage.vue -->
 <template>
-  <q-page class="main-page">
+  <q-page class="main-page" :style="mainPageStyle">
     <div class="content-container">
       <div class="text-content">
         <h1 class="main-title">
@@ -31,6 +31,10 @@
 </template>
 
 <script setup>
+const mainPageStyle = {
+  background: "url('icons/main-background.png') no-repeat center center",
+  backgroundSize: 'cover',
+};
 defineOptions({
   name: 'IndexPage',
 });
@@ -43,8 +47,6 @@ defineOptions({
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('icons/main-background.png') no-repeat center center;
-  background-size: cover;
   overflow: hidden;
 }
 

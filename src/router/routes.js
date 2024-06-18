@@ -51,6 +51,11 @@ const routes = [
         component: () => import('pages/MyPage.vue'),
         meta: { title: '너겟, 마이페이지' },
       },
+      {
+        path: '/guide/:id',
+        component: () => import('pages/GuidePageDetails.vue'),
+        meta: { title: '취업 가이드 상세' },
+      },
     ],
   },
   {
