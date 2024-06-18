@@ -98,7 +98,7 @@ const fetchGuides = async () => {
         contentSnippet: guide.content.slice(0, 100) + '...',
         username: '관리자',
       }))
-      .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)); // Sort by latest date
+      .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
   } catch (error) {
     console.error('Failed to fetch job guides:', error);
   }
@@ -232,7 +232,7 @@ onMounted(() => {
   font-weight: bold;
   font-size: 1.1rem;
   color: #333;
-  max-width: 65%; /* Adjusted width */
+  max-width: 65%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -259,7 +259,7 @@ onMounted(() => {
   margin-top: 8px;
   font-size: 0.9rem;
   color: #555;
-  max-height: 4.2em; /* Increased max height for 3 lines of text */
+  max-height: 4.2em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: pre-wrap;

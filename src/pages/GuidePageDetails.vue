@@ -58,7 +58,7 @@ const viewDetails = guide => {
 };
 
 const goToList = () => {
-  router.push('/'); // Assuming the list page is the root. Adjust path if needed.
+  router.push('/');
 };
 
 watch(
@@ -129,14 +129,14 @@ onMounted(() => {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-  background-color: #fafafa; /* Background color for empty space */
+  background-color: #fafafa;
 }
 
 .detail-content {
   font-size: 1rem;
   line-height: 1.8;
   color: #555;
-  white-space: pre-wrap; /* Ensure new lines are preserved */
+  white-space: pre-wrap;
 }
 
 .navigation-container {
