@@ -51,6 +51,11 @@ const routes = [
         component: () => import('pages/MyPage.vue'),
         meta: { title: '너겟, 마이페이지' },
       },
+      {
+        path: '/success-case/:id',
+        component: () => import('pages/SuccessCaseDetails.vue'),
+        meta: { title: '너겟, 취업 성공사례 상세페이지' },
+      },
     ],
   },
   {
