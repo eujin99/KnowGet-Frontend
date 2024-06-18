@@ -12,22 +12,32 @@
       <q-card-section>
         <q-list bordered>
           <q-item v-for="post in paginatedPosts" :key="post.postId" clickable @click="viewDetails(post)">
-            <q-item-section side>
-              <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ post.joSj }}</q-item-label>
+            <q-item-section class="middle">
+              <q-item-label class="title">{{ post.joSj }}</q-item-label>
               <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
-              <q-item-label caption>{{ post.bsnsSumryCn }}</q-item-label>
             </q-item-section>
-            <q-item-section side>
-              <q-item-label>{{ post.gu }}</q-item-label>
-              <q-item-label caption>경력 : {{ post.careerCndNm }}</q-item-label>
-              <q-item-label caption>학력 : {{ post.acdmcrNm }}</q-item-label>
+            <q-item-section side class="details-section">
+              <q-item-label caption>
+                <q-icon name="place" class="q-mr-sm"/>
+                {{ post.gu }}
+              </q-item-label>
+              <q-item-label caption>
+                <q-icon name="work" class="q-mr-sm"/>
+                {{ post.careerCndNm }}
+              </q-item-label>
+              <q-item-label caption>
+                <q-icon name="school" class="q-mr-sm"/>
+                {{ post.acdmcrNm }}
+              </q-item-label>
             </q-item-section>
-            <q-item-section side>
-              <q-btn dense round icon="bookmark" :color="post.isBookmarked ? 'yellow' : 'grey'"
-                     @click.stop="toggleBookmark(post)"/>
+            <q-item-section class="bookmark-section">
+              <q-icon name="bookmark" :size="bookmarkIconSize" :color="post.isBookmarked ? 'yellow' : 'grey'"
+                      @click.stop="toggleBookmark(post)"/>
+              <q-chip :color="getStatusColor(post.rceptClosNm)" outline
+                      class="status-chip">
+                <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
+                <q-tooltip class="tooltip-with-arrow">마감일 : {{ getCloseDate(post.rceptClosNm) }}</q-tooltip>
+              </q-chip>
             </q-item-section>
           </q-item>
         </q-list>
@@ -100,14 +110,26 @@ export default {
 
     const getRecruitmentStatus = (rceptClosNm) => {
       const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
-      if (!dateMatch) return '상태 불명'
+      if (!dateMatch) return '확인요망'
       const closeDate = parseISO(dateMatch[0])
-      return isAfter(closeDate, new Date()) ? '구인중' : '구인 마감'
+      return isAfter(closeDate, new Date()) ? '구인중' : '구인마감'
+    }
+
+    const getStatusColor = rceptClosNm => {
+      return getRecruitmentStatus(rceptClosNm) === '구인마감' ? 'grey' : 'green';
+    };
+
+    const getCloseDate = (rceptClosNm) => {
+      const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
+      if (!dateMatch) return '확인요망'
+      return dateMatch[0]
     }
 
     watch(page, fetchPosts) // 페이지가 변경될 때마다 fetchPosts 호출
 
     onMounted(fetchPosts)
+
+    const bookmarkIconSize = '28px';
 
     return {
       posts,
@@ -118,7 +140,10 @@ export default {
       viewDetails,
       toggleBookmark,
       getRecruitmentStatus,
-      updatePagination: fetchPosts // 페이지네이션 컨트롤에서 페이지 변경 시 fetchPosts 호출
+      getStatusColor,
+      getCloseDate,
+      updatePagination: fetchPosts, // 페이지네이션 컨트롤에서 페이지 변경 시 fetchPosts 호출
+      bookmarkIconSize,
     }
   }
 }
@@ -141,15 +166,100 @@ export default {
 }
 
 .q-item-section {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px;
 }
 
-.q-item-section.side {
-  flex: 0 0 150px;
-  max-width: 150px;
+.middle {
+  flex: 2.05;
+  padding-left: 10px;
 }
 
-.q-item-section.middle {
-  flex: 2;
+.details-section {
+  flex: 0.85;
+  padding-left: 10px;
+  padding-right: 5px;
+  align-items: flex-end;
+  align-self: center;
+}
+
+.bookmark-section {
+  flex: 0 0 50px;
+  max-width: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-chip {
+  font-size: 0.65rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 18px;
+  text-align: center;
+}
+
+.tooltip-with-arrow .q-tooltip {
+  position: relative;
+  padding: 5px 10px;
+}
+
+.tooltip-with-arrow .q-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%; /* 위쪽에 화살표를 표시합니다 */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #ccc transparent transparent transparent; /* 화살표 색상 */
+}
+
+@media (max-width: 400px) {
+  .q-item-section {
+    padding: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .middle, .details-section {
+    padding-left: 5px; /* Adjust padding as needed for smaller screens */
+  }
+
+  .bookmark-section {
+    align-self: flex-end;
+    margin-top: 8px;
+  }
+
+  .status-chip {
+    font-size: 0.55rem;
+    text-align: center;
+  }
+
+  .q-item-label {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+  }
+
+  .q-item-label[caption] {
+    font-size: 0.75rem;
+  }
+
+  .title {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+  }
+
+  .text-caption {
+    font-size: 0.5rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: 0.03333em;
+  }
 }
 </style>
