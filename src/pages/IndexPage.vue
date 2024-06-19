@@ -1,4 +1,3 @@
-<!-- src/pages/IndexPage.vue -->
 <template>
   <q-page class="main-page" :style="mainPageStyle">
     <div class="content-container">
@@ -59,6 +58,11 @@ defineOptions({
   padding: 20px;
   color: white;
   z-index: 1;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.q-page-with-sidebar .content-container {
+  margin-left: 260px;
 }
 
 .text-content {
@@ -94,5 +98,104 @@ defineOptions({
   object-fit: cover;
   object-position: 50% 25%;
   border-radius: 10px;
+}
+
+/* 반응형 디자인 */
+@media screen and (max-width: 1200px) {
+  .content-container {
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .text-content {
+    width: 50%;
+    margin-bottom: 20px;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    line-height: 1.2;
+  }
+
+  .main-subtitle {
+    font-size: 1.4rem;
+  }
+
+  .video-container {
+    width: 50%;
+    height: 70vh;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .content-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .text-content {
+    width: 80%;
+    margin-bottom: 20px;
+  }
+
+  .main-title {
+    font-size: 3rem;
+    line-height: 1.2;
+  }
+
+  .main-subtitle {
+    font-size: 1.3rem;
+  }
+
+  .video-container {
+    width: 100%;
+    height: 50vh;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .text-content {
+    width: 90%;
+    margin-bottom: 20px;
+  }
+
+  .main-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+
+  .main-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .video-container {
+    width: 100%;
+    height: 40vh;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .main-title {
+    font-size: 2rem;
+  }
+
+  .main-subtitle {
+    font-size: 1rem;
+  }
+
+  .video-container {
+    height: 30vh;
+  }
 }
 </style>
