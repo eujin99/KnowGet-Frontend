@@ -110,18 +110,14 @@
     <PasswordConfirmPopup ref="passwordConfirmPopup" />
   </q-drawer>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { defineProps, defineEmits, getCurrentInstance } from 'vue';
-import NotificationPopup from './NotificationPopup.vue';
-import PasswordConfirmPopup from './PasswordConfirmPopup.vue';
+import axios from 'axios';
 
 const props = defineProps({
   isOpen: {
-    type: Boolean,
-    required: true,
-  },
-  staticSidebar: {
     type: Boolean,
     required: true,
   },
@@ -135,12 +131,10 @@ function onUpdateModelValue(value) {
 
 const isLoggedIn = ref(false);
 const userName = ref('');
-const unreadMessages = ref(4);
 const loginData = ref({
   username: '',
   password: '',
 });
-const selectedLocation = ref(null);
 const notifications = ref([]);
 
 const linksList = ref([
@@ -184,138 +178,59 @@ const linksList = ref([
 
 const { proxy } = getCurrentInstance();
 
-function toggleNotificationPopup() {
-  if (notificationPopup.value) {
-    notificationPopup.value.show();
-  }
-}
-
 function openPasswordConfirmPopup() {
   proxy.$refs.passwordConfirmPopup.openDialog();
 }
 
-function login() {
-  isLoggedIn.value = true;
-  userName.value = loginData.value.username;
-  selectedLocation.value = localStorage.getItem('location');
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('userName', userName.value);
+async function login() {
+  try {
+    const response = await axios.post('/user/login', {
+      username: loginData.value.username,
+      password: loginData.value.password,
+    });
+    if (response.data.success) {
+      isLoggedIn.value = true;
+      userName.value = loginData.value.username;
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userName', userName.value);
 
-  notifications.value = [
-    {
-      id: 1,
-      time: '14시간 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 2,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 3,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 4,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 5,
-      time: '3일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 6,
-      time: '4일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 7,
-      time: '5일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-  ];
-  unreadMessages.value = notifications.value.filter(n => !n.read).length;
+      // Fetch notifications after login
+      notifications.value = [
+        // Dummy data for now
+        {
+          id: 1,
+          time: '14시간 전',
+          read: false,
+          message: '"동작구" 일자리 공고 안내 드립니다.',
+        },
+        // Add more notifications if needed
+      ];
+    } else {
+      alert('로그인 실패: ' + response.data.message);
+    }
+  } catch (error) {
+    console.error('로그인 중 오류 발생:', error);
+    alert('로그인 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 function logout() {
   isLoggedIn.value = false;
   loginData.value = { username: '', password: '' };
   userName.value = '';
-  selectedLocation.value = '';
   notifications.value = [];
-  unreadMessages.value = 0;
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('userName');
-}
-
-function updateUnreadMessages() {
-  unreadMessages.value = notifications.value.filter(n => !n.read).length;
 }
 
 onMounted(() => {
   if (localStorage.getItem('isLoggedIn') === 'true') {
     isLoggedIn.value = true;
     userName.value = localStorage.getItem('userName') || '';
-    selectedLocation.value = localStorage.getItem('location');
-    notifications.value = [
-      {
-        id: 1,
-        time: '14시간 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 2,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 3,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 4,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 5,
-        time: '3일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 6,
-        time: '4일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 7,
-        time: '5일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-    ];
-    unreadMessages.value = notifications.value.filter(n => !n.read).length;
   }
 });
 </script>
+
 <style scoped>
 .app-sidebar {
   background-color: #e9f5fe;

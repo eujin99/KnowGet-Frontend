@@ -1,4 +1,3 @@
-<!-- src/components/SelectBoxComponent.vue -->
 <template>
   <q-select
     v-model="innerValue"
@@ -15,7 +14,7 @@ import { ref, watch } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
-  modelValue: [String, Number],
+  modelValue: [String, Number], // `String` 또는 `Number` 타입을 허용
   options: {
     type: Array,
     required: true,

@@ -72,6 +72,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import SelectBoxComponent from 'components/SelectBoxComponent.vue';
 
 const router = useRouter();
@@ -80,8 +81,8 @@ const formData = ref({
   username: '',
   password: '',
   passwordConfirm: '',
-  location: null,
-  job: null,
+  location: '',
+  job: '',
 });
 
 const locations = [
@@ -113,22 +114,44 @@ const locations = [
 ];
 
 const jobs = [
-  { label: '관리직', value: '관리직' },
-  { label: '사무직', value: '사무직' },
-  { label: '기술직', value: '기술직' },
-  // ... 희망 직종 10개 들어가면 됩니덩~
+  { label: '행정 및 사무', value: '0' },
+  { label: '마케팅 및 기획', value: '1' },
+  { label: '연구, 개발 및 교육', value: '2' },
+  { label: '건설 및 시설 관리', value: '3' },
+  { label: '안전, 재난 및 보안', value: '4' },
+  { label: '복지, 의료 및 지원 서비스', value: '5' },
+  { label: '창작 및 미용', value: '6' },
+  { label: '요식 및 제과', value: '7' },
+  { label: '판매, 영업 및 운송', value: '8' },
+  { label: '제조 및 기술', value: '9' },
 ];
 
-function onSubmit() {
+async function onSubmit() {
   if (formData.value.password !== formData.value.passwordConfirm) {
     alert('비밀번호가 일치하지 않습니다.');
     return;
   }
-  // 회원가입 로직은 여기 들어가면 됩니다. 이건 임시에요..
-  localStorage.setItem('userName', formData.value.username);
-  localStorage.setItem('location', formData.value.location);
-  alert('회원가입이 완료되었습니다.');
-  router.push('/'); // 회원가입 후 메인 페이지로 이동
+
+  try {
+    const response = await axios.post('/user/register', {
+      username: formData.value.username,
+      password: formData.value.password,
+      prefLocation: formData.value.location,
+      prefJob: formData.value.job,
+    });
+
+    if (response.data.message) {
+      localStorage.setItem('userName', formData.value.username);
+      localStorage.setItem('location', formData.value.location);
+      alert(response.data.message);
+      router.push('/');
+    } else {
+      alert('회원가입 실패: ' + response.data.message);
+    }
+  } catch (error) {
+    console.error('회원가입 중 오류 발생:', error.response || error.message);
+    alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 </script>
 
