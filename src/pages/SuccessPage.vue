@@ -11,10 +11,11 @@
       </q-card-section>
       <q-card-section>
         <div v-for="sc in paginatedSuccessCases" :key="sc.id" class="q-my-md">
-          <q-card @click="showDetails(sc)">
+          <q-card @click="navigateToDetails(sc.caseId)">
             <q-card-section>
               <div class="text-h6">{{ sc.title }}</div>
               <div>작성자: {{ sc.username }}</div>
+              <div>게시글 번호: {{ sc.caseId }}</div>
               <div>게시 일자: {{ new Date(sc.createdDate).toLocaleDateString() }}</div>
             </q-card-section>
           </q-card>
@@ -22,25 +23,12 @@
         <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
       </q-card-section>
     </q-card>
-
-    <q-dialog v-model="showDialog" persistent>
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">{{ selectedCase.title }}</div>
-          <div>작성자: {{ selectedCase.username }}</div>
-          <div>게시 일자: {{ new Date(selectedCase.createdDate).toLocaleDateString() }}</div>
-          <div>내용: {{ selectedCase.content }}</div>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Close" v-close-popup />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { api } from 'boot/axios';
 import PaginationControl from 'components/PaginationControl.vue';
 
@@ -48,16 +36,15 @@ const successCases = ref([]);
 const page = ref(1);
 const itemsPerPage = 10;
 const totalPages = computed(() => Math.ceil(successCases.value.length / itemsPerPage));
-const showDialog = ref(false);
-const selectedCase = ref(null);
+const router = useRouter();
 
 const fetchSuccessCases = async () => {
-   try {
-      const response = await api.get('/success-case');
-      successCases.value = response.data.filter(successCase => successCase.isApproved === 1);
-    } catch (error) {
-      console.error('Failed to fetch success cases:', error);
-    }
+  try {
+    const response = await api.get('/success-case');
+    successCases.value = response.data.filter(successCase => successCase.isApproved === 1);
+  } catch (error) {
+    console.error('Failed to fetch success cases:', error);
+  }
 };
 
 onMounted(fetchSuccessCases);
@@ -69,13 +56,11 @@ const updatePagination = (newPage) => {
 
 const paginatedSuccessCases = computed(() => {
   const start = (page.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return successCases.value.slice(start, end);
+  return successCases.value.slice(start, start + itemsPerPage);
 });
 
-const showDetails = (sc) => {
-  selectedCase.value = sc;
-  showDialog.value = true;
+const navigateToDetails = (caseId) => {
+  router.push({ name: 'SuccessPageDetails', params: { caseId: caseId } });
 };
 </script>
 
