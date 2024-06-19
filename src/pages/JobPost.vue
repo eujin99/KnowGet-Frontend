@@ -33,11 +33,11 @@
             <q-item-section class="bookmark-section">
               <q-icon name="bookmark" :size="bookmarkIconSize" :color="post.isBookmarked ? 'yellow' : 'grey'"
                       @click.stop="toggleBookmark(post)"/>
-              <q-chip :color="getStatusColor(post.rceptClosNm)" outline
-                      class="status-chip">
-                <q-item-label label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
+              <q-badge :color="getStatusColor(post.rceptClosNm)" outline
+                       class="status-badge">
+                <q-item-label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
                 <q-tooltip class="tooltip-with-arrow">마감일 : {{ getCloseDate(post.rceptClosNm) }}</q-tooltip>
-              </q-chip>
+              </q-badge>
             </q-item-section>
           </q-item>
         </q-list>
@@ -110,7 +110,7 @@ export default {
 
     const getRecruitmentStatus = (rceptClosNm) => {
       const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
-      if (!dateMatch) return '확인요망'
+      if (!dateMatch) return '확인필요'
       const closeDate = parseISO(dateMatch[0])
       return isAfter(closeDate, new Date()) ? '구인중' : '구인마감'
     }
@@ -121,7 +121,7 @@ export default {
 
     const getCloseDate = (rceptClosNm) => {
       const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
-      if (!dateMatch) return '확인요망'
+      if (!dateMatch) return '확인필요'
       return dateMatch[0]
     }
 
@@ -193,15 +193,16 @@ export default {
   align-items: center;
 }
 
-.status-chip {
+.status-badge {
   font-size: 0.65rem;
   margin-top: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 18px;
+  height: 24px;
   text-align: center;
+  border-radius: 12px;
 }
 
 .tooltip-with-arrow .q-tooltip {
@@ -236,7 +237,7 @@ export default {
     margin-top: 8px;
   }
 
-  .status-chip {
+  .status-badge {
     font-size: 0.55rem;
     text-align: center;
   }

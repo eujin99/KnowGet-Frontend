@@ -64,10 +64,10 @@ export default {
       return this.modelValue;
     },
     startPage() {
-      return Math.floor((this.currentPage - 1) / 10) * 10;
+      return Math.floor((this.currentPage - 1) / 5) * 5;
     },
     pagesInSet() {
-      return Math.min(10, this.totalPages - this.startPage);
+      return Math.min(5, this.totalPages - this.startPage + 1);
     },
   },
   methods: {
