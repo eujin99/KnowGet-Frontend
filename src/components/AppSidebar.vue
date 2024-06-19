@@ -1,4 +1,3 @@
-<!-- src/components/AppSidebar.vue -->
 <template>
   <q-drawer
     :model-value="isOpen"
@@ -15,16 +14,6 @@
       <div class="sidebar-login-complete">
         <div class="welcome-message">
           <strong>{{ userName }}</strong> 님, 오늘도 응원합니다.
-          <q-btn dense round flat icon="mail" @click="toggleNotificationPopup">
-            <q-badge color="red" floating transparent v-if="unreadMessages">{{
-              unreadMessages
-            }}</q-badge>
-          </q-btn>
-          <NotificationPopup
-            :notifications="notifications"
-            ref="notificationPopup"
-            @notification-updated="updateUnreadMessages"
-          />
         </div>
         <q-btn
           label="마이페이지"
@@ -38,17 +27,28 @@
           class="q-mt-sm full-width logout-button"
           @click="logout"
         />
-      </div>
-      <div class="location-section">
-        <p>
-          <q-icon name="place" size="xs" />
-          <span> {{ userName }} 님의 희망 근무지예요. </span>
-        </p>
-        <SelectBoxComponent
-          v-model="selectedLocation"
-          :options="locations"
-          label="근무 희망 지역"
-        />
+        <!-- 알림 아코디언 -->
+        <q-expansion-item
+          icon="mail"
+          label="알림왔어요!"
+          header-class="notification-header"
+          dense
+          switch-toggle-side
+          class="notification-accordion"
+        >
+          <div class="notification-list">
+            <div
+              v-for="notification in notifications"
+              :key="notification.id"
+              class="notification-item"
+            >
+              <div class="notification-content">
+                <small class="notification-time">{{ notification.time }}</small>
+                <p>{{ notification.message }}</p>
+              </div>
+            </div>
+          </div>
+        </q-expansion-item>
       </div>
     </div>
     <div v-else>
@@ -110,12 +110,10 @@
     <PasswordConfirmPopup ref="passwordConfirmPopup" />
   </q-drawer>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { defineProps, defineEmits, getCurrentInstance } from 'vue';
 import NotificationPopup from './NotificationPopup.vue';
-import SelectBoxComponent from './SelectBoxComponent.vue';
 import PasswordConfirmPopup from './PasswordConfirmPopup.vue';
 
 const props = defineProps({
@@ -184,34 +182,6 @@ const linksList = ref([
   },
 ]);
 
-const locations = ref([
-  { label: '강남구', value: '강남구' },
-  { label: '강동구', value: '강동구' },
-  { label: '강북구', value: '강북구' },
-  { label: '강서구', value: '강서구' },
-  { label: '관악구', value: '관악구' },
-  { label: '광진구', value: '광진구' },
-  { label: '구로구', value: '구로구' },
-  { label: '금천구', value: '금천구' },
-  { label: '노원구', value: '노원구' },
-  { label: '도봉구', value: '도봉구' },
-  { label: '동대문구', value: '동대문구' },
-  { label: '동작구', value: '동작구' },
-  { label: '마포구', value: '마포구' },
-  { label: '서대문구', value: '서대문구' },
-  { label: '서초구', value: '서초구' },
-  { label: '성동구', value: '성동구' },
-  { label: '성북구', value: '성북구' },
-  { label: '송파구', value: '송파구' },
-  { label: '양천구', value: '양천구' },
-  { label: '영등포구', value: '영등포구' },
-  { label: '용산구', value: '용산구' },
-  { label: '은평구', value: '은평구' },
-  { label: '종로구', value: '종로구' },
-  { label: '중구', value: '중구' },
-  { label: '중랑구', value: '중랑구' },
-]);
-
 const { proxy } = getCurrentInstance();
 
 function toggleNotificationPopup() {
@@ -234,59 +204,45 @@ function login() {
   notifications.value = [
     {
       id: 1,
-      avatar: 'path/to/avatar1.png',
-      user: '관리자',
-      target: userName.value,
       time: '14시간 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 2,
-      avatar: 'path/to/avatar2.png',
-      user: '관리자',
-      target: userName.value,
       time: '2일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 3,
-      avatar: 'path/to/avatar3.png',
-      user: '관리자',
-      target: userName.value,
       time: '2일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 4,
-      avatar: 'path/to/avatar4.png',
-      user: '관리자',
-      target: userName.value,
       time: '2일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 5,
-      avatar: 'path/to/avatar5.png',
-      user: '관리자',
-      target: userName.value,
       time: '3일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 6,
-      avatar: 'path/to/avatar6.png',
-      user: '관리자',
-      target: userName.value,
       time: '4일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
     {
       id: 7,
-      avatar: 'path/to/avatar7.png',
-      user: '관리자',
-      target: userName.value,
       time: '5일 전',
       read: false,
+      message: '"동작구" 일자리 공고 안내 드립니다.',
     },
   ];
   unreadMessages.value = notifications.value.filter(n => !n.read).length;
@@ -303,11 +259,6 @@ function logout() {
   localStorage.removeItem('userName');
 }
 
-function selectLocation(location) {
-  selectedLocation.value = location;
-  localStorage.setItem('location', location);
-}
-
 function updateUnreadMessages() {
   unreadMessages.value = notifications.value.filter(n => !n.read).length;
 }
@@ -320,66 +271,51 @@ onMounted(() => {
     notifications.value = [
       {
         id: 1,
-        avatar: 'path/to/avatar1.png',
-        user: '관리자',
-        target: userName.value,
         time: '14시간 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 2,
-        avatar: 'path/to/avatar2.png',
-        user: '관리자',
-        target: userName.value,
         time: '2일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 3,
-        avatar: 'path/to/avatar3.png',
-        user: '관리자',
-        target: userName.value,
         time: '2일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 4,
-        avatar: 'path/to/avatar4.png',
-        user: '관리자',
-        target: userName.value,
         time: '2일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 5,
-        avatar: 'path/to/avatar5.png',
-        user: '관리자',
-        target: userName.value,
         time: '3일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 6,
-        avatar: 'path/to/avatar6.png',
-        user: '관리자',
-        target: userName.value,
         time: '4일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
       {
         id: 7,
-        avatar: 'path/to/avatar7.png',
-        user: '관리자',
-        target: userName.value,
         time: '5일 전',
         read: false,
+        message: '"동작구" 일자리 공고 안내 드립니다.',
       },
     ];
     unreadMessages.value = notifications.value.filter(n => !n.read).length;
   }
 });
 </script>
-
 <style scoped>
 .app-sidebar {
   background-color: #e9f5fe;
@@ -426,12 +362,6 @@ onMounted(() => {
   color: #000;
 }
 
-.location-section {
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-bottom: 20px;
-}
-
 .router-link {
   text-decoration: none;
   color: inherit;
@@ -458,5 +388,46 @@ onMounted(() => {
 
 .menu-item:hover {
   background-color: #c3e2f7;
+}
+
+.notification-header {
+  background-color: #f7f9fc;
+}
+
+.notification-accordion {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.notification-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.notification-item {
+  padding: 10px;
+  transition: background-color 0.3s;
+}
+
+.notification-item:hover {
+  background-color: #f0f8ff;
+}
+
+.notification-content {
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+.notification-time {
+  color: #888;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  display: block;
 }
 </style>
