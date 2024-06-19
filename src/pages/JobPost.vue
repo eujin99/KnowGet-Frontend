@@ -97,7 +97,7 @@ export default {
     })
 
     const viewDetails = (post) => {
-      router.push({name: 'JobPostDetails', params: {post}})
+      router.push({name: `JobPostDetails`, params: {postId: post.postId}})
     }
 
     const toggleBookmark = async (post) => {
@@ -194,7 +194,7 @@ export default {
 }
 
 .status-badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   margin-top: 4px;
   display: flex;
   align-items: center;
