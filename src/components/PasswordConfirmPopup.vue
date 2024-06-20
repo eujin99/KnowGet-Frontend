@@ -1,4 +1,3 @@
-<!-- src/components/PasswordConfirmPopup.vue -->
 <template>
   <q-dialog v-model="isDialogOpen">
     <q-card class="popup-card">
@@ -13,6 +12,7 @@
             label="비밀번호"
             outlined
             required
+            ref="passwordInput"
           />
           <q-btn
             label="확인"
@@ -28,25 +28,57 @@
 
 <script setup>
 import { ref, defineExpose } from 'vue';
+import { useQuasar } from 'quasar';
+import { api } from 'boot/axios';
 
 const isDialogOpen = ref(false);
 const password = ref('');
+const $q = useQuasar();
+const passwordInput = ref(null);
+
+const username = localStorage.getItem('userName');
 
 function openDialog() {
   isDialogOpen.value = true;
+  password.value = ''; // 초기화
+  setTimeout(() => {
+    passwordInput.value.focus();
+  }, 300);
 }
 
 function closeDialog() {
   isDialogOpen.value = false;
 }
 
-function confirmPassword() {
-  // Dummy password check for demonstration
-  if (password.value === '0000') {
-    closeDialog();
-    window.location.href = '/mypage';
-  } else {
-    alert('비밀번호가 틀렸습니다.');
+async function confirmPassword() {
+  try {
+    const response = await api.post('/user/login', {
+      username: username,
+      password: password.value,
+    });
+
+    if (response.data.token) {
+      closeDialog();
+      $q.notify({
+        type: 'positive',
+        message: '비밀번호가 확인되었습니다.',
+      });
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: '비밀번호가 틀렸습니다.',
+      });
+      password.value = '';
+      passwordInput.value.focus();
+    }
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: '비밀번호 확인 중 오류가 발생했습니다.',
+    });
+    console.error('비밀번호 확인 오류:', error);
+    password.value = '';
+    passwordInput.value.focus();
   }
 }
 

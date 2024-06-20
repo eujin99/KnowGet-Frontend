@@ -12,13 +12,14 @@
         </q-card-section>
 
         <q-card-section>
-          <q-form @submit="onSubmit">
+          <q-form>
             <q-input
               v-model="formData.username"
               label="아이디"
               :rules="[val => !!val || '아이디를 입력해주세요']"
               dense
               outlined
+              autocomplete="username"
             />
             <q-input
               v-model="formData.password"
@@ -28,6 +29,7 @@
               dense
               outlined
               class="q-mt-md"
+              autocomplete="new-password"
             />
             <q-input
               v-model="formData.passwordConfirm"
@@ -40,6 +42,7 @@
               dense
               outlined
               class="q-mt-md"
+              autocomplete="new-password"
             />
             <p class="subtext">
               근무 희망 지역과 직종을 선택해주세요.
@@ -49,18 +52,22 @@
               v-model="formData.location"
               :options="locations"
               label="근무 희망 지역"
+              option-value="value"
+              option-label="label"
             />
             <br />
             <SelectBoxComponent
               v-model="formData.job"
               :options="jobs"
               label="희망 직종"
+              option-value="value"
+              option-label="label"
             />
             <q-btn
               label="가입하기"
-              type="submit"
               color="primary"
               class="q-mt-md full-width"
+              @click="handleSubmit"
             />
           </q-form>
         </q-card-section>
@@ -70,9 +77,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { useQuasar } from 'quasar';
+import { api } from 'boot/axios';
 import SelectBoxComponent from 'components/SelectBoxComponent.vue';
 
 const router = useRouter();
@@ -126,14 +134,15 @@ const jobs = [
   { label: '제조 및 기술', value: '9' },
 ];
 
-async function onSubmit() {
+const handleSubmit = async () => {
   if (formData.value.password !== formData.value.passwordConfirm) {
     alert('비밀번호가 일치하지 않습니다.');
     return;
   }
 
   try {
-    const response = await axios.post('/user/register', {
+    // passwordConfirm 필드를 제외한 데이터 전송
+    const response = await api.post('/user/register', {
       username: formData.value.username,
       password: formData.value.password,
       prefLocation: formData.value.location,
@@ -152,7 +161,7 @@ async function onSubmit() {
     console.error('회원가입 중 오류 발생:', error.response || error.message);
     alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
   }
-}
+};
 </script>
 
 <style scoped>
