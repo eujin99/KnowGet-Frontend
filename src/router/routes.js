@@ -13,6 +13,7 @@ const routes = [
         path: 'jobpost',
         component: () => import('pages/JobPost.vue'),
         meta: {title: '너겟, 일자리 찾기'},
+        name: 'JobPost',
       },
       {
         path: 'post/:postId',
@@ -63,10 +64,5 @@ const routes = [
     component: () => import('pages/ErrorNotFound.vue'),
   },
 ];
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
 
 export default routes;

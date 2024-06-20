@@ -41,7 +41,8 @@
             </q-item-section>
           </q-item>
         </q-list>
-        <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
+        <pagination-control v-if="totalPages > 0" :total-pages="totalPages" v-model="page"
+                            @update:model-value="updatePagination"/>
       </q-card-section>
     </q-card>
   </q-page>
@@ -73,7 +74,7 @@ export default {
     const fetchPosts = async () => {
       try {
         const response = await api.get(`/posts`)
-        console.log('API response:', response.data) // 응답 콘솔에 출력
+        // console.log('API response:', response.data) // 응답 콘솔에 출력
         if (Array.isArray(response.data)) {
           posts.value = response.data.map(post => ({
             ...post,
