@@ -115,6 +115,7 @@
 import { ref, onMounted } from 'vue';
 import { defineProps, defineEmits, getCurrentInstance } from 'vue';
 import axios from 'axios';
+import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
 
 const props = defineProps({
   isOpen: {
