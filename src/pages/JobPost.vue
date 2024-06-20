@@ -41,7 +41,8 @@
             </q-item-section>
           </q-item>
         </q-list>
-        <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
+        <pagination-control v-if="totalPages > 0" :total-pages="totalPages" v-model="page"
+                            @update:model-value="updatePagination"/>
       </q-card-section>
     </q-card>
   </q-page>
@@ -49,7 +50,7 @@
 
 <script>
 import {computed, onMounted, ref, watch} from 'vue'
-import {useRouter} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useQuasar} from 'quasar'
 import {api} from 'boot/axios'
 import {useAuthStore} from 'stores/authStore'
@@ -62,17 +63,18 @@ export default {
   },
   setup() {
     const $q = useQuasar()
+    const route = useRoute()
+    const router = useRouter()
     const posts = ref([])
-    const page = ref(1)
+    const page = ref(parseInt(route.query.page) || 1)
     const itemsPerPage = 10
     const totalPages = computed(() => Math.ceil(posts.value.length / itemsPerPage))
     const authStore = useAuthStore()
-    const router = useRouter()
 
     const fetchPosts = async () => {
       try {
         const response = await api.get(`/posts`)
-        console.log('API response:', response.data) // 응답 콘솔에 출력
+        // console.log('API response:', response.data) // 응답 콘솔에 출력
         if (Array.isArray(response.data)) {
           posts.value = response.data.map(post => ({
             ...post,
@@ -97,7 +99,9 @@ export default {
     })
 
     const viewDetails = (post) => {
-      router.push({name: 'JobPostDetails', params: {post}})
+      router.push({
+        name: `JobPostDetails`, params: {postId: post.postId}, query: {page: page.value}
+      })
     }
 
     const toggleBookmark = async (post) => {
@@ -194,7 +198,7 @@ export default {
 }
 
 .status-badge {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   margin-top: 4px;
   display: flex;
   align-items: center;
