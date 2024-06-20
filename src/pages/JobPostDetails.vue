@@ -2,7 +2,7 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section v-if="post">
-        <q-btn flat round dense icon="arrow_back" @click="$router.back()" align="flex-start"/>
+        <q-btn flat round dense icon="arrow_back" @click="goBack" class="back-btn"/>
         <p/>
         <div class="text-h5">{{ post.joSj }}</div>
         <p/>
@@ -10,16 +10,45 @@
       </q-card-section>
 
       <q-card-section v-if="post">
-        <div class="detail-info">
-          <q-table :rows="details" :columns="columns" row-key="key" flat bordered/>
-        </div>
-      </q-card-section>
-
-      <q-card-section v-if="post">
-        <div class="additional-info">
-          <h6>기타사항</h6>
-          <!--          <p>{{ post.etc }}</p>-->
-        </div>
+        <table class="details-table">
+          <tbody>
+          <tr>
+            <th colspan="2">구인상태</th>
+          </tr>
+          <tr>
+            <td class="center-align">구인 상태</td>
+            <td>{{ getRecruitmentStatus(post.rceptClosNm) }}</td>
+          </tr>
+          <tr>
+            <th colspan="2">구인 업체 현황</th>
+          </tr>
+          <tr>
+            <td class="center-align">업체명</td>
+            <td>{{ post.cmpnyNm }}</td>
+          </tr>
+          <tr>
+            <td class="center-align">위치</td>
+            <td>{{ post.bassAdresCn }}</td>
+          </tr>
+          <tr>
+            <td class="center-align">업종</td>
+            <td>{{ post.bsnsSumryCn }}</td>
+          </tr>
+          <tr>
+            <th colspan="2">구인 내용</th>
+          </tr>
+          <tr v-for="(value, key) in jobDetails" :key="key">
+            <td class="center-align">{{ key }}</td>
+            <td>{{ value }}</td>
+          </tr>
+          <tr>
+            <th colspan="2">기타사항</th>
+          </tr>
+          <tr>
+            <td colspan="2">{{ post.etc }}</td>
+          </tr>
+          </tbody>
+        </table>
       </q-card-section>
 
       <q-card-section v-else>
@@ -31,10 +60,12 @@
 
 <script setup>
 import {computed, onMounted, ref} from 'vue'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {api} from 'boot/axios'
+import {isAfter, parseISO} from "date-fns";
 
 const route = useRoute()
+const router = useRouter()
 const post = ref(null)
 
 const fetchPostDetails = async () => {
@@ -46,31 +77,35 @@ const fetchPostDetails = async () => {
   }
 }
 
+const getRecruitmentStatus = (rceptClosNm) => {
+  const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
+  if (!dateMatch) return '확인필요'
+  const closeDate = parseISO(dateMatch[0])
+  return isAfter(closeDate, new Date()) ? '구인중' : '구인마감'
+}
+
 const getCloseDate = (rceptClosNm) => {
   const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
   if (!dateMatch) return '확인필요'
   return dateMatch[0]
 }
 
+const jobDetails = computed(() => post.value ? {
+  '모집 직종': post.value.jobcodeNm,
+  '모집 인원 수': post.value.rcritNmprCo,
+  '급여': post.value.hopeWage,
+  '근무시간': post.value.workTimeNm,
+  '복리후생': post.value.joFeinsrSbscrbNm,
+  '근무장소': post.value.workPararBassAdresCn,
+  '마감일': getCloseDate(post.value.rceptClosNm)
+} : {})
+
 onMounted(fetchPostDetails)
 
-const details = computed(() => post.value ? [
-  {key: '기업 명칭', value: post.value.cmpnyNm},
-  {key: '기업 주소', value: post.value.bassAdresCn},
-  {key: '모집 직종', value: post.value.jobcodeNm},
-  {key: '사업 요약 내용', value: post.value.bsnsSumryCn},
-  {key: '모집 인원 수', value: post.value.rcritNmprCo},
-  {key: '급여', value: post.value.hopeWage},
-  {key: '근무시간', value: post.value.workTimeNm},
-  {key: '복리후생', value: post.value.joFeinsrSbscrbNm},
-  {key: '근무장소', value: post.value.workPararBassAdresCn},
-  {key: '마감일', value: getCloseDate(post.value.rceptClosNm)},
-] : [])
-
-const columns = [
-  {name: 'key', required: true, label: '항목', align: 'left', field: row => row.key},
-  {name: 'value', required: true, label: '내용', align: 'left', field: row => row.value}
-]
+const goBack = () => {
+  const previousPage = route.query.page || 1
+  router.push({name: 'JobPost', query: {page: previousPage}})
+}
 
 </script>
 
@@ -90,11 +125,33 @@ const columns = [
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.detail-info {
-  margin-bottom: 20px;
+.back-btn {
+  display: flex;
+  align-items: flex-start;
 }
 
-.additional-info h6 {
-  margin-top: 0;
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.details-table th,
+.details-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.details-table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+.details-table th[colspan="2"] {
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.center-align {
+  text-align: center;
 }
 </style>

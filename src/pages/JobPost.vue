@@ -49,7 +49,7 @@
 
 <script>
 import {computed, onMounted, ref, watch} from 'vue'
-import {useRouter} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import {useQuasar} from 'quasar'
 import {api} from 'boot/axios'
 import {useAuthStore} from 'stores/authStore'
@@ -62,12 +62,13 @@ export default {
   },
   setup() {
     const $q = useQuasar()
+    const route = useRoute()
+    const router = useRouter()
     const posts = ref([])
-    const page = ref(1)
+    const page = ref(parseInt(route.query.page) || 1)
     const itemsPerPage = 10
     const totalPages = computed(() => Math.ceil(posts.value.length / itemsPerPage))
     const authStore = useAuthStore()
-    const router = useRouter()
 
     const fetchPosts = async () => {
       try {
@@ -97,7 +98,9 @@ export default {
     })
 
     const viewDetails = (post) => {
-      router.push({name: `JobPostDetails`, params: {postId: post.postId}})
+      router.push({
+        name: `JobPostDetails`, params: {postId: post.postId}, query: {page: page.value}
+      })
     }
 
     const toggleBookmark = async (post) => {
