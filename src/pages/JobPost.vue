@@ -23,23 +23,23 @@
             </q-item-section>
             <q-item-section side class="details-section">
               <q-item-label caption>
-                <q-icon name="place" class="q-mr-sm" />
+                <q-icon name="place" class="q-mr-sm"/>
                 {{ post.gu }}
               </q-item-label>
               <q-item-label caption>
-                <q-icon name="work" class="q-mr-sm" />
+                <q-icon name="work" class="q-mr-sm"/>
                 {{ post.careerCndNm }}
               </q-item-label>
               <q-item-label caption>
-                <q-icon name="school" class="q-mr-sm" />
+                <q-icon name="school" class="q-mr-sm"/>
                 {{ post.acdmcrNm }}
               </q-item-label>
             </q-item-section>
             <q-item-section class="bookmark-section">
               <q-icon
-                name="bookmark"
+                :name="post.isBookmarked ? 'bookmark' : 'bookmark_border'"
                 :size="bookmarkIconSize"
-                :color="post.isBookmarked ? 'yellow' : 'grey'"
+                :color="post.isBookmarked ? 'red-5' : 'grey'"
                 @click.stop="toggleBookmark(post)"
               />
               <q-badge
@@ -48,10 +48,12 @@
                 class="status-badge"
               >
                 <q-item-label>{{
-                  getRecruitmentStatus(post.rceptClosNm)
-                }}</q-item-label>
+                    getRecruitmentStatus(post.rceptClosNm)
+                  }}
+                </q-item-label>
                 <q-tooltip class="tooltip-with-arrow"
-                  >마감일 : {{ getCloseDate(post.rceptClosNm) }}</q-tooltip
+                >마감일 : {{ getCloseDate(post.rceptClosNm) }}
+                </q-tooltip
                 >
               </q-badge>
             </q-item-section>
@@ -68,7 +70,7 @@
 import {computed, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useQuasar} from 'quasar'
-import {api} from 'boot/axios'
+import {api, customApi} from 'boot/axios'
 import {useAuthStore} from 'stores/authStore'
 import {isAfter, parseISO} from 'date-fns'
 import PaginationControl from 'components/PaginationControl.vue'
@@ -90,13 +92,9 @@ export default {
     const fetchPosts = async () => {
       try {
         const response = await api.get(`/posts`)
-        // console.log('API response:', response.data) // 응답 콘솔에 출력
-        
         if (Array.isArray(response.data)) {
-          posts.value = response.data.map(post => ({
-            ...post,
-            isBookmarked: false, // 실제 사용자 데이터에서 북마크 여부 가져와야 함
-          }));
+          posts.value = response.data
+          await checkBookmarks();
         } else {
           throw new Error('Invalid API response');
         }
@@ -108,6 +106,28 @@ export default {
         });
       }
     };
+
+    const checkBookmarks = async () => {
+      if (!authStore.isLoggedIn) {
+        posts.value.forEach(post => post.isBookmarked = false)
+        return
+      }
+
+      for (const post of posts.value) {
+        if (!authStore.isLoggedIn) {
+          // 로그인 상태가 아니면 중지
+          post.isBookmarked = false
+          continue;
+        }
+
+        try {
+          const response = await customApi.get(`/bookmark/${post.postId}`)
+          post.isBookmarked = response.data
+        } catch (error) {
+          post.isBookmarked = false
+        }
+      }
+    }
 
     const paginatedPosts = computed(() => {
       const start = (page.value - 1) * itemsPerPage;
@@ -123,10 +143,19 @@ export default {
 
     const toggleBookmark = async post => {
       if (!authStore.isLoggedIn) {
-        $q.notify('로그인이 필요합니다.');
+        $q.notify('로그인이 필요합니다');
         return;
       }
-      await api.post(`/bookmark/${post.joRegistNo}`);
+      try {
+        const response = await customApi.post(`/bookmark/${post.postId}`)
+        post.isBookmarked = !post.isBookmarked
+      } catch (error) {
+        console.error('Error toggling bookmark:', error)
+        $q.notify({
+          type: 'negative',
+          message: '북마크를 토글하는 중 오류가 발생했습니다.',
+        })
+      }
     };
 
     const getRecruitmentStatus = rceptClosNm => {
@@ -149,6 +178,15 @@ export default {
     };
 
     watch(page, fetchPosts); // 페이지가 변경될 때마다 fetchPosts 호출
+
+    // 로그인 상태가 변경될 때 체크하기 위한 watch
+    watch(() => authStore.isLoggedIn, async (newVal) => {
+      if (newVal) {
+        await checkBookmarks();
+      } else {
+        posts.value.forEach(post => post.isBookmarked = false);
+      }
+    });
 
     onMounted(fetchPosts);
 
