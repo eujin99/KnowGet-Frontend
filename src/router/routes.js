@@ -64,6 +64,11 @@ const routes = [
         component: () => import('pages/GuidePageDetails.vue'),
         meta: { title: '취업 가이드 상세' },
       },
+      {
+        path: 'uploadtest',
+        component: () => import('pages/UploadTest.vue'),
+        meta: { title: '업로드 테스트 페이지' },
+      },
     ],
   },
   {
