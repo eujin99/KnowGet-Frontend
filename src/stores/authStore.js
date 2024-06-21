@@ -1,10 +1,12 @@
-import { defineStore } from 'pinia';
-import { api } from 'boot/axios';
+import {defineStore} from 'pinia';
+import {api} from 'boot/axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isLoggedIn: false, // 사용자가 로그인 했는지 여부임 !
-    user: {},
+    username: '', // 사용자 이름
+    role: '', // 사용자 역할
+    token: '', // 사용자 토큰
   }),
   actions: {
     async login(credentials) {
@@ -13,25 +15,32 @@ export const useAuthStore = defineStore('auth', {
         const response = await api.post('/user/login', credentials);
 
         if (response.status === 200) {
-          // 로그인 성공하면 상태 없데ㅔ이트 됨!!
+          // 로그인 성공하면 상태 업데이트 됨!!
           this.isLoggedIn = true;
-          this.user = response.data;
+          this.username = response.data.username;
+          this.role = response.data.role;
+          this.token = response.data.token;
           localStorage.setItem('isLoggedIn', 'true'); //로그인 상태 로컬에 저장
-          localStorage.setItem('user', JSON.stringify(response.data)); //사용자 정보 로컬에 저장
+          localStorage.setItem('username', response.data.username); //사용자 정보 로컬에 저장
+          localStorage.setItem('role', response.data.role); //사용자 정보 로컬에 저장
+          localStorage.setItem('token', response.data.token); //사용자 정보 로컬에 저장
         } else {
-          throw new Error('Login failed');
+          console.log(response.data.message);
         }
       } catch (error) {
-        this.isLoggedIn = false;
-        this.user = {};
+        console.error(error);
         throw error;
       }
     },
     logout() {
       this.isLoggedIn = false;
-      this.user = {};
-      localStorage.removeItem('isLoggedIn'); //로컬에서 로그인 상태 ㅈ제거
-      localStorage.removeItem('user'); //로컬에서 사용자 정보도 제거
+      this.username = '';
+      this.role = '';
+      this.token = '';
+      localStorage.setItem('isLoggedIn', 'false'); //로컬에서 로그인 상태 제거
+      localStorage.removeItem('username'); //로컬에서 사용자 정보 제거
+      localStorage.removeItem('role'); //로컬에서 사용자 정보 제거
+      localStorage.removeItem('token'); //로컬에서 사용자 정보 제거
     },
   },
 });
