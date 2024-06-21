@@ -6,14 +6,14 @@
     bordered
     class="app-sidebar"
   >
-    <div v-if="isLoggedIn">
+    <div class="sidebar-header">
+      <h2 class="logo-title">KnowGet</h2>
+    </div>
+    <div v-if="authStore.isLoggedIn">
       <!-- 로그인 완료 섹션 -->
-      <div class="sidebar-header">
-        <h2 class="logo-title">KnowGet</h2>
-      </div>
       <div class="sidebar-login-complete">
         <div class="welcome-message">
-          <strong>{{ userName }}</strong> 님, 오늘도 응원합니다.
+          <strong>{{ authStore.user.username }}</strong> 님, 오늘도 응원합니다.
         </div>
         <q-btn
           label="마이페이지"
@@ -53,37 +53,7 @@
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <div class="sidebar-header">
-        <h2 class="logo-title">KnowGet</h2>
-      </div>
-      <div class="sidebar-login">
-        <p>로그인 후 너겟을 마음껏 이용해보세요!</p>
-        <q-input
-          filled
-          v-model="loginData.username"
-          placeholder="아이디"
-          class="q-mt-sm"
-        />
-        <q-input
-          filled
-          v-model="loginData.password"
-          type="password"
-          placeholder="비밀번호"
-          class="q-mt-sm"
-        />
-        <q-btn
-          label="로그인"
-          color="primary"
-          class="q-mt-sm full-width"
-          @click="login"
-        />
-        <q-btn
-          label="회원가입"
-          flat
-          class="q-mt-sm full-width signup-button"
-          @click="$router.push('/signup')"
-        />
-      </div>
+      <AppLogin />
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -113,8 +83,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { defineProps, defineEmits, getCurrentInstance } from 'vue';
-import axios from 'axios';
+import { defineProps, defineEmits } from 'vue';
+import { useAuthStore } from 'stores/authStore';
+import AppLogin from 'components/AppLogin.vue';
 import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
 
 const props = defineProps({
@@ -130,13 +101,23 @@ function onUpdateModelValue(value) {
   emit('update:isOpen', value);
 }
 
-const isLoggedIn = ref(false);
-const userName = ref('');
-const loginData = ref({
-  username: '',
-  password: '',
-});
+const authStore = useAuthStore();
 const notifications = ref([]);
+
+onMounted(() => {
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    authStore.isLoggedIn = true;
+    authStore.user = JSON.parse(localStorage.getItem('user'));
+  }
+});
+
+function openPasswordConfirmPopup() {
+  authStore.$refs.passwordConfirmPopup.openDialog();
+}
+
+function logout() {
+  authStore.logout();
+}
 
 const linksList = ref([
   {
@@ -176,60 +157,6 @@ const linksList = ref([
     link: '/consult',
   },
 ]);
-
-const { proxy } = getCurrentInstance();
-
-function openPasswordConfirmPopup() {
-  proxy.$refs.passwordConfirmPopup.openDialog();
-}
-
-async function login() {
-  try {
-    const response = await axios.post('/user/login', {
-      username: loginData.value.username,
-      password: loginData.value.password,
-    });
-    if (response.data.success) {
-      isLoggedIn.value = true;
-      userName.value = loginData.value.username;
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userName', userName.value);
-
-      // Fetch notifications after login
-      notifications.value = [
-        // Dummy data for now
-        {
-          id: 1,
-          time: '14시간 전',
-          read: false,
-          message: '"동작구" 일자리 공고 안내 드립니다.',
-        },
-        // Add more notifications if needed
-      ];
-    } else {
-      alert('로그인 실패: ' + response.data.message);
-    }
-  } catch (error) {
-    console.error('로그인 중 오류 발생:', error);
-    alert('로그인 중 오류가 발생했습니다. 다시 시도해 주세요.');
-  }
-}
-
-function logout() {
-  isLoggedIn.value = false;
-  loginData.value = { username: '', password: '' };
-  userName.value = '';
-  notifications.value = [];
-  localStorage.removeItem('isLoggedIn');
-  localStorage.removeItem('userName');
-}
-
-onMounted(() => {
-  if (localStorage.getItem('isLoggedIn') === 'true') {
-    isLoggedIn.value = true;
-    userName.value = localStorage.getItem('userName') || '';
-  }
-});
 </script>
 
 <style scoped>
@@ -243,17 +170,10 @@ onMounted(() => {
   padding-right: 20px;
 }
 
-.sidebar-login,
 .sidebar-login-complete {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 20px;
-}
-
-.sidebar-login p,
-.sidebar-login-complete p {
-  margin-bottom: 0.5rem;
-  color: #555;
 }
 
 .welcome-message {
@@ -270,11 +190,6 @@ onMounted(() => {
 
 .logout-button {
   background-color: #cccccc;
-  color: #000;
-}
-
-.signup-button {
-  background-color: #7bcaff;
   color: #000;
 }
 
