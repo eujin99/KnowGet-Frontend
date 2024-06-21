@@ -1,22 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-
-    <q-header elevated class="bg-primary text-white" height-hint="98" v-if="successCase">
-      <q-toolbar>
-        <q-btn dense flat round icon="arrow_back" @click="goBack" />
-
-        <q-toolbar-title>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-          </q-avatar>
-          {{ successCase.title }}
-        </q-toolbar-title>
-
-        <q-space />
-
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
-      </q-toolbar>
-    </q-header>
+    <q-header class="header" v-if="successCase"> </q-header>
 
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
     </q-drawer>
@@ -26,9 +10,12 @@
         <q-card class="page-card" v-if="successCase">
           <q-card-section>
             <div class="header">
-              <div class="text-h5">{{ successCase.title }}</div>
+              <div class="sc-title">{{ successCase.title }}</div>
               <div class="text-caption">작성자: {{ successCase.username }}</div>
-              <div class="text-caption">게시 일자: {{ new Date(successCase.createdDate).toLocaleDateString() }}</div>
+              <div class="text-caption">
+                게시 일자:
+                {{ new Date(successCase.createdDate).toLocaleDateString() }}
+              </div>
             </div>
             <q-separator spaced />
 
@@ -38,37 +25,38 @@
               </q-card-section>
             </q-card>
 
-            <q-separator spaced />
-
-            <!-- Comments Section -->
             <q-card class="comment-section">
               <q-card-section>
                 <div class="text-h6">댓글</div>
-                <div v-if="successCase.comments && successCase.comments.length > 0">
-                  <div v-for="(comment, index) in successCase.comments" :key="index" class="comment-item">
-                    <div class="text-caption">{{ comment.username }} - {{ new Date(comment.createdDate).toLocaleString() }}</div>
+                <div
+                  v-if="successCase.comments && successCase.comments.length > 0"
+                >
+                  <div
+                    v-for="(comment, index) in successCase.comments"
+                    :key="index"
+                    class="comment-item"
+                  >
+                    <div class="text-caption">
+                      {{ comment.username }} -
+                      {{ new Date(comment.createdDate).toLocaleString() }}
+                    </div>
                     <div>{{ comment.text }}</div>
                   </div>
                 </div>
                 <div v-else class="text-caption">댓글이 없습니다.</div>
 
-                <!-- 댓글 form -->
-                <div class="q-mt-md q-flex q-items-center">
+                <!-- 대ㅅ글 form 시작 -->
+                <div class="comment-form">
                   <q-input
                     filled
                     rounded
                     dense
                     v-model="newComment"
-                    placeholder="댓글을 작성해주세욤..."
+                    placeholder="댓글을 작성해주세요..."
                     clearable
-                    class="q-mr-sm"
                     @keydown.enter="submitComment"
                   />
-                  <q-btn
-                    color="primary"
-                    label="확인"
-                    @click="submitComment"
-                  />
+                  <q-btn color="primary" label="확인" @click="submitComment" />
                 </div>
               </q-card-section>
             </q-card>
@@ -111,16 +99,15 @@ const toggleRightDrawer = () => {
 const submitComment = async () => {
   try {
     const response = await api.post(`/success-case/${caseId}/comments`, {
-      text: newComment.value
+      text: newComment.value,
     });
 
-    // 새로운 댓글을 배열에 추가
     if (!successCase.value.comments) {
       successCase.value.comments = [];
     }
     successCase.value.comments.push(response.data);
 
-    // 입력 필드 초기화
+
     newComment.value = '';
   } catch (error) {
     console.error('Failed to submit comment:', error);
@@ -128,7 +115,6 @@ const submitComment = async () => {
 };
 
 const newComment = ref('');
-
 </script>
 
 <style scoped>
@@ -178,9 +164,5 @@ const newComment = ref('');
   margin-bottom: 10px;
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
-}
-
-.q-mr-sm {
-  margin-right: 10px;
 }
 </style>

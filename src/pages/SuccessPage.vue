@@ -10,17 +10,27 @@
         </div>
       </q-card-section>
       <q-card-section>
-        <div v-for="sc in paginatedSuccessCases" :key="sc.id" class="q-my-md">
+        <div
+          v-for="sc in paginatedSuccessCases"
+          :key="sc.caseId"
+          class="q-my-md"
+        >
           <q-card @click="navigateToDetails(sc.caseId)">
             <q-card-section>
-              <div class="text-h6">{{ sc.title }}</div>
+              <div class="CaseCard">{{ sc.title }}</div>
               <div>작성자: {{ sc.username }}</div>
               <div>게시글 번호: {{ sc.caseId }}</div>
-              <div>게시 일자: {{ new Date(sc.createdDate).toLocaleDateString() }}</div>
+              <div>
+                게시 일자: {{ new Date(sc.createdDate).toLocaleDateString() }}
+              </div>
             </q-card-section>
           </q-card>
         </div>
-        <pagination-control :total-pages="totalPages" v-model="page" @update:model-value="updatePagination"/>
+        <pagination-control
+          :total-pages="totalPages"
+          v-model="page"
+          @update:model-value="updatePagination"
+        />
       </q-card-section>
     </q-card>
   </q-page>
@@ -35,21 +45,25 @@ import PaginationControl from 'components/PaginationControl.vue';
 const successCases = ref([]);
 const page = ref(1);
 const itemsPerPage = 10;
-const totalPages = computed(() => Math.ceil(successCases.value.length / itemsPerPage));
+const totalPages = computed(() =>
+  Math.ceil(successCases.value.length / itemsPerPage),
+);
 const router = useRouter();
 
 const fetchSuccessCases = async () => {
   try {
     const response = await api.get('/success-case');
-    successCases.value = response.data.filter(successCase => successCase.isApproved === 1);
+    successCases.value = response.data.filter(
+      successCase => successCase.isApproved === 1,
+    );
   } catch (error) {
-    console.error('Failed to fetch success cases:', error);
+    console.error('성공사례 fetch 에러', error);
   }
 };
 
 onMounted(fetchSuccessCases);
 
-const updatePagination = (newPage) => {
+const updatePagination = newPage => {
   page.value = newPage;
   fetchSuccessCases();
 };
@@ -59,7 +73,7 @@ const paginatedSuccessCases = computed(() => {
   return successCases.value.slice(start, start + itemsPerPage);
 });
 
-const navigateToDetails = (caseId) => {
+const navigateToDetails = caseId => {
   router.push({ name: 'SuccessPageDetails', params: { caseId: caseId } });
 };
 </script>
