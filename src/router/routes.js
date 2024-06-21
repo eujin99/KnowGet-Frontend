@@ -38,6 +38,13 @@ const routes = [
         meta: {title: '너겟, 취업 성공사례'},
       },
       {
+        path: 'success/:caseId',
+        component: () => import('pages/SuccessPageDetails.vue'),
+        meta: { title: '너겟, 취업 성공사례 상세페이지' },
+        name: 'SuccessPageDetails',
+        props: true,
+      },
+      {
         path: 'consult',
         component: () => import('pages/ConsultPage.vue'),
         meta: {title: '너겟, 상담하기'},
