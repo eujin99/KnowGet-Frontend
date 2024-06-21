@@ -3,15 +3,15 @@
     <div class="content-container">
       <div class="text-content">
         <h1 class="main-title">
-          노숙인<br />
-          통합 일자리<br />
+          노숙인<br/>
+          통합 일자리<br/>
           지식관리시스템
         </h1>
-        <br />
-        <br />
+        <br/>
+        <br/>
         <p class="main-subtitle">
-          함께가면 멀리갈 수 있습니다.<br />
-          모두의 일상을 지키는 첫 걸음,<br />
+          함께가면 멀리갈 수 있습니다.<br/>
+          모두의 일상을 지키는 첫 걸음,<br/>
           너겟이 함께합니다.
         </p>
       </div>
@@ -30,6 +30,8 @@
 </template>
 
 <script setup>
+import {onMounted} from "vue";
+
 const mainPageStyle = {
   background: "url('icons/main-background.png') no-repeat center center",
   backgroundSize: 'cover',
@@ -37,6 +39,12 @@ const mainPageStyle = {
 defineOptions({
   name: 'IndexPage',
 });
+
+onMounted(() => {
+  if (localStorage.getItem('isLoggedIn') === null)
+    localStorage.setItem('isLoggedIn', 'false');
+});
+
 </script>
 
 <style scoped>
