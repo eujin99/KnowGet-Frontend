@@ -45,7 +45,20 @@
             <th colspan="2">기타사항</th>
           </tr>
           <tr>
-            <td colspan="2">{{ post.etc }}</td>
+            <td class="center-align">직무 내용</td>
+            <td colspan="2" v-html="formatTextWithLineBreaks(post.dtyCn)">
+            </td>
+          </tr>
+          <tr>
+            <td class="center-align">전형 정보</td>
+            <td>
+              전형 방법 : {{ post.modelMthNm }}<br/>
+              접수 방법 : {{ post.rceptMthNm }}<br/>
+              제출 서류 : {{ post.presentnPapersNm }}<br/>
+              담당자 이름 : {{ post.mngrNm }}<br/>
+              담당자 전화번호 : {{ post.mngrPhonNo }}<br/>
+              담당자 소속 : {{ post.mngrInsttNm }}<br/>
+            </td>
           </tr>
           </tbody>
         </table>
@@ -95,7 +108,7 @@ const jobDetails = computed(() => post.value ? {
   '모집 인원 수': post.value.rcritNmprCo,
   '급여': post.value.hopeWage,
   '근무시간': post.value.workTimeNm,
-  '복리후생': post.value.joFeinsrSbscrbNm,
+  '복리후생': post.value.joFeinsrSbscrbNm + ' / ' + post.value.retGrantsNm,
   '근무장소': post.value.workPararBassAdresCn,
   '마감일': getCloseDate(post.value.rceptClosNm)
 } : {})
@@ -106,6 +119,12 @@ const goBack = () => {
   const previousPage = route.query.page || 1
   router.push({name: 'JobPost', query: {page: previousPage}})
 }
+
+const formatTextWithLineBreaks = (text) => {
+  if (!text) return ''
+  return text.replace(/\n/g, '<br>')
+}
+
 
 </script>
 
