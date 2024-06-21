@@ -19,7 +19,7 @@
           label="마이페이지"
           color="primary"
           class="q-mt-sm full-width"
-          @click="openPasswordConfirmPopup"
+          @click="goToMyPage"
         />
         <q-btn
           label="로그아웃"
@@ -75,9 +75,6 @@
         </q-item>
       </router-link>
     </q-list>
-
-    <!-- 비밀번호 확인 팝업 -->
-    <PasswordConfirmPopup ref="passwordConfirmPopup" />
   </q-drawer>
 </template>
 
@@ -85,7 +82,6 @@
 import { defineEmits, defineProps, onMounted, ref } from 'vue';
 import { useAuthStore } from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
-import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -113,8 +109,8 @@ onMounted(() => {
   }
 });
 
-function openPasswordConfirmPopup() {
-  authStore.$refs.passwordConfirmPopup.openDialog();
+function goToMyPage() {
+  router.push('/mypage');
 }
 
 function logout() {
