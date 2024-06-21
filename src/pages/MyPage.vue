@@ -94,7 +94,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from 'stores/authStore';
-import { api } from 'boot/axios';
+import { customApi } from 'boot/axios';
 
 const authStore = useAuthStore();
 const selectedTab = ref('info');
@@ -148,17 +148,14 @@ const jobOptions = [
   { label: '제조 및 기술', value: '9' },
 ];
 
+//커스텀 api 로 마이페이지에 기존 선택값 가져옴. 이렇게 쓰는거겠지?
 async function fetchUserData() {
   try {
     if (authStore.isLoggedIn) {
-      const response = await api.get('/mypage', {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      });
+      const response = await customApi.get('/mypage');
 
       //하..한번 더 매핑. 이 방법 밖에 없나 ? 바보윾진.
-
+      //이건 보여주기식 매핑입니다. 사용자에게 보여주기 위해.
       const jobMapping = {
         0: '행정 및 사무',
         1: '마케팅 및 기획',
@@ -188,41 +185,72 @@ async function updateInfo() {
     return;
   }
 
-  // console.log('근무 희망 지역 업데이트 요청:', formData.value.location.value);
+  /* 이거 response로 받는거 이제 쓸모없어서 일단 주석 처리 해둠!!
+
   try {
-    const response = await api.patch(
-      '/mypage/pref-location',
-      { location: formData.value.location.value },
-      { headers: { Authorization: `Bearer ${authStore.token}` } },
-    );
-    // console.log('근무 희망 지역 업데이트 성공:', response.data);
+    const response = await customApi.patch('/mypage/pref-location', {
+      location: formData.value.location.value,
+    });
   } catch (error) {
-    console.error('근무 희망 지역 업데이트 실패:', error);
+    console.error('근무 희망 지역 수정 실패:', error);
   }
 
-  // console.log('희망 직종 업데이트 요청:', formData.value.job.value);
   try {
-    const response = await api.patch(
-      '/mypage/pref-job',
-      { job: formData.value.job.value },
-      { headers: { Authorization: `Bearer ${authStore.token}` } },
-    );
-    // console.log('희망 직종 업데이트 성공:', response.data);
+    const response = await customApi.patch('/mypage/pref-job', {
+      job:
+        jobOptions.find(option => option.label === formData.value.job.value)
+          ?.value || formData.value.job.value,
+    });
   } catch (error) {
-    console.error('희망 직종 업데이트 실패:', error);
+    console.error('희망 직종 수정 실패:', error);
   }
+
+
 
   if (formData.value.password) {
-    // console.log('비밀번호 업데이트 요청:', formData.value.password);
     try {
-      const response = await api.patch(
-        '/mypage/password',
-        { password: formData.value.password },
-        { headers: { Authorization: `Bearer ${authStore.token}` } },
-      );
-      // console.log('비밀번호 업데이트 성공:', response.data);
+      const response = await customApi.patch('/mypage/password', {
+        password: formData.value.password,
+      });
     } catch (error) {
-      console.error('비밀번호 업데이트 실패:', error);
+      console.error('비밀번호 수정 실패:', error);
+    }
+  }
+
+  alert('변경 사항이 저장되었습니다.');
+}
+
+
+*/
+
+  //지역 수정요 customAPI 로 저장
+  try {
+    await customApi.patch('/mypage/pref-location', {
+      location: formData.value.location.value,
+    });
+  } catch (error) {
+    console.error('근무 희망 지역 수정 실패:', error);
+  }
+
+  //직종 수정요  customAPI 로 저장
+  try {
+    await customApi.patch('/mypage/pref-job', {
+      job:
+        jobOptions.find(option => option.label === formData.value.job.value)
+          ?.value || formData.value.job.value,
+    });
+  } catch (error) {
+    console.error('희망 직종 수정 실패:', error);
+  }
+
+  //비번 수정요  customAPI 로 저장
+  if (formData.value.password) {
+    try {
+      await customApi.patch('/mypage/password', {
+        password: formData.value.password,
+      });
+    } catch (error) {
+      console.error('비밀번호 수정 실패:', error);
     }
   }
 
