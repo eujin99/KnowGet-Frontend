@@ -19,7 +19,7 @@
           label="마이페이지"
           color="primary"
           class="q-mt-sm full-width"
-          @click="openPasswordConfirmPopup"
+          @click="goToMyPage"
         />
         <q-btn
           label="로그아웃"
@@ -53,7 +53,7 @@
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <AppLogin/>
+      <AppLogin />
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -66,7 +66,7 @@
       >
         <q-item clickable v-ripple class="menu-item">
           <q-item-section avatar>
-            <q-icon :name="link.icon"/>
+            <q-icon :name="link.icon" />
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
@@ -75,18 +75,14 @@
         </q-item>
       </router-link>
     </q-list>
-
-    <!-- 비밀번호 확인 팝업 -->
-    <PasswordConfirmPopup ref="passwordConfirmPopup"/>
   </q-drawer>
 </template>
 
 <script setup>
-import {defineEmits, defineProps, onMounted, ref} from 'vue';
-import {useAuthStore} from 'stores/authStore';
+import { defineEmits, defineProps, onMounted, ref } from 'vue';
+import { useAuthStore } from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
-import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
-import {useRouter} from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
@@ -113,8 +109,8 @@ onMounted(() => {
   }
 });
 
-function openPasswordConfirmPopup() {
-  authStore.$refs.passwordConfirmPopup.openDialog();
+function goToMyPage() {
+  router.push('/mypage');
 }
 
 function logout() {
