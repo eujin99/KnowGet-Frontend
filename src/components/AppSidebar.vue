@@ -13,7 +13,7 @@
       <!-- 로그인 완료 섹션 -->
       <div class="sidebar-login-complete">
         <div class="welcome-message">
-          <strong>{{ authStore.user.username }}</strong> 님, 오늘도 응원합니다.
+          <strong>{{ authStore.username }}</strong> 님, 오늘도 응원합니다.
         </div>
         <q-btn
           label="마이페이지"
@@ -53,7 +53,7 @@
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <AppLogin />
+      <AppLogin/>
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -66,7 +66,7 @@
       >
         <q-item clickable v-ripple class="menu-item">
           <q-item-section avatar>
-            <q-icon :name="link.icon" />
+            <q-icon :name="link.icon"/>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
@@ -77,16 +77,18 @@
     </q-list>
 
     <!-- 비밀번호 확인 팝업 -->
-    <PasswordConfirmPopup ref="passwordConfirmPopup" />
+    <PasswordConfirmPopup ref="passwordConfirmPopup"/>
   </q-drawer>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { defineProps, defineEmits } from 'vue';
-import { useAuthStore } from 'stores/authStore';
+import {defineEmits, defineProps, onMounted, ref} from 'vue';
+import {useAuthStore} from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
 import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   isOpen: {
@@ -107,7 +109,7 @@ const notifications = ref([]);
 onMounted(() => {
   if (localStorage.getItem('isLoggedIn') === 'true') {
     authStore.isLoggedIn = true;
-    authStore.user = JSON.parse(localStorage.getItem('user'));
+    authStore.username = localStorage.getItem('username');
   }
 });
 
@@ -117,6 +119,7 @@ function openPasswordConfirmPopup() {
 
 function logout() {
   authStore.logout();
+  router.push('/');
 }
 
 const linksList = ref([

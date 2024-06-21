@@ -30,9 +30,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/authStore';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {useAuthStore} from 'stores/authStore';
 
 const loginData = ref({
   username: '',
@@ -47,12 +47,12 @@ async function login() {
     await authStore.login(loginData.value);
 
     if (authStore.isLoggedIn) {
-      router.push('/');
+      await router.push('/');
     } else {
       alert('로그인 실패: 서버에서 올바른 응답을 받지 못했습니다.');
     }
   } catch (error) {
-    alert('아이디와 비밀번호를 다시 확인해 주세요 !');
+    alert('아이디 혹은 비밀번호를 다시 확인해 주세요!');
   }
 }
 </script>
