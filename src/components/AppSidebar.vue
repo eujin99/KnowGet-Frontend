@@ -6,14 +6,14 @@
     bordered
     class="app-sidebar"
   >
-    <div v-if="isLoggedIn">
+    <div class="sidebar-header">
+      <h2 class="logo-title">KnowGet</h2>
+    </div>
+    <div v-if="authStore.isLoggedIn">
       <!-- 로그인 완료 섹션 -->
-      <div class="sidebar-header">
-        <h2 class="logo-title">KnowGet</h2>
-      </div>
       <div class="sidebar-login-complete">
         <div class="welcome-message">
-          <strong>{{ userName }}</strong> 님, 오늘도 응원합니다.
+          <strong>{{ authStore.user.username }}</strong> 님, 오늘도 응원합니다.
         </div>
         <q-btn
           label="마이페이지"
@@ -53,37 +53,7 @@
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <div class="sidebar-header">
-        <h2 class="logo-title">KnowGet</h2>
-      </div>
-      <div class="sidebar-login">
-        <p>로그인 후 너겟을 마음껏 이용해보세요!</p>
-        <q-input
-          filled
-          v-model="loginData.username"
-          placeholder="아이디"
-          class="q-mt-sm"
-        />
-        <q-input
-          filled
-          v-model="loginData.password"
-          type="password"
-          placeholder="비밀번호"
-          class="q-mt-sm"
-        />
-        <q-btn
-          label="로그인"
-          color="primary"
-          class="q-mt-sm full-width"
-          @click="login"
-        />
-        <q-btn
-          label="회원가입"
-          flat
-          class="q-mt-sm full-width signup-button"
-          @click="$router.push('/signup')"
-        />
-      </div>
+      <AppLogin />
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -110,18 +80,16 @@
     <PasswordConfirmPopup ref="passwordConfirmPopup" />
   </q-drawer>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
-import { defineProps, defineEmits, getCurrentInstance } from 'vue';
-import NotificationPopup from './NotificationPopup.vue';
-import PasswordConfirmPopup from './PasswordConfirmPopup.vue';
+import { defineProps, defineEmits } from 'vue';
+import { useAuthStore } from 'stores/authStore';
+import AppLogin from 'components/AppLogin.vue';
+import PasswordConfirmPopup from 'components/PasswordConfirmPopup.vue';
 
 const props = defineProps({
   isOpen: {
-    type: Boolean,
-    required: true,
-  },
-  staticSidebar: {
     type: Boolean,
     required: true,
   },
@@ -133,15 +101,23 @@ function onUpdateModelValue(value) {
   emit('update:isOpen', value);
 }
 
-const isLoggedIn = ref(false);
-const userName = ref('');
-const unreadMessages = ref(4);
-const loginData = ref({
-  username: '',
-  password: '',
-});
-const selectedLocation = ref(null);
+const authStore = useAuthStore();
 const notifications = ref([]);
+
+onMounted(() => {
+  if (localStorage.getItem('isLoggedIn') === 'true') {
+    authStore.isLoggedIn = true;
+    authStore.user = JSON.parse(localStorage.getItem('user'));
+  }
+});
+
+function openPasswordConfirmPopup() {
+  authStore.$refs.passwordConfirmPopup.openDialog();
+}
+
+function logout() {
+  authStore.logout();
+}
 
 const linksList = ref([
   {
@@ -181,141 +157,8 @@ const linksList = ref([
     link: '/consult',
   },
 ]);
-
-const { proxy } = getCurrentInstance();
-
-function toggleNotificationPopup() {
-  if (notificationPopup.value) {
-    notificationPopup.value.show();
-  }
-}
-
-function openPasswordConfirmPopup() {
-  proxy.$refs.passwordConfirmPopup.openDialog();
-}
-
-function login() {
-  isLoggedIn.value = true;
-  userName.value = loginData.value.username;
-  selectedLocation.value = localStorage.getItem('location');
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('userName', userName.value);
-
-  notifications.value = [
-    {
-      id: 1,
-      time: '14시간 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 2,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 3,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 4,
-      time: '2일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 5,
-      time: '3일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 6,
-      time: '4일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-    {
-      id: 7,
-      time: '5일 전',
-      read: false,
-      message: '"동작구" 일자리 공고 안내 드립니다.',
-    },
-  ];
-  unreadMessages.value = notifications.value.filter(n => !n.read).length;
-}
-
-function logout() {
-  isLoggedIn.value = false;
-  loginData.value = { username: '', password: '' };
-  userName.value = '';
-  selectedLocation.value = '';
-  notifications.value = [];
-  unreadMessages.value = 0;
-  localStorage.removeItem('isLoggedIn');
-  localStorage.removeItem('userName');
-}
-
-function updateUnreadMessages() {
-  unreadMessages.value = notifications.value.filter(n => !n.read).length;
-}
-
-onMounted(() => {
-  if (localStorage.getItem('isLoggedIn') === 'true') {
-    isLoggedIn.value = true;
-    userName.value = localStorage.getItem('userName') || '';
-    selectedLocation.value = localStorage.getItem('location');
-    notifications.value = [
-      {
-        id: 1,
-        time: '14시간 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 2,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 3,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 4,
-        time: '2일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 5,
-        time: '3일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 6,
-        time: '4일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-      {
-        id: 7,
-        time: '5일 전',
-        read: false,
-        message: '"동작구" 일자리 공고 안내 드립니다.',
-      },
-    ];
-    unreadMessages.value = notifications.value.filter(n => !n.read).length;
-  }
-});
 </script>
+
 <style scoped>
 .app-sidebar {
   background-color: #e9f5fe;
@@ -327,17 +170,10 @@ onMounted(() => {
   padding-right: 20px;
 }
 
-.sidebar-login,
 .sidebar-login-complete {
   padding-left: 20px;
   padding-right: 20px;
   padding-bottom: 20px;
-}
-
-.sidebar-login p,
-.sidebar-login-complete p {
-  margin-bottom: 0.5rem;
-  color: #555;
 }
 
 .welcome-message {
@@ -354,11 +190,6 @@ onMounted(() => {
 
 .logout-button {
   background-color: #cccccc;
-  color: #000;
-}
-
-.signup-button {
-  background-color: #7bcaff;
   color: #000;
 }
 

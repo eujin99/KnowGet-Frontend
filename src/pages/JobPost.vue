@@ -11,32 +11,48 @@
       </q-card-section>
       <q-card-section>
         <q-list bordered>
-          <q-item v-for="post in paginatedPosts" :key="post.postId" clickable @click="viewDetails(post)">
+          <q-item
+            v-for="post in paginatedPosts"
+            :key="post.postId"
+            clickable
+            @click="viewDetails(post)"
+          >
             <q-item-section class="middle">
               <q-item-label class="title">{{ post.joSj }}</q-item-label>
               <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
             </q-item-section>
             <q-item-section side class="details-section">
               <q-item-label caption>
-                <q-icon name="place" class="q-mr-sm"/>
+                <q-icon name="place" class="q-mr-sm" />
                 {{ post.gu }}
               </q-item-label>
               <q-item-label caption>
-                <q-icon name="work" class="q-mr-sm"/>
+                <q-icon name="work" class="q-mr-sm" />
                 {{ post.careerCndNm }}
               </q-item-label>
               <q-item-label caption>
-                <q-icon name="school" class="q-mr-sm"/>
+                <q-icon name="school" class="q-mr-sm" />
                 {{ post.acdmcrNm }}
               </q-item-label>
             </q-item-section>
             <q-item-section class="bookmark-section">
-              <q-icon name="bookmark" :size="bookmarkIconSize" :color="post.isBookmarked ? 'yellow' : 'grey'"
-                      @click.stop="toggleBookmark(post)"/>
-              <q-badge :color="getStatusColor(post.rceptClosNm)" outline
-                       class="status-badge">
-                <q-item-label>{{ getRecruitmentStatus(post.rceptClosNm) }}</q-item-label>
-                <q-tooltip class="tooltip-with-arrow">마감일 : {{ getCloseDate(post.rceptClosNm) }}</q-tooltip>
+              <q-icon
+                name="bookmark"
+                :size="bookmarkIconSize"
+                :color="post.isBookmarked ? 'yellow' : 'grey'"
+                @click.stop="toggleBookmark(post)"
+              />
+              <q-badge
+                :color="getStatusColor(post.rceptClosNm)"
+                outline
+                class="status-badge"
+              >
+                <q-item-label>{{
+                  getRecruitmentStatus(post.rceptClosNm)
+                }}</q-item-label>
+                <q-tooltip class="tooltip-with-arrow"
+                  >마감일 : {{ getCloseDate(post.rceptClosNm) }}</q-tooltip
+                >
               </q-badge>
             </q-item-section>
           </q-item>
@@ -59,7 +75,7 @@ import PaginationControl from 'components/PaginationControl.vue'
 
 export default {
   components: {
-    PaginationControl
+    PaginationControl,
   },
   setup() {
     const $q = useQuasar()
@@ -75,28 +91,29 @@ export default {
       try {
         const response = await api.get(`/posts`)
         // console.log('API response:', response.data) // 응답 콘솔에 출력
+        
         if (Array.isArray(response.data)) {
           posts.value = response.data.map(post => ({
             ...post,
-            isBookmarked: false // 실제 사용자 데이터에서 북마크 여부 가져와야 함
-          }))
+            isBookmarked: false, // 실제 사용자 데이터에서 북마크 여부 가져와야 함
+          }));
         } else {
-          throw new Error('Invalid API response')
+          throw new Error('Invalid API response');
         }
       } catch (error) {
-        console.error('Error fetching jobs:', error)
+        console.error('Error fetching jobs:', error);
         $q.notify({
           type: 'negative',
-          message: 'Failed to fetch job listings'
-        })
+          message: 'Failed to fetch job listings',
+        });
       }
-    }
+    };
 
     const paginatedPosts = computed(() => {
-      const start = (page.value - 1) * itemsPerPage
-      const end = start + itemsPerPage
-      return posts.value.slice(start, end)
-    })
+      const start = (page.value - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      return posts.value.slice(start, end);
+    });
 
     const viewDetails = (post) => {
       router.push({
@@ -104,34 +121,36 @@ export default {
       })
     }
 
-    const toggleBookmark = async (post) => {
+    const toggleBookmark = async post => {
       if (!authStore.isLoggedIn) {
-        $q.notify('로그인이 필요합니다.')
-        return
+        $q.notify('로그인이 필요합니다.');
+        return;
       }
-      await api.post(`/bookmark/${post.joRegistNo}`)
-    }
-
-    const getRecruitmentStatus = (rceptClosNm) => {
-      const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
-      if (!dateMatch) return '확인필요'
-      const closeDate = parseISO(dateMatch[0])
-      return isAfter(closeDate, new Date()) ? '구인중' : '구인마감'
-    }
-
-    const getStatusColor = rceptClosNm => {
-      return getRecruitmentStatus(rceptClosNm) === '구인마감' ? 'grey' : 'green';
+      await api.post(`/bookmark/${post.joRegistNo}`);
     };
 
-    const getCloseDate = (rceptClosNm) => {
-      const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/)
-      if (!dateMatch) return '확인필요'
-      return dateMatch[0]
-    }
+    const getRecruitmentStatus = rceptClosNm => {
+      const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/);
+      if (!dateMatch) return '확인필요';
+      const closeDate = parseISO(dateMatch[0]);
+      return isAfter(closeDate, new Date()) ? '구인중' : '구인마감';
+    };
 
-    watch(page, fetchPosts) // 페이지가 변경될 때마다 fetchPosts 호출
+    const getStatusColor = rceptClosNm => {
+      return getRecruitmentStatus(rceptClosNm) === '구인마감'
+        ? 'grey'
+        : 'green';
+    };
 
-    onMounted(fetchPosts)
+    const getCloseDate = rceptClosNm => {
+      const dateMatch = rceptClosNm.match(/\d{4}-\d{2}-\d{2}/);
+      if (!dateMatch) return '확인필요';
+      return dateMatch[0];
+    };
+
+    watch(page, fetchPosts); // 페이지가 변경될 때마다 fetchPosts 호출
+
+    onMounted(fetchPosts);
 
     const bookmarkIconSize = '28px';
 
@@ -148,9 +167,9 @@ export default {
       getCloseDate,
       updatePagination: fetchPosts, // 페이지네이션 컨트롤에서 페이지 변경 시 fetchPosts 호출
       bookmarkIconSize,
-    }
-  }
-}
+    };
+  },
+};
 </script>
 
 <style scoped>
@@ -232,7 +251,8 @@ export default {
     align-items: flex-start;
   }
 
-  .middle, .details-section {
+  .middle,
+  .details-section {
     padding-left: 5px; /* Adjust padding as needed for smaller screens */
   }
 
