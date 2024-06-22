@@ -69,6 +69,11 @@ const routes = [
         component: () => import('pages/UploadTest.vue'),
         meta: { title: '업로드 테스트 페이지' },
       },
+      {
+        path: 'dashboard',
+        component: () => import('pages/AdminDashBoard.vue'),
+        meta: { title: '관리자 대시보드' },
+      },
     ],
   },
   {
