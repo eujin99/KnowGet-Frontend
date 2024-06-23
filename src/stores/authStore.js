@@ -1,12 +1,13 @@
-import { defineStore } from 'pinia';
-import { api, customApi } from 'boot/axios';
+import {defineStore} from 'pinia';
+import {api} from 'boot/axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isLoggedIn: false,
     username: '',
     role: '',
-    token: '',
+    accessToken: '',
+    refreshToken: '',
   }),
 
   actions: {
@@ -16,10 +17,8 @@ export const useAuthStore = defineStore('auth', {
 
         if (response.status === 200) {
           this.setAuthData(response.data);
-          localStorage.setItem('isLoggedIn', 'true');
-          localStorage.setItem('username', response.data.username);
-          localStorage.setItem('role', response.data.role);
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('accessToken', response.data.accessToken);
+          localStorage.setItem('refreshToken', response.data.refreshToken);
         } else {
           console.log(response.data.message);
         }
@@ -31,34 +30,38 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.clearAuthData();
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('username');
-      localStorage.removeItem('role');
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
     },
 
-    setAuthData({ username, role, token }) {
+    setAuthData({username, role, accessToken, refreshToken}) {
       this.isLoggedIn = true;
       this.username = username;
       this.role = role;
-      this.token = token;
+      this.accessToken = accessToken;
+      this.refreshToken = refreshToken;
     },
 
     clearAuthData() {
       this.isLoggedIn = false;
       this.username = '';
       this.role = '';
-      this.token = '';
+      this.accessToken = '';
+      this.refreshToken = '';
     },
 
     initializeAuth() {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const username = localStorage.getItem('username');
-      const role = localStorage.getItem('role');
-      const token = localStorage.getItem('token');
+      const accessToken = localStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
 
-      if (isLoggedIn && username && role && token) {
-        this.setAuthData({ username, role, token });
+      if (accessToken && refreshToken) {
+        this.setAuthData({
+          username: '', // 초기화 필요
+          role: '', // 초기화 필요
+          accessToken,
+          refreshToken
+          // isActive: '', // 초기화 필요
+        });
       } else {
         this.clearAuthData();
       }

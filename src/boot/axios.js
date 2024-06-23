@@ -1,5 +1,9 @@
 import {boot} from 'quasar/wrappers';
 import axios from 'axios';
+import {useAuthStore} from "stores/authStore";
+import {useRouter} from 'vue-router';
+
+const router = useRouter();
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -16,15 +20,53 @@ const customApi = axios.create({
   }
 });
 
-customApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+customApi.interceptors.request.use(
+  async (config) => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
+
+customApi.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+    const authStore = useAuthStore();
+
+    // 토큰 만료 오류 처리
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        // Refresh Token으로 새로운 Access Token 발급 요청
+        const refreshToken = localStorage.getItem('refreshToken');
+        const response = await axios.post('/user/refresh-token', {
+          'refreshToken': refreshToken
+        });
+
+        if (response.status === 200) {
+          const newAccessToken = response.data.accessToken;
+          localStorage.setItem('accessToken', newAccessToken);
+          customApi.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return customApi(originalRequest);
+        }
+      } catch (error) {
+        authStore.logout();
+        await router.push('/login');
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
