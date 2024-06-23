@@ -17,6 +17,9 @@ export const useAuthStore = defineStore('auth', {
 
         if (response.status === 200) {
           this.setAuthData(response.data);
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('username', response.data.username);
+          localStorage.setItem('role', response.data.role);
           localStorage.setItem('accessToken', response.data.accessToken);
           localStorage.setItem('refreshToken', response.data.refreshToken);
         } else {
@@ -30,6 +33,9 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.clearAuthData();
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
     },
@@ -51,13 +57,16 @@ export const useAuthStore = defineStore('auth', {
     },
 
     initializeAuth() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      const username = localStorage.getItem('username');
+      const role = localStorage.getItem('role');
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
 
-      if (accessToken && refreshToken) {
+      if (isLoggedIn && username && role && accessToken && refreshToken) {
         this.setAuthData({
-          username: '', // 초기화 필요
-          role: '', // 초기화 필요
+          username, // 초기화 필요
+          role, // 초기화 필요
           accessToken,
           refreshToken
           // isActive: '', // 초기화 필요
