@@ -80,19 +80,22 @@
               @click="viewDetails(post)"
             >
               <q-card-section class="job-card-section">
-                <q-img src="/images/job-placeholder.jpg" class="job-image" />
+                <q-img src="/images/job-placeholder.jpg" class="job-image"/>
                 <div class="job-info">
                   <q-item-label class="job-title">{{ post.joSj }}</q-item-label>
                   <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
                   <div class="job-details">
                     <q-item-label caption>
-                      <q-icon name="place" /> {{ post.gu }}
+                      <q-icon name="place"/>
+                      {{ post.gu }}
                     </q-item-label>
                     <q-item-label caption>
-                      <q-icon name="work" /> {{ post.careerCndNm }}
+                      <q-icon name="work"/>
+                      {{ post.careerCndNm }}
                     </q-item-label>
                     <q-item-label caption>
-                      <q-icon name="school" /> {{ post.acdmcrNm }}
+                      <q-icon name="school"/>
+                      {{ post.acdmcrNm }}
                     </q-item-label>
                   </div>
                 </div>
@@ -109,8 +112,9 @@
                     class="status-badge"
                   >
                     <q-item-label>{{
-                      getRecruitmentStatus(post.rceptClosNm)
-                    }}</q-item-label>
+                        getRecruitmentStatus(post.rceptClosNm)
+                      }}
+                    </q-item-label>
                   </q-badge>
                 </div>
               </q-card-section>
@@ -132,12 +136,12 @@
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
-import { api, customApi } from 'boot/axios';
-import { useAuthStore } from 'stores/authStore';
-import { isAfter, parseISO } from 'date-fns';
+import {computed, onMounted, ref, watch} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {useQuasar} from 'quasar';
+import {api, customApi} from 'boot/axios';
+import {useAuthStore} from 'stores/authStore';
+import {isAfter, parseISO} from 'date-fns';
 import PaginationControl from 'components/PaginationControl.vue';
 
 export default {
@@ -225,11 +229,17 @@ export default {
 
     const checkBookmarks = async () => {
       if (!authStore.isLoggedIn) {
-        posts.value.forEach(post => (post.isBookmarked = false));
-        return;
+        posts.value.forEach(post => post.isBookmarked = false)
+        return
       }
 
       for (const post of posts.value) {
+        if (!authStore.isLoggedIn) {
+          // 로그인 상태가 아니라면 중지
+          post.isBookmarked = false;
+          continue;
+        }
+
         try {
           const response = await customApi.get(`/bookmark/${post.postId}`);
           post.isBookmarked = response.data;
@@ -277,8 +287,8 @@ export default {
     const viewDetails = post => {
       router.push({
         name: 'JobPostDetails',
-        params: { postId: post.postId },
-        query: { page: page.value },
+        params: {postId: post.postId},
+        query: {page: page.value},
       });
     };
 
@@ -320,7 +330,9 @@ export default {
       $refs.statusDropdown.hide();
     };
 
-    watch(page, () => {
+    watch(page, (newPage) => {
+      router.push({query: {...route.query, page: newPage}}).catch(() => {
+      });
       if (posts.value.length) {
         filterPosts(); // 페이지가 변경될 때도 필터링 업데이트
       } else {
@@ -371,6 +383,22 @@ export default {
         selectedStatus.value !== '전체' ? selectedStatus.value : '구인 상태',
       ),
     };
+  },
+  // 페이지가 로드되기 전과 업데이트 될 때 쿼리 파라미터를 이용해 상태를 복원
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      if (to.query.page) {
+        vm.page = parseInt(to.query.page);
+      }
+      vm.fetchPosts();
+    });
+  },
+  beforeRouteUpdate(to, from, next) {
+    if (to.query.page) {
+      this.page = parseInt(to.query.page);
+    }
+    this.fetchPosts();
+    next();
   },
 };
 </script>

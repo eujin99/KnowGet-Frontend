@@ -1,9 +1,6 @@
 import {boot} from 'quasar/wrappers';
 import axios from 'axios';
 import {useAuthStore} from "stores/authStore";
-import {useRouter} from 'vue-router';
-
-const router = useRouter();
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -60,7 +57,7 @@ customApi.interceptors.response.use(
         }
       } catch (error) {
         authStore.logout();
-        await router.push('/login');
+        window.location.href = '/login';
       }
     }
 
