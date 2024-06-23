@@ -52,7 +52,7 @@
                       <q-btn
                         color="primary"
                         label="수정"
-                        @click="deleteComment(comment.commentId)"
+                        @click="editComment(comment.commentId)"
                       />
                       <q-btn
                         color="primary"
@@ -94,6 +94,40 @@ const fetchSuccessCase = async () => {
   }
 };
 
+const editComment = async commentId => {
+  const newContent = prompt('댓글을 수정하세요:');
+
+  try {
+    const response = await customApi.patch(
+      `/success-case/${caseId}/comment/${commentId}`,
+      {
+        content: newContent,
+      },
+    );
+    console.log('댓글 수정 성공: ', response.data);
+
+    const commentIndex = comments.value.findIndex(
+      comment => comment.commentId === commentId,
+    );
+    if (commentIndex !== -1) {
+      comments.value[commentIndex].content = newContent.trim();
+    }
+  } catch (error) {
+    console.error('댓글 수정 에러', error);
+  }
+};
+
+const deleteComment = async commentId => {
+  try {
+    const response = await customApi.delete(
+      `/success-case/${caseId}/comment/${commentId}`,
+    );
+    console.log('댓글 삭제 성공:', response.data.message);
+  } catch (error) {
+    console.error('댓글 삭제 에러', error);
+  }
+};
+
 const fetchComments = async () => {
   try {
     const response = await customApi.get(`/success-case/${caseId}/comments`);
@@ -112,7 +146,7 @@ onMounted(fetchSuccessCase);
 
 const submitComment = async () => {
   if (newComment.value.length === 0) {
-    console.log('댓글 내용을 최소 1자 이상 입력해주세요');
+    console.log('댓글 내용을 최소 1 자 이상 입력해주세요');
     return;
   }
   try {
@@ -184,8 +218,14 @@ const submitComment = async () => {
 
 .comment-form {
   margin-top: 20px;
+  margin-left: 20px;
   width: 120%;
   display: flex;
   align-items: center;
+}
+.comment-date {
+  font-size: 12px;
+  justify-content: space-between;
+  color: #666;
 }
 </style>

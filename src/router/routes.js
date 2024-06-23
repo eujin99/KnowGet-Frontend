@@ -35,6 +35,7 @@ const routes = [
       {
         path: 'success',
         component: () => import('pages/SuccessPage.vue'),
+        name: 'SuccessPage',
         meta: { title: '너겟, 취업 성공사례' },
       },
       {
@@ -42,6 +43,13 @@ const routes = [
         component: () => import('pages/SuccessPageDetails.vue'),
         meta: { title: '너겟, 취업 성공사례 상세페이지' },
         name: 'SuccessPageDetails',
+        props: true,
+      },
+      {
+        path: '/success-page-write',
+        component: () => import('pages/SuccessPageWrite.vue'),
+        meta: { title: '너겟, 취업 성공사례 작성' },
+        name: 'SuccessPageWrite',
         props: true,
       },
       {
