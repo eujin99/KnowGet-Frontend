@@ -1,9 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header class="header" v-if="successCase"> </q-header>
-
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-    </q-drawer>
+    <q-header class="header" v-if="successCase"></q-header>
 
     <q-page-container>
       <q-page class="page-wrapper">
@@ -23,46 +20,52 @@
               <q-card-section class="content-section">
                 <p>{{ successCase.content }}</p>
               </q-card-section>
-            </q-card>
 
-            <q-card class="comment-section">
-              <q-card-section>
-                <div class="text-h6">댓글</div>
+              <div class="comment-form">
+                <q-input
+                  filled
+                  outlined
+                  dense
+                  v-model="newComment"
+                  placeholder="댓글을 작성해주세요..."
+                  clearable
+                  @keydown.enter="submitComment"
+                />
+                <q-btn color="primary" label="확인" @click="submitComment" />
+              </div>
+
+              <div class="comments-section" v-if="comments.values">
+                <br />
                 <div
-                  v-if="successCase.comments && successCase.comments.length > 0"
+                  class="comment"
+                  v-for="comment in comments"
+                  :key="comment.commentId"
                 >
-                  <div
-                    v-for="(comment, index) in successCase.comments"
-                    :key="index"
-                    class="comment-item"
-                  >
-                    <div class="text-caption">
-                      {{ comment.username }} -
-                      {{ new Date(comment.createdDate).toLocaleString() }}
+                  <div class="comment-writer">
+                    작성자 {{ comment.username }}
+                  </div>
+                  <div class="comment-content">{{ comment.content }}</div>
+                  <div class="comment-date">
+                    작성 시각
+                    {{ new Date(comment.createdDate).toLocaleDateString() }}
+                    <div v-if="comment.username === authStore.username">
+                      <q-btn
+                        color="primary"
+                        label="수정"
+                        @click="editComment(comment.commentId)"
+                      />
+                      <q-btn
+                        color="primary"
+                        label="삭제"
+                        @click="deleteComment(comment.commentId)"
+                      />
                     </div>
-                    <div>{{ comment.text }}</div>
                   </div>
                 </div>
-                <div v-else class="text-caption">댓글이 없습니다.</div>
-
-                <!-- 대ㅅ글 form 시작 -->
-                <div class="comment-form">
-                  <q-input
-                    filled
-                    rounded
-                    dense
-                    v-model="newComment"
-                    placeholder="댓글을 작성해주세요..."
-                    clearable
-                    @keydown.enter="submitComment"
-                  />
-                  <q-btn color="primary" label="확인" @click="submitComment" />
-                </div>
-              </q-card-section>
+              </div>
             </q-card>
           </q-card-section>
         </q-card>
-        <q-spinner v-else />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -71,50 +74,92 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { api } from 'boot/axios';
+import { api, customApi } from 'boot/axios';
+import { useAuthStore } from 'stores/authStore';
 
 const successCase = ref(null);
+const comments = ref([]);
+const newComment = ref('');
 const router = useRouter();
 const caseId = router.currentRoute.value.params.caseId;
+const authStore = useAuthStore();
 
 const fetchSuccessCase = async () => {
   try {
     const response = await api.get(`/success-case/${caseId}`);
     successCase.value = response.data;
+    fetchComments();
   } catch (error) {
-    console.error('Failed to fetch success case:', error);
+    console.error('성공사례 fetch failed', error);
+  }
+};
+
+const editComment = async commentId => {
+  const newContent = prompt('댓글을 수정하세요:');
+
+  try {
+    const response = await customApi.patch(
+      `/success-case/${caseId}/comment/${commentId}`,
+      {
+        content: newContent,
+      },
+    );
+    console.log('댓글 수정 성공: ', response.data);
+
+    const commentIndex = comments.value.findIndex(
+      comment => comment.commentId === commentId,
+    );
+    if (commentIndex !== -1) {
+      comments.value[commentIndex].content = newContent.trim();
+    }
+  } catch (error) {
+    console.error('댓글 수정 에러', error);
+  }
+};
+
+const deleteComment = async commentId => {
+  try {
+    const response = await customApi.delete(
+      `/success-case/${caseId}/comment/${commentId}`,
+    );
+    console.log('댓글 삭제 성공:', response.data.message);
+  } catch (error) {
+    console.error('댓글 삭제 에러', error);
+  }
+};
+
+const fetchComments = async () => {
+  try {
+    const response = await customApi.get(`/success-case/${caseId}/comments`);
+    console.log(response.data);
+    if (Array.isArray(response.data)) {
+      comments.value = response.data;
+    } else {
+      throw new Error('Invalid API response');
+    }
+  } catch (error) {
+    console.error('댓글 fetch 에러', error);
   }
 };
 
 onMounted(fetchSuccessCase);
 
-const goBack = () => {
-  router.go(-1);
-};
-
-const toggleRightDrawer = () => {
-  rightDrawerOpen.value = !rightDrawerOpen.value;
-};
-
 const submitComment = async () => {
+  if (newComment.value.length === 0) {
+    console.log('댓글 내용을 최소 1 자 이상 입력해주세요');
+    return;
+  }
   try {
-    const response = await api.post(`/success-case/${caseId}/comments`, {
-      text: newComment.value,
+    const response = await customApi.post(`/success-case/${caseId}/comment`, {
+      caseId: caseId,
+      content: newComment.value,
     });
-
-    if (!successCase.value.comments) {
-      successCase.value.comments = [];
-    }
-    successCase.value.comments.push(response.data);
-
-
+    console.log('댓글 작성 성공:', response.data.message);
     newComment.value = '';
   } catch (error) {
-    console.error('Failed to submit comment:', error);
+    console.error('댓글 작성 에러', error);
   }
 };
-
-const newComment = ref('');
 </script>
 
 <style scoped>
@@ -154,6 +199,11 @@ const newComment = ref('');
   padding: 20px;
 }
 
+.comment {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
 .comment-section {
   width: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -164,5 +214,18 @@ const newComment = ref('');
   margin-bottom: 10px;
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
+}
+
+.comment-form {
+  margin-top: 20px;
+  margin-left: 20px;
+  width: 120%;
+  display: flex;
+  align-items: center;
+}
+.comment-date {
+  font-size: 12px;
+  justify-content: space-between;
+  color: #666;
 }
 </style>

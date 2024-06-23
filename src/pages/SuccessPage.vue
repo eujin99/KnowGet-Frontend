@@ -7,6 +7,7 @@
             <div class="text-h5">성공 사례</div>
             <p>성공 사례를 확인하세요.</p>
           </div>
+          <q-btn label="글쓰기" color="primary" @click="navigateToWritePage" />
         </div>
       </q-card-section>
       <q-card-section>
@@ -22,6 +23,13 @@
               <div>게시글 번호: {{ sc.caseId }}</div>
               <div>
                 게시 일자: {{ new Date(sc.createdDate).toLocaleDateString() }}
+              </div>
+              <div v-if="sc.username === authStore.username">
+                <q-btn
+                  color="primary"
+                  label="삭제"
+                  @click="deleteCase(sc.caseId)"
+                />
               </div>
             </q-card-section>
           </q-card>
@@ -39,8 +47,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { api } from 'boot/axios';
+import { api, customApi } from 'boot/axios';
 import PaginationControl from 'components/PaginationControl.vue';
+import { useAuthStore } from 'stores/authStore';
 
 const successCases = ref([]);
 const page = ref(1);
@@ -49,6 +58,20 @@ const totalPages = computed(() =>
   Math.ceil(successCases.value.length / itemsPerPage),
 );
 const router = useRouter();
+const authStore = useAuthStore();
+
+const navigateToWritePage = () => {
+  router.push({ name: 'SuccessPageWrite' });
+};
+
+const deleteCase = async caseId => {
+  try {
+    const response = await customApi.delete(`/success-case/${caseId}`);
+    console.log('성공 사례 삭제 성공', response.data.message);
+  } catch (error) {
+    console.error('성공 사례 삭제 에러', error);
+  }
+};
 
 const fetchSuccessCases = async () => {
   try {
