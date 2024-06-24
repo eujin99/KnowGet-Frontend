@@ -1,10 +1,7 @@
-import { boot } from 'quasar/wrappers';
+import {boot} from 'quasar/wrappers';
 import axios from 'axios';
 
-import { useAuthStore } from 'stores/authStore';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
+import {useAuthStore} from 'stores/authStore';
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -12,7 +9,7 @@ const router = useRouter();
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'http://localhost:8080/api/v1' });
+const api = axios.create({baseURL: 'http://localhost:8080/api/v1'});
 
 const customApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
@@ -57,7 +54,7 @@ customApi.interceptors.response.use(
           localStorage.setItem('accessToken', newAccessToken);
           customApi.defaults.headers.common[
             'Authorization'
-          ] = `Bearer ${newAccessToken}`;
+            ] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
@@ -71,7 +68,7 @@ customApi.interceptors.response.use(
   },
 );
 
-export default boot(({ app }) => {
+export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
@@ -83,4 +80,4 @@ export default boot(({ app }) => {
   //       so you can easily perform requests against your app's API
 });
 
-export { api, customApi };
+export {api, customApi};
