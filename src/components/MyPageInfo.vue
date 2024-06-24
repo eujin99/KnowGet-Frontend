@@ -133,17 +133,18 @@ const updateInfo = async () => {
   }
 
   try {
-    await customApi.patch('/mypage/pref-location', {
-      location: formData.value.location,
+    const locationResponse = await customApi.patch('/mypage/pref-location', {
+      location: formData.value.location.value,
     });
-    await customApi.patch('/mypage/pref-job', {
+
+    const jobResponse = await customApi.patch('/mypage/pref-job', {
       job:
-        jobOptions.find(option => option.label === formData.value.job)?.value ||
-        formData.value.job,
+        jobOptions.find(option => option.label === formData.value.job.value)
+          ?.value || formData.value.job.value,
     });
 
     if (formData.value.password) {
-      await customApi.patch('/mypage/password', {
+      const passwordResponse = await customApi.patch('/mypage/password', {
         password: formData.value.password,
       });
     }

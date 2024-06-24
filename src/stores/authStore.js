@@ -1,5 +1,5 @@
-import {defineStore} from 'pinia';
-import {api} from 'boot/axios';
+import { defineStore } from 'pinia';
+import { api } from 'boot/axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('refreshToken');
     },
 
-    setAuthData({username, role, accessToken, refreshToken}) {
+    setAuthData({ username, role, accessToken, refreshToken }) {
       this.isLoggedIn = true;
       this.username = username;
       this.role = role;
@@ -68,7 +68,7 @@ export const useAuthStore = defineStore('auth', {
           username, // 초기화 필요
           role, // 초기화 필요
           accessToken,
-          refreshToken
+          refreshToken,
           // isActive: '', // 초기화 필요
         });
       } else {
