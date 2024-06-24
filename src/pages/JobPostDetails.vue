@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {api} from 'boot/axios'
 import {isAfter, parseISO} from "date-fns";
@@ -115,6 +115,14 @@ const jobDetails = computed(() => post.value ? {
 
 onMounted(fetchPostDetails)
 
+// 경로가 변경될 때마다 fetchPostDetails를 호출
+watch(
+  () => route.params.postId,
+  async () => {
+    await fetchPostDetails();
+  },
+);
+
 const goBack = () => {
   const previousPage = route.query.page || 1
   router.push({name: 'JobPost', query: {page: previousPage}})
@@ -124,7 +132,6 @@ const formatTextWithLineBreaks = (text) => {
   if (!text) return ''
   return text.replace(/\n/g, '<br>')
 }
-
 
 </script>
 

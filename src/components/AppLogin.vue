@@ -30,9 +30,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/authStore';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {useAuthStore} from 'stores/authStore';
+import {useNotificationStore} from 'stores/notificationStore';
 
 const loginData = ref({
   username: '',
@@ -41,12 +42,15 @@ const loginData = ref({
 
 const authStore = useAuthStore();
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
 async function login() {
   try {
     await authStore.login(loginData.value);
 
     if (authStore.isLoggedIn) {
+      await notificationStore.fetchUnreadCount();
+      await notificationStore.fetchNotifications();
       await router.push('/');
     } else {
       alert('로그인 실패: 서버에서 올바른 응답을 받지 못했습니다.');

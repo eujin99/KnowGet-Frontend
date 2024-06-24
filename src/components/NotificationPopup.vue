@@ -1,114 +1,70 @@
 <template>
-  <q-popup-proxy ref="popup" transition-show="scale" transition-hide="scale">
-    <q-card class="q-popup-plugin">
+  <q-dialog v-model="isDialogOpen">
+    <q-card>
       <q-card-section>
-        <div class="text-h6">
-          <q-icon name="notifications" /> 새소식
-          <q-badge color="red">{{ unreadCount }}</q-badge>
-        </div>
+        <q-icon name="mail" size="sm"/>
+        <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
+        <q-card-section v-html="formattedContent"></q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat color="primary" @click="goToPost">바로가기</q-btn>
+          <q-btn flat label="닫기" color="primary" v-close-popup/>
+        </q-card-actions>
       </q-card-section>
-
-      <q-list separator class="notifications-list">
-        <q-item
-          v-for="notification in notifications.slice(0, 7)"
-          :key="notification.id"
-          clickable
-          v-ripple
-          @click="markAsRead(notification)"
-        >
-          <q-item-section avatar>
-            <q-avatar>
-              <img :src="notification.avatar" alt="Profile" />
-            </q-avatar>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="notification-text">
-              <strong>{{ notification.user }}</strong
-              >님이 <strong>{{ notification.target }}</strong
-              >에게 알림을 보냈습니다.
-            </q-item-label>
-            <q-item-label caption>{{ notification.time }}</q-item-label>
-          </q-item-section>
-          <q-item-section>
-            <q-badge v-if="!notification.read" color="red" floating />
-          </q-item-section>
-        </q-item>
-      </q-list>
-
-      <q-card-actions align="right">
-        <q-btn flat label="닫기" color="primary" @click="closePopup" />
-      </q-card-actions>
     </q-card>
-  </q-popup-proxy>
+  </q-dialog>
 </template>
 
-<script setup>
-import { ref, computed, watch } from 'vue';
-import { defineProps } from 'vue';
+<script>
+import {computed, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
 
-const props = defineProps({
-  notifications: {
-    type: Array,
-    required: true,
+export default {
+  name: 'NotificationPopup',
+  setup() {
+    const isDialogOpen = ref(false);
+    const selectedNotification = ref({});
+    const router = useRouter();
+    const route = useRoute();
+
+    function showNotificationPopup(notification) {
+      selectedNotification.value = notification;
+      isDialogOpen.value = true;
+    }
+
+    const formattedContent = computed(() => {
+      if (selectedNotification.value.content) {
+        const lines = selectedNotification.value.content.split('\n');
+        lines[0] = `<strong class = "title">${lines[0]}</strong><br><br>`;
+        return lines.join('<br>');
+      }
+      return '';
+    });
+
+    const goToPost = () => {
+      if (selectedNotification.value.postId) {
+        isDialogOpen.value = false; // 팝업을 닫음
+        router.push({
+          name: 'JobPostDetails',
+          params: {postId: selectedNotification.value.postId},
+        });
+      }
+    };
+
+
+    return {
+      isDialogOpen,
+      selectedNotification,
+      showNotificationPopup,
+      formattedContent,
+      goToPost,
+    };
   },
-});
-
-const popup = ref(null);
-const unreadCount = computed(
-  () => props.notifications.filter(n => !n.read).length,
-);
-
-function closePopup() {
-  if (popup.value) {
-    popup.value.hide();
-  }
-}
-
-function markAsRead(notification) {
-  notification.read = true;
-  // 트리거링하여 부모 컴포넌트에서 변경사항을 감지하게 함
-  popup.value.$emit('notification-updated', unreadCount.value);
-}
+};
 </script>
 
 <style scoped>
-.q-popup-plugin {
-  width: 350px;
-}
-
-.q-badge {
-  margin-left: 10px;
-}
-
-.notifications-list {
-  max-height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
-}
-
-.q-item-section[avatar] {
-  width: 50px;
-}
-
-.q-item-section img {
-  width: 100%;
-  height: auto;
-  border-radius: 50%;
-}
-
-.notification-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-}
-
-.q-item-label {
-  display: block;
-}
-
-.q-item-label[caption] {
-  font-size: 0.8rem;
-  color: gray;
+.title {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 </style>

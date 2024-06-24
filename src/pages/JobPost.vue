@@ -80,7 +80,7 @@
               @click="viewDetails(post)"
             >
               <q-card-section class="job-card-section">
-                <q-img src="/images/job-placeholder.jpg" class="job-image"/>
+                <q-img src="" class="job-image"/>
                 <div class="job-info">
                   <q-item-label class="job-title">{{ post.joSj }}</q-item-label>
                   <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
@@ -257,9 +257,7 @@ export default {
     };
 
     const getStatusColor = rceptClosNm => {
-      return getRecruitmentStatus(rceptClosNm) === '구인 마감'
-        ? 'grey'
-        : 'green';
+      return getRecruitmentStatus(rceptClosNm) === '구인 마감' ? 'grey' : 'green';
     };
 
     const filterPosts = () => {
@@ -303,9 +301,7 @@ export default {
         // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
         $q.notify({
           type: 'positive',
-          message: post.isBookmarked
-            ? '북마크에 추가되었습니다.'
-            : '북마크에서 제거되었습니다.',
+          message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
         });
       } catch (error) {
         console.error('Error toggling bookmark:', error);
