@@ -16,7 +16,7 @@
 
 <script>
 import {computed, ref} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
+import {useRouter} from 'vue-router';
 
 export default {
   name: 'NotificationPopup',
@@ -24,7 +24,6 @@ export default {
     const isDialogOpen = ref(false);
     const selectedNotification = ref({});
     const router = useRouter();
-    const route = useRoute();
 
     function showNotificationPopup(notification) {
       selectedNotification.value = notification;
