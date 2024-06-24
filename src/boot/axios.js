@@ -1,7 +1,7 @@
-import {boot} from 'quasar/wrappers';
+import { boot } from 'quasar/wrappers';
 import axios from 'axios';
-import {useAuthStore} from "stores/authStore";
-import {useRouter} from 'vue-router';
+import { useAuthStore } from 'stores/authStore';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
@@ -11,33 +11,33 @@ const router = useRouter();
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({baseURL: 'http://localhost:8080/api/v1'});
+const api = axios.create({ baseURL: 'http://localhost:8080/api/v1' });
 
 const customApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
 customApi.interceptors.request.use(
-  async (config) => {
+  async config => {
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
-  }
+  },
 );
 
 customApi.interceptors.response.use(
-  (response) => {
+  response => {
     return response;
   },
-  async (error) => {
+  async error => {
     const originalRequest = error.config;
     const authStore = useAuthStore();
 
@@ -48,13 +48,15 @@ customApi.interceptors.response.use(
         // Refresh Token으로 새로운 Access Token 발급 요청
         const refreshToken = localStorage.getItem('refreshToken');
         const response = await axios.post('/user/refresh-token', {
-          'refreshToken': refreshToken
+          refreshToken: refreshToken,
         });
 
         if (response.status === 200) {
           const newAccessToken = response.data.accessToken;
           localStorage.setItem('accessToken', newAccessToken);
-          customApi.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          customApi.defaults.headers.common[
+            'Authorization'
+          ] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
@@ -65,10 +67,10 @@ customApi.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
-export default boot(({app}) => {
+export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
@@ -80,4 +82,4 @@ export default boot(({app}) => {
   //       so you can easily perform requests against your app's API
 });
 
-export {api, customApi};
+export { api, customApi };

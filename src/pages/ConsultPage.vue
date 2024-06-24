@@ -17,9 +17,7 @@
             />
           </div>
           <div class="consultation-content">
-            <p class="consultation-description">
-              {{ descriptionText }}
-            </p>
+            <p class="consultation-description">{{ descriptionText }}</p>
             <q-input
               v-model="consultationContent"
               type="textarea"
@@ -44,12 +42,14 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { customApi } from 'boot/axios';
+import { useAuthStore } from 'stores/authStore';
 
-// 상담 유형 및 내용
 const selectedType = ref('일자리');
 const consultationContent = ref('');
 
-// 상담 유형 옵션
+const authStore = useAuthStore();
+
 const typeOptions = [
   { label: '일자리', value: '일자리' },
   { label: '이력서 및 서류 작성', value: '이력서 및 서류 작성' },
@@ -57,7 +57,6 @@ const typeOptions = [
   { label: '기타', value: '기타' },
 ];
 
-// 상담 유형에 따른 설명 텍스트
 const descriptionText = computed(() => {
   switch (selectedType.value) {
     case '일자리':
@@ -73,11 +72,24 @@ const descriptionText = computed(() => {
   }
 });
 
-// 상담 신청 함수
-const submitConsultation = () => {
-  alert(
-    `상담 유형: ${selectedType.value}\n상담 내용: ${consultationContent.value}`,
-  );
+const submitConsultation = async () => {
+  try {
+    if (!authStore.isLoggedIn) {
+      alert('로그인 후 상담을 신청할 수 있습니다.');
+      return;
+    }
+
+    await customApi.post('/counseling', {
+      category: selectedType.value,
+      content: consultationContent.value,
+    });
+
+    alert('상담이 성공적으로 신청되었습니다.');
+    consultationContent.value = ''; // 상담 내용 초기화
+  } catch (error) {
+    console.error('상담 신청에 실패했습니다:', error);
+    alert('상담 신청에 실패했습니다. 나중에 다시 시도해 주세요.');
+  }
 };
 </script>
 

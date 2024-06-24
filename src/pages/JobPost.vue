@@ -290,6 +290,13 @@ export default {
       try {
         await customApi.post(`/bookmark/${post.postId}`);
         post.isBookmarked = !post.isBookmarked;
+        // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
+        $q.notify({
+          type: 'positive',
+          message: post.isBookmarked
+            ? '북마크에 추가되었습니다.'
+            : '북마크에서 제거되었습니다.',
+        });
       } catch (error) {
         console.error('Error toggling bookmark:', error);
         $q.notify({
