@@ -82,6 +82,20 @@ const routes = [
         component: () => import('pages/AdminDashBoard.vue'),
         meta: { title: '관리자 대시보드' },
       },
+      {
+        path: 'counselingdetail/:id',
+        component: () => import('pages/AdminCounselingDetail.vue'),
+        meta: { title: '관리자 상담 답변 페이지' },
+        name: 'CounselingDetail',
+        props: true,
+      },
+      {
+        path: 'mycounselingdetail/:id',
+        component: () => import('pages/MyPageCounselingDetail.vue'),
+        name: 'MyPageCounselingDetail',
+        meta: { title: '내 상담 자세히 보기' },
+        props: true,
+      },
     ],
   },
   {
