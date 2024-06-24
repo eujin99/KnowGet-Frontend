@@ -1,65 +1,41 @@
 <template>
   <div class="counseling-management">
-    <q-table
-      :rows="counselings"
-      :columns="columns"
-      row-key="counselingId"
-      @row-click="openCounselingDialog"
-    />
-    <q-dialog v-model="isDialogOpen">
-      <q-card>
-        <q-card-section>
-          <div class="text-h6">상담 내용</div>
-          <q-input
-            v-model="selectedCounseling.content"
-            type="textarea"
-            outlined
-            readonly
-          />
-        </q-card-section>
-        <q-card-section>
-          <div class="text-h6">답변 작성</div>
-          <q-input v-model="answerContent" type="textarea" outlined />
-          <q-btn label="저장" color="primary" @click="saveAnswer" />
-          <q-btn label="삭제" color="negative" @click="deleteAnswer" />
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <table class="counseling-table">
+      <thead>
+        <tr>
+          <th>상담 ID</th>
+          <th>사용자</th>
+          <th>카테고리</th>
+          <th>내용</th>
+          <th>날짜</th>
+          <th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="counseling in counselings"
+          :key="counseling.counselingId"
+          @click="goToCounselingDetail(counseling.counselingId)"
+        >
+          <td>{{ counseling.counselingId }}</td>
+          <td>{{ counseling.user }}</td>
+          <td>{{ counseling.category }}</td>
+          <td>{{ counseling.content }}</td>
+          <td>{{ counseling.sentDate }}</td>
+          <td>{{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
 
 const counselings = ref([]);
-const selectedCounseling = ref(null);
-const answerContent = ref('');
-const isDialogOpen = ref(false);
-
-const columns = [
-  {
-    name: 'counselingId',
-    required: true,
-    label: '상담 ID',
-    align: 'left',
-    field: row => row.counselingId,
-  },
-  { name: 'user', label: '사용자', align: 'left', field: row => row.user },
-  {
-    name: 'category',
-    label: '카테고리',
-    align: 'left',
-    field: row => row.category,
-  },
-  { name: 'content', label: '내용', align: 'left', field: row => row.content },
-  {
-    name: 'sentDate',
-    label: '날짜',
-    align: 'left',
-    field: row => row.sentDate,
-  },
-];
+const router = useRouter();
 
 const fetchCounselings = async () => {
   try {
@@ -70,47 +46,8 @@ const fetchCounselings = async () => {
   }
 };
 
-const openCounselingDialog = row => {
-  selectedCounseling.value = row;
-  isDialogOpen.value = true;
-  fetchAnswer(row.counselingId);
-};
-
-const fetchAnswer = async counselingId => {
-  try {
-    const response = await customApi.get(`/answer/${counselingId}`);
-    answerContent.value = response.data.content;
-  } catch (error) {
-    answerContent.value = ''; // Reset if no answer
-  }
-};
-
-const saveAnswer = async () => {
-  try {
-    if (selectedCounseling.value) {
-      await customApi.post('/answer', {
-        counselingId: selectedCounseling.value.counselingId,
-        content: answerContent.value,
-      });
-      alert('답변이 저장되었습니다.');
-    }
-  } catch (error) {
-    console.error('Failed to save answer:', error);
-  }
-};
-
-const deleteAnswer = async () => {
-  try {
-    if (selectedCounseling.value) {
-      await customApi.delete(
-        `/answer/${selectedCounseling.value.counselingId}`,
-      );
-      alert('답변이 삭제되었습니다.');
-      answerContent.value = '';
-    }
-  } catch (error) {
-    console.error('Failed to delete answer:', error);
-  }
+const goToCounselingDetail = counselingId => {
+  router.push({ name: 'CounselingDetail', params: { id: counselingId } });
 };
 
 onMounted(fetchCounselings);
@@ -119,5 +56,41 @@ onMounted(fetchCounselings);
 <style scoped>
 .counseling-management {
   padding: 20px;
+}
+
+.counseling-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 1em;
+  font-family: sans-serif;
+  min-width: 600px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.counseling-table th,
+.counseling-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.counseling-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.counseling-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.counseling-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.counseling-table tbody tr:hover {
+  background-color: #f1f1f1;
+  cursor: pointer;
 }
 </style>
