@@ -1,6 +1,6 @@
 import {boot} from 'quasar/wrappers';
 import axios from 'axios';
-
+import {Notify} from 'quasar';
 import {useAuthStore} from 'stores/authStore';
 
 // Be careful when using SSR for cross-request state pollution
@@ -32,35 +32,36 @@ customApi.interceptors.request.use(
 );
 
 customApi.interceptors.response.use(
-  response => {
-    return response;
-  },
+  response => response,
   async error => {
     const originalRequest = error.config;
     const authStore = useAuthStore();
 
     // 토큰 만료 오류 처리
-    if (error.response.status === 401 && !originalRequest._retry) {
+    if (error.response.status === 401 || error.response.status === 400 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         // Refresh Token으로 새로운 Access Token 발급 요청
         const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post('/user/refresh-token', {
+        const response = await axios.post('http://localhost:8080/api/v1/user/refresh-token', {
           refreshToken: refreshToken,
         });
 
         if (response.status === 200) {
           const newAccessToken = response.data.accessToken;
           localStorage.setItem('accessToken', newAccessToken);
-          customApi.defaults.headers.common[
-            'Authorization'
-            ] = `Bearer ${newAccessToken}`;
+          customApi.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
       } catch (error) {
         authStore.logout();
-        window.location.href = '/login';
+        Notify.create({
+          message: '로그인이 필요합니다.',
+          color: 'negative',
+          position: 'top',
+        });
+        window.location.href = '/';
       }
     }
 

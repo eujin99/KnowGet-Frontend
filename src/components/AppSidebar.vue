@@ -107,6 +107,7 @@ import AppLogin from 'components/AppLogin.vue';
 import {useRouter} from 'vue-router';
 import {useNotificationStore} from 'stores/notificationStore';
 import NotificationPopup from 'components/NotificationPopup.vue';
+import {Notify} from 'quasar';
 
 export default defineComponent({
   components: {
@@ -145,6 +146,12 @@ export default defineComponent({
     const logout = () => {
       authStore.logout();
       router.push('/');
+      Notify.create({
+        type: 'info', // 알림 유형 (info, positive, negative 등)
+        message: '로그아웃되었습니다. 이용해 주셔서 감사합니다.',
+        timeout: 3000, // 알림이 표시되는 시간 (밀리초)
+        position: 'top-right' // 알림이 표시되는 위치 (top, bottom, left, right 등 조합 가능)
+      });
     };
 
     const handleNotificationClick = async (notification) => {

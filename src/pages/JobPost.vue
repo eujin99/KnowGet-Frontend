@@ -138,7 +138,7 @@
 <script>
 import {computed, onMounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import {useQuasar} from 'quasar';
+import {Notify} from 'quasar';
 import {api, customApi} from 'boot/axios';
 import {useAuthStore} from 'stores/authStore';
 import {isAfter, parseISO} from 'date-fns';
@@ -149,7 +149,6 @@ export default {
     PaginationControl,
   },
   setup() {
-    const $q = useQuasar();
     const route = useRoute();
     const router = useRouter();
     const posts = ref([]);
@@ -220,9 +219,9 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching jobs:', error);
-        $q.notify({
+        Notify.create({
           type: 'negative',
-          message: 'Failed to fetch job listings',
+          message: '일자리 정보를 불러오는 도중 오류가 발생했습니다.',
         });
       }
     };
@@ -292,20 +291,23 @@ export default {
 
     const toggleBookmark = async post => {
       if (!authStore.isLoggedIn) {
-        $q.notify('로그인이 필요합니다');
+        Notify.create({
+          type: 'negative',
+          message: '로그인이 필요합니다',
+        });
         return;
       }
       try {
         await customApi.post(`/bookmark/${post.postId}`);
         post.isBookmarked = !post.isBookmarked;
         // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
-        $q.notify({
+        Notify.create({
           type: 'positive',
           message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
         });
       } catch (error) {
         console.error('Error toggling bookmark:', error);
-        $q.notify({
+        Notify.create({
           type: 'negative',
           message: '북마크를 토글하는 중 오류가 발생했습니다.',
         });
