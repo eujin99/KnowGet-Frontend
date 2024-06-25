@@ -115,6 +115,7 @@ const fetchUserData = async () => {
   try {
     if (authStore.isLoggedIn) {
       const response = await customApi.get('/mypage');
+      console.log('Fetched user data:', response.data);
       formData.value.username = response.data.username;
       formData.value.location = response.data.prefLocation;
       formData.value.job =

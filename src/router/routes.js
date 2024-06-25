@@ -1,4 +1,3 @@
-// src/router/routes.js
 const routes = [
   {
     path: '/',
@@ -94,6 +93,20 @@ const routes = [
         component: () => import('pages/MyPageCounselingDetail.vue'),
         name: 'MyPageCounselingDetail',
         meta: { title: '내 상담 자세히 보기' },
+        props: true,
+      },
+      // 추가된 라우트
+      {
+        path: 'admin-job-guide-create',
+        component: () => import('pages/AdminJobGuideCreate.vue'),
+        meta: { title: '취업 가이드 작성' },
+        name: 'AdminJobGuideCreate',
+      },
+      {
+        path: 'admin-job-guide-detail/:id',
+        component: () => import('pages/AdminJobGuideDetail.vue'),
+        meta: { title: '취업 가이드 상세' },
+        name: 'AdminJobGuideDetail',
         props: true,
       },
     ],
