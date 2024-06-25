@@ -29,31 +29,53 @@
         />
         <!-- 알림 아코디언 -->
         <q-expansion-item
-          icon="mail"
-          label="알림왔어요!"
-          header-class="notification-header"
           dense
           switch-toggle-side
           class="notification-accordion"
         >
+          <template v-slot:header>
+            <div class="notification-header">
+              <div class="notification-text-container">
+                <q-icon name="mail" class="mail-icon"/>
+                <q-badge
+                  v-if="notificationStore.unreadCount > 0"
+                  color="red"
+                  floating
+                >
+                  {{ notificationStore.unreadCount }}
+                </q-badge>
+                <span class="notification-label">알림왔어요!</span>
+              </div>
+            </div>
+          </template>
           <div class="notification-list">
             <div
               v-for="notification in notifications"
-              :key="notification.id"
-              class="notification-item"
+              :key="notification.notificationId"
+              :class="{'notification-item': true, 'read': notification.isRead}"
             >
               <div class="notification-content">
-                <small class="notification-time">{{ notification.time }}</small>
-                <p>{{ notification.message }}</p>
+                <small class="notification-time">
+                  {{ notification.formattedDate }}
+                </small>
+                <p @click="handleNotificationClick(notification)">{{ notification.content }}</p>
               </div>
+              <q-btn
+                dense
+                icon="close"
+                @click="deleteNotification(notification.notificationId)"
+                class="delete-button"
+              />
             </div>
           </div>
         </q-expansion-item>
+
+        <NotificationPopup ref="notificationPopup"/>
       </div>
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <AppLogin />
+      <AppLogin/>
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -66,7 +88,7 @@
       >
         <q-item clickable v-ripple class="menu-item">
           <q-item-section avatar>
-            <q-icon :name="link.icon" />
+            <q-icon :name="link.icon"/>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
@@ -78,84 +100,145 @@
   </q-drawer>
 </template>
 
-<script setup>
-import { defineEmits, defineProps, onMounted, ref } from 'vue';
-import { useAuthStore } from 'stores/authStore';
+<script>
+import {computed, defineComponent, onMounted, ref} from 'vue';
+import {useAuthStore} from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
+import {useNotificationStore} from 'stores/notificationStore';
+import NotificationPopup from 'components/NotificationPopup.vue';
+import {Notify} from 'quasar';
 
-const router = useRouter();
+export default defineComponent({
+  components: {
+    AppLogin,
+    NotificationPopup,
+  },
+  props: {
+    isOpen: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(props, {emit}) {
+    const router = useRouter();
+    const authStore = useAuthStore();
+    const notificationStore = useNotificationStore();
+    const notifications = computed(() => notificationStore.notifications);
 
-const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    required: true,
+    const onUpdateModelValue = value => {
+      emit('update:isOpen', value);
+    };
+
+    onMounted(async () => {
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        authStore.isLoggedIn = true;
+        authStore.username = localStorage.getItem('username');
+      }
+      await notificationStore.fetchUnreadCount();
+      await notificationStore.fetchNotifications();
+    });
+
+    const goToMyPage = () => {
+      router.push('/mypage');
+    };
+
+    const logout = () => {
+      authStore.logout();
+      router.push('/');
+      Notify.create({
+        type: 'info', // 알림 유형 (info, positive, negative 등)
+        message: '로그아웃되었습니다. 이용해 주셔서 감사합니다.',
+        timeout: 3000, // 알림이 표시되는 시간 (밀리초)
+        position: 'top-right' // 알림이 표시되는 위치 (top, bottom, left, right 등 조합 가능)
+      });
+    };
+
+    const handleNotificationClick = async (notification) => {
+      if (!notification.isRead) {
+        await notificationStore.markAsRead(notification);
+      }
+      if (notificationPopup.value) {
+        notificationPopup.value.showNotificationPopup(notification);
+      }
+    };
+
+    const notificationPopup = ref(null);
+
+    const deleteNotification = async (notificationId) => {
+      try {
+        await notificationStore.deleteNotification(notificationId);
+        Notify.create({
+          type: 'info',
+          message: '알림이 삭제되었습니다.',
+          timeout: 3000,
+          position: 'top-right',
+        });
+      } catch (error) {
+        console.error('Failed to delete notification:', error);
+        Notify.create({
+          type: 'negative',
+          message: '알림 삭제 중 오류가 발생했습니다.',
+          timeout: 3000,
+          position: 'top-right',
+        });
+      }
+    };
+
+    const linksList = ref([
+      {
+        title: 'KnowGet 너겟',
+        caption: '너겟 메인페이지',
+        icon: 'home',
+        link: '/',
+      },
+      {
+        title: '일자리 찾기',
+        caption: '일자리 공고입니다.',
+        icon: 'work',
+        link: '/jobpost',
+      },
+      {
+        title: '교육 찾기',
+        caption: '교육 정보를 확인하세요.',
+        icon: 'school',
+        link: '/education',
+      },
+      {
+        title: '취업 가이드',
+        caption: '취업 정보를 제공합니다.',
+        icon: 'book',
+        link: '/guide',
+      },
+      {
+        title: '취업 성공사례',
+        caption: '성공적인 취업 사례를 확인하세요.',
+        icon: 'thumb_up',
+        link: '/success',
+      },
+      {
+        title: '상담하기',
+        caption: '상담 서비스를 이용해보세요.',
+        icon: 'chat',
+        link: '/consult',
+      },
+    ]);
+
+    return {
+      props,
+      authStore,
+      notificationStore,
+      notifications,
+      onUpdateModelValue,
+      goToMyPage,
+      logout,
+      handleNotificationClick,
+      notificationPopup,
+      deleteNotification,
+      linksList,
+    };
   },
 });
-
-const emit = defineEmits(['update:isOpen']);
-
-function onUpdateModelValue(value) {
-  emit('update:isOpen', value);
-}
-
-const authStore = useAuthStore();
-const notifications = ref([]);
-
-onMounted(() => {
-  if (localStorage.getItem('isLoggedIn') === 'true') {
-    authStore.isLoggedIn = true;
-    authStore.username = localStorage.getItem('username');
-  }
-});
-
-function goToMyPage() {
-  router.push('/mypage');
-}
-
-function logout() {
-  authStore.logout();
-  router.push('/');
-}
-
-const linksList = ref([
-  {
-    title: 'KnowGet 너겟',
-    caption: '너겟 메인페이지',
-    icon: 'home',
-    link: '/',
-  },
-  {
-    title: '일자리 찾기',
-    caption: '일자리 공고입니다.',
-    icon: 'work',
-    link: '/jobpost',
-  },
-  {
-    title: '교육 찾기',
-    caption: '교육 정보를 확인하세요.',
-    icon: 'school',
-    link: '/education',
-  },
-  {
-    title: '취업 가이드',
-    caption: '취업 정보를 제공합니다.',
-    icon: 'book',
-    link: '/guide',
-  },
-  {
-    title: '취업 성공사례',
-    caption: '성공적인 취업 사례를 확인하세요.',
-    icon: 'thumb_up',
-    link: '/success',
-  },
-  {
-    title: '상담하기',
-    caption: '상담 서비스를 이용해보세요.',
-    icon: 'chat',
-    link: '/consult',
-  },
-]);
 </script>
 
 <style scoped>
@@ -221,7 +304,40 @@ const linksList = ref([
 }
 
 .notification-header {
-  background-color: #f7f9fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+}
+
+.notification-text-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.notification-label {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.mail-icon-container {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.mail-icon {
+  margin-right: 0;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
 }
 
 .notification-accordion {
@@ -238,11 +354,19 @@ const linksList = ref([
 
 .notification-item {
   padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   transition: background-color 0.3s;
 }
 
 .notification-item:hover {
   background-color: #f0f8ff;
+}
+
+.notification-item.read {
+  background-color: #f5f5f5;
+  color: #888;
 }
 
 .notification-content {
@@ -259,5 +383,10 @@ const linksList = ref([
   font-size: 0.9em;
   margin-bottom: 5px;
   display: block;
+}
+
+.delete-button {
+  margin-left: 10px;
+  font-size: 7px;
 }
 </style>

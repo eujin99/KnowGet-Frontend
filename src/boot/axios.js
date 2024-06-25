@@ -1,8 +1,15 @@
-import { boot } from 'quasar/wrappers';
+import {boot} from 'quasar/wrappers';
 import axios from 'axios';
-import { useAuthStore } from 'stores/authStore';
+import {Notify} from 'quasar';
+import {useAuthStore} from 'stores/authStore';
 
-const api = axios.create({ baseURL: 'http://localhost:8080/api/v1' });
+// Be careful when using SSR for cross-request state pollution
+// due to creating a Singleton instance here;
+// If any client changes this (global) instance, it might be a
+// good idea to move this instance creation inside of the
+// "export default () => {}" function below (which runs individually
+// for each client)
+const api = axios.create({baseURL: 'http://localhost:8080/api/v1'});
 
 const customApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
@@ -22,33 +29,35 @@ customApi.interceptors.request.use(
 );
 
 customApi.interceptors.response.use(
-  response => {
-    return response;
-  },
+  response => response,
   async error => {
     const originalRequest = error.config;
     const authStore = useAuthStore();
 
-    if (error.response.status === 401 && !originalRequest._retry) {
+    // 토큰 만료 오류 처리
+    if (error.response.status === 401 || error.response.status === 400 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post('/user/refresh-token', {
+        const response = await axios.post('http://localhost:8080/api/v1/user/refresh-token', {
           refreshToken: refreshToken,
         });
 
         if (response.status === 200) {
           const newAccessToken = response.data.accessToken;
           localStorage.setItem('accessToken', newAccessToken);
-          customApi.defaults.headers.common[
-            'Authorization'
-          ] = `Bearer ${newAccessToken}`;
+          customApi.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
       } catch (error) {
         authStore.logout();
-        window.location.href = '/login';
+        Notify.create({
+          message: '로그인이 필요합니다.',
+          color: 'negative',
+          position: 'top',
+        });
+        window.location.href = '/';
       }
     }
 
@@ -56,9 +65,11 @@ customApi.interceptors.response.use(
   },
 );
 
-export default boot(({ app }) => {
+export default boot(({app}) => {
+  // for use inside Vue files (Options API) through this.$axios and this.$api
+
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
 });
 
-export { api, customApi };
+export {api, customApi};
