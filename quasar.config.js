@@ -8,7 +8,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const { configure } = require('quasar/wrappers');
+const {configure} = require('quasar/wrappers');
 const path = require('path');
 
 module.exports = configure(function (/* ctx */) {
@@ -29,7 +29,11 @@ module.exports = configure(function (/* ctx */) {
         },
       },
     },
-    boot: ['i18n', 'axios'],
+    boot: [
+      'i18n',
+      'axios',
+      'notify',
+    ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ['app.scss'],
@@ -96,7 +100,7 @@ module.exports = configure(function (/* ctx */) {
               lintCommand: 'eslint "./**/*.{js,mjs,cjs,vue}"',
             },
           },
-          { server: false },
+          {server: false},
         ],
       ],
     },
@@ -122,7 +126,9 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: [
+        'Notify'
+      ],
     },
 
     // animations: 'all', // --- includes all animations
