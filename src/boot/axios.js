@@ -13,9 +13,6 @@ const api = axios.create({baseURL: 'http://localhost:8080/api/v1'});
 
 const customApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1',
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 customApi.interceptors.request.use(
@@ -41,7 +38,6 @@ customApi.interceptors.response.use(
     if (error.response.status === 401 || error.response.status === 400 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // Refresh Token으로 새로운 Access Token 발급 요청
         const refreshToken = localStorage.getItem('refreshToken');
         const response = await axios.post('http://localhost:8080/api/v1/user/refresh-token', {
           refreshToken: refreshToken,
@@ -73,12 +69,7 @@ export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
   app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
 });
 
 export {api, customApi};
