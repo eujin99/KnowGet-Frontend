@@ -124,7 +124,7 @@
                         <q-btn
                           color="primary"
                           label="저장"
-                          @click="saveEditedReply(reply)"
+                          @click="saveEditedReply(comment.commentId, reply)"
                         />
                       </div>
                       <div class="reply-date">
@@ -154,12 +154,12 @@
                         v-model="newReplyContent[comment.commentId]"
                         placeholder="답글을 작성해주세요..."
                         clearable
-                        @keydown.enter="submitReply(comment)"
+                        @keydown.enter="submitReply(comment.commentId)"
                       />
                       <q-btn
                         color="primary"
                         label="확인"
-                        @click="submitReply(comment)"
+                        @click="submitReply(comment.commentId)"
                       />
                     </div>
                   </div>
@@ -197,6 +197,56 @@ const fetchSuccessCase = async () => {
   }
 };
 
+// fetchComments 함수 추가
+// 댓글 목록을 불러오는 API를 호출하고, 불러온 댓글 목록을 comments 변수에 저장
+const fetchComments = async () => {
+  try {
+    const response = await customApi.get(`/success-case/${caseId}/comments`);
+    if (Array.isArray(response.data)) {
+      const fetchedComments = response.data.map(comment => ({
+        ...comment,
+        editing: false,
+        newContent: '',
+        showReplies: false,
+        replies: [],
+      }));
+
+      // 각 댓글마다 답글 로딩(for n개의 답글 보기 버튼)
+      for (let comment of fetchedComments) {
+        // fetchedComments 배열의 각 요소를 comment로 받아와서 반복문을 실행
+        const replyResponse = await customApi.get(
+          `/comment/${comment.commentId}/replies`,
+        );
+        if (Array.isArray(replyResponse.data)) {
+          // replyResponse.data가 배열이면
+          comment.replies = replyResponse.data.map(reply => ({
+            ...reply,
+            editing: false,
+            newContent: '',
+          }));
+        } else {
+          throw new Error('replies에 대한 API 응답 오류');
+        }
+      }
+
+      // comments 업데이트 - 최신순 정렬
+      comments.value = fetchedComments.sort(
+        (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+      );
+
+      // newReplyContent 초기화
+      comments.value.forEach(comment => {
+        newReplyContent[comment.commentId] = '';
+      });
+    } else {
+      throw new Error('comments에 대한 API 응답 오류');
+    }
+  } catch (error) {
+    console.error('댓글 fetch 에러:', error);
+  }
+};
+
+//댓글 수정
 const editComment = async commentId => {
   try {
     const newContent = newContent.length();
@@ -228,6 +278,8 @@ const editComment = async commentId => {
     console.error('댓글 수정 에러:', error);
   }
 };
+
+// 댓글 삭제 confirm msg
 const confirmDeleteComment = async commentId => {
   const comment = comments.value.find(
     comment => comment.commentId === commentId,
@@ -242,6 +294,7 @@ const confirmDeleteComment = async commentId => {
   }
 };
 
+// 댓글 삭제
 const deleteComment = async commentId => {
   try {
     const response = await customApi.delete(
@@ -255,55 +308,6 @@ const deleteComment = async commentId => {
   }
 };
 
-// fetchComments 함수 추가
-// 댓글 목록을 불러오는 API를 호출하고, 불러온 댓글 목록을 comments 변수에 저장
-const fetchComments = async () => {
-  try {
-    const response = await customApi.get(`/success-case/${caseId}/comments`);
-    if (Array.isArray(response.data)) {
-      const fetchedComments = response.data.map(comment => ({
-        ...comment,
-        editing: false,
-        newContent: '',
-        showReplies: false,
-        replies: [],
-      }));
-
-      // 각 댓글마다 답글 로딩(for n개의 답글 보기 버튼)
-      for (let comment of fetchedComments) {
-        // fetchedComments 배열의 각 요소를 comment로 받아와서 반복문을 실행
-        const replyResponse = await customApi.get(
-          `/comment/${comment.commentId}/replies`,
-        );
-        if (Array.isArray(replyResponse.data)) {
-          // replyResponse.data가 배열이면
-          comment.replies = replyResponse.data.map(reply => ({
-            ...reply,
-            editing: false,
-            newContent: '',
-          }));
-        } else {
-          throw new Error('Invalid API response for replies');
-        }
-      }
-
-      // comments 업데이트
-      comments.value = fetchedComments.sort(
-        (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
-      );
-
-      // newReplyContent 초기화
-      comments.value.forEach(comment => {
-        newReplyContent[comment.commentId] = '';
-      });
-    } else {
-      throw new Error('Invalid API response for comments');
-    }
-  } catch (error) {
-    console.error('댓글 fetch 에러:', error);
-  }
-};
-
 const toggleEditing = comment => {
   comment.editing = !comment.editing;
   if (comment.editing) {
@@ -311,6 +315,7 @@ const toggleEditing = comment => {
   }
 };
 
+// 댓글 수정 저장
 const saveEditedComment = async comment => {
   try {
     const newContent = comment.newContent.trim();
@@ -326,9 +331,6 @@ const saveEditedComment = async comment => {
 
     console.log('댓글 수정 성공:', response.data.message);
 
-    // 수정 완료 후 editing 상태 해제
-    comment.editing = false;
-
     // 수정 후 댓글 목록을 다시 불러옴
     fetchComments();
   } catch (error) {
@@ -336,6 +338,7 @@ const saveEditedComment = async comment => {
   }
 };
 
+// 댓글 작성
 const submitComment = async () => {
   try {
     const response = await customApi.post(`/success-case/${caseId}/comment`, {
@@ -353,36 +356,48 @@ const submitComment = async () => {
   }
 };
 
-const toggleShowReplies = async comment => {
+// 답글 작성
+const submitReply = async commentId => {
   try {
-    comment.showReplies = !comment.showReplies;
-    if (comment.showReplies && comment.replies.length === 0) {
-      const response = await customApi.get(
-        `/comment/${comment.commentId}/replies`,
-      );
-      if (Array.isArray(response.data)) {
-        comment.replies = response.data.map(reply => ({
-          ...reply,
-          editing: false,
-          newContent: '',
-        }));
-      } else {
-        throw new Error('Invalid API response');
-      }
+    const content = newReplyContent[commentId];
+    if (!content || content.trim() === '') {
+      console.log('답글 내용을 최소 1자 이상 입력해주세요');
+      return;
     }
+
+    // API를 호출하여 답글을 서버에 전송
+    const response = await customApi.post(`/comment/${commentId}/reply`, {
+      content: content.trim(), // 답글 내용을 보내기 전에 trim()으로 앞뒤 공백 제거
+    });
+
+    console.log('답글 작성 성공:', response.data.message);
+    fetchComments();
+    // 답글 객체 생성
+    const newReply = {
+      replyId: response.data.replyId, // 서버에서 생성한 답글의 ID
+      content: content.trim(), // 입력된 답글 내용
+      createdDate: new Date().toISOString(),
+      username: authStore.username,
+      editing: false,
+      newContent: '', // 편집할 내용 초기값
+    };
+
+    // 답글 목록에 새로 추가
+    const commentIndex = comments.value.findIndex(
+      comment => comment.commentId === commentId,
+    );
+    if (commentIndex !== -1) {
+      comments.value[commentIndex].replies.unshift(newReply); // 답글을 최상단에 추가
+    }
+
+    newReplyContent[commentId] = '';
   } catch (error) {
-    console.error('답글 fetch 에러:', error);
+    console.error('답글 작성 에러:', error);
   }
 };
 
-const toggleEditingReply = reply => {
-  reply.editing = !reply.editing;
-  if (reply.editing) {
-    reply.newContent = reply.content;
-  }
-};
-
-const saveEditedReply = async reply => {
+// 답글 수정
+const saveEditedReply = async (commentId, reply) => {
   try {
     const newContent = reply.newContent.trim();
     if (newContent.length === 0) {
@@ -391,34 +406,64 @@ const saveEditedReply = async reply => {
     }
 
     const response = await customApi.patch(
-      `/success-case/${caseId}/reply/${reply.replyId}`,
+      `/comment/${commentId}/reply/${reply.replyId}`,
       { content: newContent },
     );
 
     console.log('답글 수정 성공:', response.data.message);
 
-    // 수정 완료 후 editing 상태 해제
     reply.editing = false;
-
-    // 수정 후 답글 목록을 다시 불러옴
-    fetchComments(); // 답글만 불러오는 API로 변경 필요
+    fetchComments();
   } catch (error) {
     console.error('답글 수정 에러:', error);
   }
 };
 
-const deleteReply = async replyId => {
+// 답글 삭제
+const deleteReply = async (commentId, replyId) => {
   try {
     const response = await customApi.delete(
-      `/success-case/${caseId}/reply/${replyId}`,
+      `/comment/${commentId}/reply/${replyId}`,
     );
 
     console.log('답글 삭제 성공:', response.data.message);
 
-    // 삭제 후 답글 목록을 다시 불러옴
-    fetchComments(); // 답글만 불러오는 API로 변경 필요
+    fetchComments();
   } catch (error) {
     console.error('답글 삭제 에러:', error);
+  }
+};
+
+const toggleShowReplies = async comment => {
+  try {
+    // 현재 답글 상태를 토글
+    comment.showReplies = !comment.showReplies;
+
+    // 답글을 보여줄 때, 답글 목록을 API
+    if (comment.showReplies && comment.replies.length === 0) {
+      const response = await customApi.get(
+        `/comment/${comment.commentId}/replies`,
+      );
+      if (Array.isArray(response.data)) {
+        // 가져온 답글 목록을 comment 객체에 업데이트
+        comment.replies = response.data.map(reply => ({
+          ...reply,
+          editing: false,
+          newContent: '',
+        }));
+      } else {
+        throw new Error('Invalid API response for replies');
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching replies:', error);
+  }
+};
+
+const toggleEditingReply = reply => {
+  reply.editing = !reply.editing;
+  if (reply.editing) {
+    reply.newContent = reply.content;
   }
 };
 
