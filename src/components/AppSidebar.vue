@@ -166,7 +166,23 @@ export default defineComponent({
     const notificationPopup = ref(null);
 
     const deleteNotification = async (notificationId) => {
-      await notificationStore.deleteNotification(notificationId);
+      try {
+        await notificationStore.deleteNotification(notificationId);
+        Notify.create({
+          type: 'info',
+          message: '알림이 삭제되었습니다.',
+          timeout: 3000,
+          position: 'top-right',
+        });
+      } catch (error) {
+        console.error('Failed to delete notification:', error);
+        Notify.create({
+          type: 'negative',
+          message: '알림 삭제 중 오류가 발생했습니다.',
+          timeout: 3000,
+          position: 'top-right',
+        });
+      }
     };
 
     const linksList = ref([
