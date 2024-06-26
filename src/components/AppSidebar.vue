@@ -15,67 +15,81 @@
         <div class="welcome-message">
           <strong>{{ authStore.username }}</strong> 님, 오늘도 응원합니다.
         </div>
-        <q-btn
-          label="마이페이지"
-          color="primary"
-          class="q-mt-sm full-width"
-          @click="goToMyPage"
-        />
+        <div v-if="authStore.role !== 'ADMIN'">
+          <q-btn
+            label="마이페이지"
+            color="primary"
+            class="q-mt-sm full-width"
+            @click="goToMyPage"
+          />
+          <!-- 알림 아코디언 -->
+          <q-expansion-item
+            dense
+            switch-toggle-side
+            class="notification-accordion"
+          >
+            <template v-slot:header>
+              <div class="notification-header">
+                <div class="notification-text-container">
+                  <q-icon name="mail" class="mail-icon" />
+                  <q-badge
+                    v-if="notificationStore.unreadCount > 0"
+                    color="red"
+                    floating
+                  >
+                    {{ notificationStore.unreadCount }}
+                  </q-badge>
+                  <span class="notification-label">알림왔어요!</span>
+                </div>
+              </div>
+            </template>
+            <div class="notification-list">
+              <div
+                v-for="notification in notifications"
+                :key="notification.notificationId"
+                :class="{
+                  'notification-item': true,
+                  read: notification.isRead,
+                }"
+              >
+                <div class="notification-content">
+                  <small class="notification-time">
+                    {{ notification.formattedDate }}
+                  </small>
+                  <p @click="handleNotificationClick(notification)">
+                    {{ notification.content }}
+                  </p>
+                </div>
+                <q-btn
+                  dense
+                  icon="close"
+                  @click="deleteNotification(notification.notificationId)"
+                  class="delete-button"
+                />
+              </div>
+            </div>
+          </q-expansion-item>
+        </div>
+        <div v-else>
+          <q-btn
+            label="관리자 대시보드"
+            color="primary"
+            class="q-mt-sm full-width"
+            @click="goToDashboard"
+          />
+        </div>
         <q-btn
           label="로그아웃"
           flat
           class="q-mt-sm full-width logout-button"
           @click="logout"
         />
-        <!-- 알림 아코디언 -->
-        <q-expansion-item
-          dense
-          switch-toggle-side
-          class="notification-accordion"
-        >
-          <template v-slot:header>
-            <div class="notification-header">
-              <div class="notification-text-container">
-                <q-icon name="mail" class="mail-icon"/>
-                <q-badge
-                  v-if="notificationStore.unreadCount > 0"
-                  color="red"
-                  floating
-                >
-                  {{ notificationStore.unreadCount }}
-                </q-badge>
-                <span class="notification-label">알림왔어요!</span>
-              </div>
-            </div>
-          </template>
-          <div class="notification-list">
-            <div
-              v-for="notification in notifications"
-              :key="notification.notificationId"
-              :class="{'notification-item': true, 'read': notification.isRead}"
-            >
-              <div class="notification-content">
-                <small class="notification-time">
-                  {{ notification.formattedDate }}
-                </small>
-                <p @click="handleNotificationClick(notification)">{{ notification.content }}</p>
-              </div>
-              <q-btn
-                dense
-                icon="close"
-                @click="deleteNotification(notification.notificationId)"
-                class="delete-button"
-              />
-            </div>
-          </div>
-        </q-expansion-item>
-
-        <NotificationPopup ref="notificationPopup"/>
+        <NotificationPopup ref="notificationPopup" />
       </div>
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <AppLogin/>
+      <AppLogin />
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -88,7 +102,7 @@
       >
         <q-item clickable v-ripple class="menu-item">
           <q-item-section avatar>
-            <q-icon :name="link.icon"/>
+            <q-icon :name="link.icon" />
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
@@ -101,13 +115,13 @@
 </template>
 
 <script>
-import {computed, defineComponent, onMounted, ref} from 'vue';
-import {useAuthStore} from 'stores/authStore';
+import { computed, defineComponent, onMounted, ref } from 'vue';
+import { useAuthStore } from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
-import {useRouter} from 'vue-router';
-import {useNotificationStore} from 'stores/notificationStore';
+import { useRouter } from 'vue-router';
+import { useNotificationStore } from 'stores/notificationStore';
 import NotificationPopup from 'components/NotificationPopup.vue';
-import {Notify} from 'quasar';
+import { Notify } from 'quasar';
 
 export default defineComponent({
   components: {
@@ -120,7 +134,7 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, {emit}) {
+  setup(props, { emit }) {
     const router = useRouter();
     const authStore = useAuthStore();
     const notificationStore = useNotificationStore();
@@ -134,6 +148,7 @@ export default defineComponent({
       if (localStorage.getItem('isLoggedIn') === 'true') {
         authStore.isLoggedIn = true;
         authStore.username = localStorage.getItem('username');
+        authStore.role = localStorage.getItem('role');
       }
       await notificationStore.fetchUnreadCount();
       await notificationStore.fetchNotifications();
@@ -143,6 +158,10 @@ export default defineComponent({
       router.push('/mypage');
     };
 
+    const goToDashboard = () => {
+      router.push('/dashboard');
+    };
+
     const logout = () => {
       authStore.logout();
       router.push('/');
@@ -150,11 +169,11 @@ export default defineComponent({
         type: 'info', // 알림 유형 (info, positive, negative 등)
         message: '로그아웃되었습니다. 이용해 주셔서 감사합니다.',
         timeout: 3000, // 알림이 표시되는 시간 (밀리초)
-        position: 'top-right' // 알림이 표시되는 위치 (top, bottom, left, right 등 조합 가능)
+        position: 'top-right', // 알림이 표시되는 위치 (top, bottom, left, right 등 조합 가능)
       });
     };
 
-    const handleNotificationClick = async (notification) => {
+    const handleNotificationClick = async notification => {
       if (!notification.isRead) {
         await notificationStore.markAsRead(notification);
       }
@@ -165,7 +184,7 @@ export default defineComponent({
 
     const notificationPopup = ref(null);
 
-    const deleteNotification = async (notificationId) => {
+    const deleteNotification = async notificationId => {
       try {
         await notificationStore.deleteNotification(notificationId);
         Notify.create({
@@ -231,6 +250,7 @@ export default defineComponent({
       notifications,
       onUpdateModelValue,
       goToMyPage,
+      goToDashboard,
       logout,
       handleNotificationClick,
       notificationPopup,
