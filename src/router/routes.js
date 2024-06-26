@@ -69,7 +69,7 @@ const routes = [
       {
         path: '/guide/:id',
         component: () => import('pages/GuidePageDetails.vue'),
-        meta: { title: '취업 가이드 상세' },
+        meta: { title: '너겟. 취업 가이드' },
       },
       {
         path: 'uploadtest',
@@ -79,12 +79,12 @@ const routes = [
       {
         path: 'dashboard',
         component: () => import('pages/AdminDashBoard.vue'),
-        meta: { title: '관리자 대시보드' },
+        meta: { title: '너겟, 관리자 대시보드' },
       },
       {
         path: 'counselingdetail/:id',
         component: () => import('pages/AdminCounselingDetail.vue'),
-        meta: { title: '관리자 상담 답변 페이지' },
+        meta: { title: '너겟, 관리자 상담 답변' },
         name: 'CounselingDetail',
         props: true,
       },
@@ -92,21 +92,33 @@ const routes = [
         path: 'mycounselingdetail/:id',
         component: () => import('pages/MyPageCounselingDetail.vue'),
         name: 'MyPageCounselingDetail',
-        meta: { title: '내 상담 자세히 보기' },
+        meta: { title: '너겟, 내 상담 내역' },
         props: true,
       },
-      // 추가된 라우트
       {
         path: 'admin-job-guide-create',
         component: () => import('pages/AdminJobGuideCreate.vue'),
-        meta: { title: '취업 가이드 작성' },
+        meta: { title: '너겟, 관리자 취업 가이드 작성' },
         name: 'AdminJobGuideCreate',
       },
       {
         path: 'admin-job-guide-detail/:id',
         component: () => import('pages/AdminJobGuideDetail.vue'),
-        meta: { title: '취업 가이드 상세' },
+        meta: { title: '너겟, 관리자 취업 가이드 상세' },
         name: 'AdminJobGuideDetail',
+        props: true,
+      },
+      {
+        path: '/success-detail/:id',
+        name: 'AdminSuccessDetail',
+        component: () => import('pages/AdminSuccessDetail.vue'),
+        props: true,
+      },
+      {
+        path: '/mypage/success-detail/:id',
+        name: 'MyPageSuccessDetail',
+        component: () => import('pages/MyPageSuccessDetail.vue'),
+        meta: { title: '너겟, 내가 쓴 성공 사례' },
         props: true,
       },
     ],
