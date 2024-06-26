@@ -73,7 +73,6 @@ const fetchJobGuideDetail = async () => {
     title.value = response.data.title;
     content.value = response.data.content;
 
-    // Check if imageUrls and documentUrls exist before mapping
     const existingImages = response.data.imageUrls
       ? response.data.imageUrls.map(url => ({ url, type: 'image/' }))
       : [];
@@ -86,16 +85,37 @@ const fetchJobGuideDetail = async () => {
   }
 };
 
-const updateJobGuide = async () => {
+const fetchImageUrls = async () => {
   try {
-    // Job Guide 수정
-    await customApi.put(`/job-guide/${jobGuideId}`, {
-      title: title.value,
-      content: content.value,
-    });
+    const response = await customApi.get(`/image/${jobGuideId}`);
+    console.log('Image URLs:', response.data); // 응답 데이터 로그 출력
+    const images = response.data.map(url => ({ url, type: 'image/' }));
+    existingFiles.value = [...existingFiles.value, ...images];
+  } catch (error) {
+    console.error('Failed to fetch image URLs:', error);
+  }
+};
 
+const updateJobGuide = async () => {
+  const formData = new FormData();
+  formData.append('title', title.value);
+  formData.append('content', content.value);
+
+  // Append new files to formData
+  for (let i = 0; i < newFiles.value.length; i++) {
+    formData.append('files', newFiles.value[i]);
+  }
+
+  try {
+    console.log('Sending data to server:', formData);
+    const response = await customApi.put(`/job-guide/${jobGuideId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log('Server response:', response);
     alert('취업 가이드가 수정되었습니다.');
-    router.push({ path: '/dashboard' }); // 대시보드 페이지로 이동
+    router.push({ path: '/dashboard' });
   } catch (error) {
     console.error('Failed to update job guide:', error);
     alert('수정 중 오류가 발생했습니다.');
@@ -118,7 +138,10 @@ const cancelEdit = () => {
   router.push({ path: '/dashboard' });
 };
 
-onMounted(fetchJobGuideDetail);
+onMounted(() => {
+  fetchJobGuideDetail();
+  fetchImageUrls();
+});
 </script>
 
 <style scoped>
