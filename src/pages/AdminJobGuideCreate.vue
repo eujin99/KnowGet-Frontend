@@ -132,8 +132,8 @@ const createJobGuide = async () => {
     }
 
     // Update the job guide with URLs if necessary
-    // alert('취업 가이드가 등록되었습니다.');
-    router.push({ path: `/job-guide/${jobGuideId}` }); // 상세 페이지로 이동
+    alert('취업 가이드가 등록되었습니다.');
+    router.push({ path: `/dashboard` }); // 상세 페이지로 이동
   } catch (error) {
     console.error('Failed to create job guide:', error);
     alert('등록 중 오류가 발생했습니다.');

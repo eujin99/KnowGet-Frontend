@@ -15,6 +15,15 @@
         <q-separator spaced />
         <div class="detail-content-container">
           <div class="detail-content" v-html="guide.content"></div>
+          <div class="detail-images" v-if="guide.images && guide.images.length">
+            <img
+              v-for="image in guide.images"
+              :key="image"
+              :src="image"
+              alt="Guide image"
+              class="detail-image"
+            />
+          </div>
         </div>
         <q-separator spaced />
       </q-card-section>
@@ -27,7 +36,6 @@ import { ref, onMounted, watch } from 'vue';
 import { api } from 'boot/axios';
 import { date } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
-import GuidePage from './GuidePage.vue';
 
 const guide = ref({});
 const previousGuide = ref(null);
@@ -38,6 +46,10 @@ const fetchGuideDetails = async id => {
   try {
     const response = await api.get(`/job-guide/${id}`);
     guide.value = response.data;
+
+    // Fetch images
+    const imageResponse = await api.get(`/image/${id}`);
+    guide.value.images = imageResponse.data;
 
     const allGuides = await api.get('/job-guide');
     const guideIndex = allGuides.data.findIndex(g => g.guideId === id);
@@ -137,6 +149,18 @@ onMounted(() => {
   line-height: 1.8;
   color: #555;
   white-space: pre-wrap;
+}
+
+.detail-images {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-image {
+  max-width: 100px;
+  max-height: 100px;
 }
 
 .navigation-container {

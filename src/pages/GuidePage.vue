@@ -59,6 +59,15 @@
               <div class="guide-content">
                 {{ truncatedContent(guide.content) }}
               </div>
+              <div class="guide-images">
+                <img
+                  v-for="image in guide.images"
+                  :key="image"
+                  :src="image"
+                  alt="Guide image"
+                  class="guide-image"
+                />
+              </div>
             </q-card-section>
           </q-card>
         </div>
@@ -92,13 +101,18 @@ const router = useRouter();
 const fetchGuides = async () => {
   try {
     const response = await api.get('/job-guide');
-    guides.value = response.data
-      .map(guide => ({
-        ...guide,
-        contentSnippet: guide.content.slice(0, 100) + '...',
-        username: '관리자',
-      }))
-      .sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+    const guideList = response.data.map(guide => ({
+      ...guide,
+      contentSnippet: guide.content.slice(0, 100) + '...',
+      username: '관리자',
+    }));
+    for (const guide of guideList) {
+      const imageResponse = await api.get(`/image/${guide.guideId}`);
+      guide.images = imageResponse.data;
+    }
+    guides.value = guideList.sort(
+      (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
+    );
   } catch (error) {
     console.error('Failed to fetch job guides:', error);
   }
@@ -212,7 +226,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  height: 200px;
+  height: 300px;
   padding: 15px;
 }
 
@@ -263,6 +277,19 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: pre-wrap;
+}
+
+.guide-images {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.guide-image {
+  max-width: 50px;
+  max-height: 50px;
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 .pagination-container {
