@@ -5,6 +5,8 @@
       <q-tab name="userStatistics" label="이용자 통계" />
       <q-tab name="counselingManagement" label="상담 관리" />
       <q-tab name="jobGuideManagement" label="취업 가이드 관리" />
+      <q-tab name="successManagement" label="성공사례 관리" />
+      <!-- 새로운 탭 추가 -->
     </q-tabs>
 
     <div v-if="selectedTab === 'userManagement'">
@@ -19,6 +21,9 @@
     <div v-if="selectedTab === 'jobGuideManagement'">
       <AdminJobGuideManagement />
     </div>
+    <div v-if="selectedTab === 'successManagement'">
+      <AdminSuccessManagement />
+    </div>
   </q-page>
 </template>
 
@@ -28,6 +33,7 @@ import AdminUserManagement from 'components/AdminUserManagement.vue';
 import AdminUserStatistics from 'components/AdminUserStatistics.vue';
 import AdminCounselingManagement from 'components/AdminCounselingManagement.vue';
 import AdminJobGuideManagement from 'components/AdminJobGuideManagement.vue';
+import AdminSuccessManagement from 'components/AdminSuccessManagement.vue';
 
 const selectedTab = ref('userManagement');
 </script>

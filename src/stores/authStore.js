@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', {
     role: '',
     accessToken: '',
     refreshToken: '',
+    // isActive: true,
   }),
 
   actions: {
@@ -16,12 +17,20 @@ export const useAuthStore = defineStore('auth', {
         const response = await api.post('/user/login', credentials);
 
         if (response.status === 200) {
+          // console.log('isActive:', response.data.isActive);
+
+          // if (!response.data.isActive) {
+          //   console.log('계정이 비활성화되어 있습니다.');
+          //   throw new Error('계정이 비활성화되어 있습니다.');
+          // }
+
           this.setAuthData(response.data);
           localStorage.setItem('isLoggedIn', 'true');
           localStorage.setItem('username', response.data.username);
           localStorage.setItem('role', response.data.role);
           localStorage.setItem('accessToken', response.data.accessToken);
           localStorage.setItem('refreshToken', response.data.refreshToken);
+          // localStorage.setItem('isActive', response.data.isActive);
         } else {
           console.log(response.data.message);
         }
@@ -38,14 +47,16 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('role');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      // localStorage.removeItem('isActive');
     },
 
-    setAuthData({ username, role, accessToken, refreshToken }) {
+    setAuthData({ username, role, accessToken, refreshToken, isActive }) {
       this.isLoggedIn = true;
       this.username = username;
       this.role = role;
       this.accessToken = accessToken;
       this.refreshToken = refreshToken;
+      // this.isActive = isActive;
     },
 
     clearAuthData() {
@@ -54,6 +65,7 @@ export const useAuthStore = defineStore('auth', {
       this.role = '';
       this.accessToken = '';
       this.refreshToken = '';
+      // this.isActive = null;
     },
 
     initializeAuth() {
@@ -62,14 +74,22 @@ export const useAuthStore = defineStore('auth', {
       const role = localStorage.getItem('role');
       const accessToken = localStorage.getItem('accessToken');
       const refreshToken = localStorage.getItem('refreshToken');
+      // const isActive = localStorage.getItem('isActive');
 
-      if (isLoggedIn && username && role && accessToken && refreshToken) {
+      if (
+        isLoggedIn &&
+        username &&
+        role &&
+        accessToken &&
+        refreshToken //&&
+        // isActive
+      ) {
         this.setAuthData({
-          username, // 초기화 필요
-          role, // 초기화 필요
+          username,
+          role,
           accessToken,
           refreshToken,
-          // isActive: '', // 초기화 필요
+          // isActive,
         });
       } else {
         this.clearAuthData();
