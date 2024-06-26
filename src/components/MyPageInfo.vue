@@ -52,6 +52,14 @@
         />
       </q-form>
     </q-card-section>
+    <q-card-section>
+      <q-btn
+        label="탈퇴하기"
+        color="negative"
+        class="q-mt-md full-width"
+        @click="withdraw"
+      />
+    </q-card-section>
   </q-card>
 </template>
 
@@ -59,8 +67,10 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from 'stores/authStore';
 import { customApi } from 'boot/axios';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
 const formData = ref({
   username: '',
@@ -134,18 +144,18 @@ const updateInfo = async () => {
   }
 
   try {
-    const locationResponse = await customApi.patch('/mypage/pref-location', {
+    await customApi.patch('/mypage/pref-location', {
       location: formData.value.location.value,
     });
 
-    const jobResponse = await customApi.patch('/mypage/pref-job', {
+    await customApi.patch('/mypage/pref-job', {
       job:
         jobOptions.find(option => option.label === formData.value.job.value)
           ?.value || formData.value.job.value,
     });
 
     if (formData.value.password) {
-      const passwordResponse = await customApi.patch('/mypage/password', {
+      await customApi.patch('/mypage/password', {
         password: formData.value.password,
       });
     }
@@ -154,6 +164,22 @@ const updateInfo = async () => {
   } catch (error) {
     console.error('정보 업데이트에 실패했습니다:', error);
     alert('정보 업데이트에 실패했습니다. 나중에 다시 시도해 주세요.');
+  }
+};
+
+const withdraw = async () => {
+  try {
+    const response = await customApi.patch('/mypage/deactivate');
+    if (response.status === 200) {
+      alert(response.data.message);
+      authStore.logout();
+      router.push('/');
+    } else {
+      alert('탈퇴에 실패했습니다. 다시 시도해주세요.');
+    }
+  } catch (error) {
+    console.error('Error during withdrawal:', error);
+    alert('탈퇴에 실패했습니다. 다시 시도해주세요.');
   }
 };
 
