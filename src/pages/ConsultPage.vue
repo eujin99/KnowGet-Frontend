@@ -41,9 +41,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { customApi } from 'boot/axios';
-import { useAuthStore } from 'stores/authStore';
+import {computed, ref} from 'vue';
+import {customApi} from 'boot/axios';
+import {useAuthStore} from 'stores/authStore';
+import {Notify} from "quasar";
 
 const selectedType = ref('일자리');
 const consultationContent = ref('');
@@ -51,10 +52,10 @@ const consultationContent = ref('');
 const authStore = useAuthStore();
 
 const typeOptions = [
-  { label: '일자리', value: '일자리' },
-  { label: '이력서 및 서류 작성', value: '이력서 및 서류 작성' },
-  { label: '교육 신청', value: '교육 신청' },
-  { label: '기타', value: '기타' },
+  {label: '일자리', value: '일자리'},
+  {label: '이력서 및 서류 작성', value: '이력서 및 서류 작성'},
+  {label: '교육 신청', value: '교육 신청'},
+  {label: '기타', value: '기타'},
 ];
 
 const descriptionText = computed(() => {
