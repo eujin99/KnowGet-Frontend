@@ -10,6 +10,7 @@ import { useAuthStore } from 'stores/authStore';
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ baseURL: 'http://localhost:8080/api/v1' });
+// http://3.36.148.873.36.148.87:8080   => 이걸로 baseURL 모두 변경 !!!!
 
 const customApi = axios.create({
   baseURL: 'http://localhost:8080/api/v1',

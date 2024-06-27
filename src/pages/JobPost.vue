@@ -80,21 +80,21 @@
               @click="viewDetails(post)"
             >
               <q-card-section class="job-card-section">
-                <q-img src="" class="job-image"/>
+                <q-img :src="post.imageUrl" class="job-image" />
                 <div class="job-info">
                   <q-item-label class="job-title">{{ post.joSj }}</q-item-label>
                   <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
                   <div class="job-details">
                     <q-item-label caption>
-                      <q-icon name="place"/>
+                      <q-icon name="place" />
                       {{ post.gu }}
                     </q-item-label>
                     <q-item-label caption>
-                      <q-icon name="work"/>
+                      <q-icon name="work" />
                       {{ post.careerCndNm }}
                     </q-item-label>
                     <q-item-label caption>
-                      <q-icon name="school"/>
+                      <q-icon name="school" />
                       {{ post.acdmcrNm }}
                     </q-item-label>
                   </div>
@@ -111,9 +111,8 @@
                     outline
                     class="status-badge"
                   >
-                    <q-item-label>{{
-                        getRecruitmentStatus(post.rceptClosNm)
-                      }}
+                    <q-item-label
+                      >{{ getRecruitmentStatus(post.rceptClosNm) }}
                     </q-item-label>
                   </q-badge>
                 </div>
@@ -136,12 +135,12 @@
 </template>
 
 <script>
-import {computed, onMounted, ref, watch} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-import {Notify} from 'quasar';
-import {api, customApi} from 'boot/axios';
-import {useAuthStore} from 'stores/authStore';
-import {isAfter, parseISO} from 'date-fns';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Notify } from 'quasar';
+import { api, customApi } from 'boot/axios';
+import { useAuthStore } from 'stores/authStore';
+import { isAfter, parseISO } from 'date-fns';
 import PaginationControl from 'components/PaginationControl.vue';
 
 export default {
@@ -207,11 +206,18 @@ export default {
     const selectedLocation = ref(null);
     const selectedStatus = ref('전체');
 
+    const jobDropdown = ref(null);
+    const locationDropdown = ref(null);
+    const statusDropdown = ref(null);
+
     const fetchPosts = async () => {
       try {
         const response = await api.get('/posts');
         if (Array.isArray(response.data)) {
-          posts.value = response.data;
+          posts.value = response.data.map(post => ({
+            ...post,
+            imageUrl: getRandomJobImage(post.jobCode),
+          }));
           filterPosts(); // 데이터를 가져온 후 필터링
           await checkBookmarks();
         } else {
@@ -228,8 +234,8 @@ export default {
 
     const checkBookmarks = async () => {
       if (!authStore.isLoggedIn) {
-        posts.value.forEach(post => post.isBookmarked = false)
-        return
+        posts.value.forEach(post => (post.isBookmarked = false));
+        return;
       }
 
       for (const post of posts.value) {
@@ -256,7 +262,9 @@ export default {
     };
 
     const getStatusColor = rceptClosNm => {
-      return getRecruitmentStatus(rceptClosNm) === '구인 마감' ? 'grey' : 'green';
+      return getRecruitmentStatus(rceptClosNm) === '구인 마감'
+        ? 'grey'
+        : 'green';
     };
 
     const filterPosts = () => {
@@ -284,8 +292,8 @@ export default {
     const viewDetails = post => {
       router.push({
         name: 'JobPostDetails',
-        params: {postId: post.postId},
-        query: {page: page.value},
+        params: { postId: post.postId },
+        query: { page: page.value },
       });
     };
 
@@ -303,7 +311,9 @@ export default {
         // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
         Notify.create({
           type: 'positive',
-          message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
+          message: post.isBookmarked
+            ? '북마크에 추가되었습니다.'
+            : '북마크에서 제거되었습니다.',
         });
       } catch (error) {
         console.error('Error toggling bookmark:', error);
@@ -318,26 +328,25 @@ export default {
       selectedJobCategory.value = code;
       page.value = 1; // 필터 선택하면 1페이지로 이동함요
       filterPosts();
-      $refs.jobDropdown.hide();
+      jobDropdown.value.hide();
     };
 
     const applyLocationFilter = location => {
       selectedLocation.value = location;
       page.value = 1;
       filterPosts();
-      $refs.locationDropdown.hide();
+      locationDropdown.value.hide();
     };
 
     const applyStatusFilter = status => {
       selectedStatus.value = status;
       page.value = 1;
       filterPosts();
-      $refs.statusDropdown.hide();
+      statusDropdown.value.hide();
     };
 
-    watch(page, (newPage) => {
-      router.push({query: {...route.query, page: newPage}}).catch(() => {
-      });
+    watch(page, newPage => {
+      router.push({ query: { ...route.query, page: newPage } }).catch(() => {});
       if (posts.value.length) {
         filterPosts(); // 페이지가 변경될 때도 필터링 업데이트
       } else {
@@ -359,6 +368,107 @@ export default {
 
     onMounted(fetchPosts);
 
+    const getRandomJobImage = jobCode => {
+      const jobImages = {
+        0: [
+          'job0-1.jpg',
+          'job0-2.jpg',
+          'job0-3.jpg',
+          'job0-4.jpg',
+          'job0-5.jpg',
+          'job0-6.jpg',
+          'job0-7.jpg',
+          'job0-8.jpg',
+          'job0-9.jpg',
+          'job0-10.jpg',
+          'job0-11.jpg',
+          'job0-12.jpg',
+          'job0-13.jpg',
+        ],
+        1: [
+          'job1-1.jpg',
+          'job1-2.jpg',
+          'job1-3.jpg',
+          'job1-4.jpg',
+          'job1-5.jpg',
+        ],
+        2: [
+          'job2-1.jpg',
+          'job2-2.jpg',
+          'job2-3.jpg',
+          'job2-4.jpg',
+          'job2-5.jpg',
+        ],
+        3: [
+          'job3-1.jpg',
+          'job3-2.jpg',
+          'job3-3.jpg',
+          'job3-4.jpg',
+          'job3-5.jpg',
+          'job3-6.jpg',
+          'job3-7.jpg',
+          'job3-8.jpg',
+          'job3-9.jpg',
+          'job3-10.jpg',
+          'job3-11.jpg',
+        ],
+        4: [
+          'job4-1.jpg',
+          'job4-2.jpg',
+          'job4-3.jpg',
+          'job4-4.jpg',
+          'job4-5.jpg',
+        ],
+        5: [
+          'job5-1.jpg',
+          'job5-2.jpg',
+          'job5-3.jpg',
+          'job5-4.jpg',
+          'job5-5.jpg',
+          'job5-6.jpg',
+          'job5-7.jpg',
+          'job5-8.jpg',
+          'job5-9.jpg',
+          'job5-10.jpg',
+          'job5-11.jpg',
+        ],
+        6: [
+          'job6-1.jpg',
+          'job6-2.jpg',
+          'job6-3.jpg',
+          'job6-4.jpg',
+          'job6-5.jpg',
+        ],
+        7: [
+          'job7-1.jpg',
+          'job7-2.jpg',
+          'job7-3.jpg',
+          'job7-4.jpg',
+          'job7-5.jpg',
+        ],
+        8: [
+          'job8-1.jpg',
+          'job8-2.jpg',
+          'job8-3.jpg',
+          'job8-4.jpg',
+          'job6-5.jpg',
+        ],
+        9: [
+          'job9-1.jpg',
+          'job9-2.jpg',
+          'job9-3.jpg',
+          'job9-4.jpg',
+          'job9-5.jpg',
+        ],
+      };
+
+      const images = jobImages[jobCode] || [];
+      if (images.length === 0) return '';
+
+      const randomIndex = Math.floor(Math.random() * images.length);
+      return `/icons/${images[randomIndex]}`;
+    };
+
     return {
       posts,
       page,
@@ -375,7 +485,7 @@ export default {
       jobCategories,
       locationFilters,
       statusFilters,
-      updatePagination: fetchPosts, // 페이지네이션 컨트롤에서 페이지 변경 시 fetchPosts 호출
+      updatePagination: fetchPosts,
       jobFilterLabel: computed(() =>
         selectedJobCategory.value !== null
           ? jobCategories.value[selectedJobCategory.value]
@@ -387,9 +497,12 @@ export default {
       statusFilterLabel: computed(() =>
         selectedStatus.value !== '전체' ? selectedStatus.value : '구인 상태',
       ),
+      jobDropdown,
+      locationDropdown,
+      statusDropdown,
     };
   },
-  // 페이지가 로드되기 전과 업데이트 될 때 쿼리 파라미터를 이용해 상태를 복원
+
   beforeRouteEnter(to, from, next) {
     next(vm => {
       if (to.query.page) {
