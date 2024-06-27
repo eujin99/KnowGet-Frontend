@@ -37,7 +37,7 @@
           rows="6"
         />
         <div class="submit-button">
-          <q-btn label="답변 등록" color="primary" @click="submitAnswer" />
+          <q-btn label="답변 등록" color="primary" @click="submitAnswer"/>
         </div>
       </q-card-section>
       <q-card-section v-else>
@@ -50,9 +50,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+import {onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
 
 const route = useRoute();
 const router = useRouter();
@@ -94,7 +94,7 @@ const submitAnswer = async () => {
     counseling.value.answerId = response.data.answerId;
 
     alert('답변이 등록되었습니다.');
-    router.push({ name: 'AdminCounselingManagement' });
+    await router.push({name: 'AdminCounselingDetail'});
   } catch (error) {
     console.error('Failed to submit answer:', error);
     alert('답변 등록 중 오류가 발생했습니다.');
