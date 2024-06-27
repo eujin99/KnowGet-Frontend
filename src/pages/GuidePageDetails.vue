@@ -2,86 +2,70 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
-        <div class="detail-header">
-          <div class="detail-title">{{ guide.title }}</div>
-          <div class="detail-meta">
-            <span>등록 날짜: {{ formatDate(guide.createdDate) }}</span>
-            <span v-if="guide.updatedDate"
-              >| 수정 날짜: {{ formatDate(guide.updatedDate) }}</span
-            >
-            <div class="detail-author">작성자: 관리자</div>
-          </div>
-        </div>
-        <q-separator spaced />
-        <div class="detail-content-container">
-          <div class="detail-content" v-html="guide.content"></div>
-          <div class="detail-images" v-if="guide.images && guide.images.length">
+        <div class="text-h5">{{ jobGuide.title }}</div>
+        <q-card-section v-if="images.length">
+          <div
+            class="image-preview"
+            v-for="(image, index) in images"
+            :key="index"
+          >
             <img
-              v-for="image in guide.images"
-              :key="image"
               :src="image"
-              alt="Guide image"
-              class="detail-image"
+              alt="Job Guide Image"
+              style="max-width: 100%; height: auto"
             />
           </div>
+        </q-card-section>
+        <div v-html="jobGuide.content" class="job-guide-content"></div>
+      </q-card-section>
+      <q-card-section v-if="documents.length">
+        <div class="text-h6">첨부 문서</div>
+        <div
+          class="document-link"
+          v-for="(document, index) in documents"
+          :key="index"
+        >
+          <a :href="document" target="_blank">문서 링크 {{ index + 1 }}</a>
         </div>
-        <q-separator spaced />
       </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { api } from 'boot/axios';
-import { date } from 'quasar';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { customApi } from 'boot/axios';
 
-const guide = ref({});
-const previousGuide = ref(null);
+const jobGuide = ref({
+  title: '',
+  content: '',
+});
+const images = ref([]);
+const documents = ref([]);
+
 const route = useRoute();
-const router = useRouter();
 
-const fetchGuideDetails = async id => {
+const fetchJobGuide = async () => {
+  const jobGuideId = route.params.id;
   try {
-    const response = await api.get(`/job-guide/${id}`);
-    guide.value = response.data;
+    const response = await customApi.get(`/job-guide/${jobGuideId}`);
+    jobGuide.value = response.data;
 
-    // Fetch images
-    const imageResponse = await api.get(`/image/${id}`);
-    guide.value.images = imageResponse.data;
+    const imageResponse = await customApi.get(`/image/${jobGuideId}`);
+    console.log('Image response:', imageResponse.data);
+    images.value = imageResponse.data || [];
 
-    const allGuides = await api.get('/job-guide');
-    const guideIndex = allGuides.data.findIndex(g => g.guideId === id);
-
-    previousGuide.value = allGuides.data[guideIndex - 1] || null;
+    const documentResponse = await customApi.get(`/document/${jobGuideId}`);
+    console.log('Document response:', documentResponse.data);
+    documents.value = documentResponse.data['URLs'] || [];
   } catch (error) {
-    console.error('Failed to fetch guide details:', error);
+    console.error('Failed to fetch job guide:', error);
   }
 };
 
-const formatDate = dateString => {
-  const dateObj = new Date(dateString);
-  return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
-};
-
-const viewDetails = guide => {
-  router.push(`/guide/${guide.guideId}`);
-};
-
-const goToList = () => {
-  router.push('/');
-};
-
-watch(
-  () => route.params.id,
-  newId => {
-    fetchGuideDetails(newId);
-  },
-);
-
 onMounted(() => {
-  fetchGuideDetails(route.params.id);
+  fetchJobGuide();
 });
 </script>
 
@@ -95,91 +79,23 @@ onMounted(() => {
 
 .page-card {
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 20px auto;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.detail-title {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #333;
-  margin-right: 10px;
-  flex: 1;
-}
-
-.detail-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: 0.85rem;
-  color: gray;
-}
-
-.detail-author {
-  font-size: 0.85rem;
-  color: gray;
-  text-align: right;
-  margin-top: 5px;
-}
-
-.detail-content-container {
-  height: 550px; /* Fixed height */
-  overflow-y: auto;
-  margin-top: 15px;
-  padding: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-  background-color: #fafafa;
-}
-
-.detail-content {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #555;
-  white-space: pre-wrap;
-}
-
-.detail-images {
-  margin-top: 15px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.detail-image {
-  max-width: 100px;
-  max-height: 100px;
-}
-
-.navigation-container {
-  display: flex;
-  justify-content: space-between;
+.job-guide-content {
   margin-top: 20px;
+  color: #333;
 }
 
-.nav-btn {
-  text-transform: none;
-  font-weight: bold;
-  color: #1976d2;
+.image-preview {
+  margin-top: 10px;
 }
 
-.back-btn {
-  align-self: flex-start;
-}
-
-.previous-btn {
-  align-self: flex-end;
+.document-link {
+  margin-top: 10px;
 }
 </style>
