@@ -31,7 +31,7 @@
             <template v-slot:header>
               <div class="notification-header">
                 <div class="notification-text-container">
-                  <q-icon name="mail" class="mail-icon" />
+                  <q-icon name="mail" class="mail-icon"/>
                   <q-badge
                     v-if="notificationStore.unreadCount > 0"
                     color="red"
@@ -84,12 +84,12 @@
           class="q-mt-sm full-width logout-button"
           @click="logout"
         />
-        <NotificationPopup ref="notificationPopup" />
+        <NotificationPopup ref="notificationPopup"/>
       </div>
     </div>
     <div v-else>
       <!-- 로그인 전 섹션 -->
-      <AppLogin />
+      <AppLogin/>
     </div>
 
     <!-- 메뉴 항목 섹션 -->
@@ -102,7 +102,7 @@
       >
         <q-item clickable v-ripple class="menu-item">
           <q-item-section avatar>
-            <q-icon :name="link.icon" />
+            <q-icon :name="link.icon"/>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ link.title }}</q-item-label>
@@ -115,13 +115,13 @@
 </template>
 
 <script>
-import { computed, defineComponent, onMounted, ref } from 'vue';
-import { useAuthStore } from 'stores/authStore';
+import {computed, defineComponent, onMounted, ref} from 'vue';
+import {useAuthStore} from 'stores/authStore';
 import AppLogin from 'components/AppLogin.vue';
-import { useRouter } from 'vue-router';
-import { useNotificationStore } from 'stores/notificationStore';
+import {useRouter} from 'vue-router';
+import {useNotificationStore} from 'stores/notificationStore';
 import NotificationPopup from 'components/NotificationPopup.vue';
-import { Notify } from 'quasar';
+import {Notify} from 'quasar';
 
 export default defineComponent({
   components: {
@@ -134,7 +134,7 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, { emit }) {
+  setup(props, {emit}) {
     const router = useRouter();
     const authStore = useAuthStore();
     const notificationStore = useNotificationStore();
@@ -150,8 +150,10 @@ export default defineComponent({
         authStore.username = localStorage.getItem('username');
         authStore.role = localStorage.getItem('role');
       }
-      await notificationStore.fetchUnreadCount();
-      await notificationStore.fetchNotifications();
+      if (localStorage.getItem('role') !== 'ADMIN') {
+        await notificationStore.fetchUnreadCount();
+        await notificationStore.fetchNotifications();
+      }
     });
 
     const goToMyPage = () => {
@@ -191,7 +193,7 @@ export default defineComponent({
           type: 'info',
           message: '알림이 삭제되었습니다.',
           timeout: 3000,
-          position: 'top-right',
+          position: 'bottom-left',
         });
       } catch (error) {
         console.error('Failed to delete notification:', error);
@@ -199,7 +201,7 @@ export default defineComponent({
           type: 'negative',
           message: '알림 삭제 중 오류가 발생했습니다.',
           timeout: 3000,
-          position: 'top-right',
+          position: 'bottom-left',
         });
       }
     };

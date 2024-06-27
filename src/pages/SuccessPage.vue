@@ -4,8 +4,10 @@
       <q-card-section>
         <div class="header">
           <div>
-            <div class="text-h5">성공 사례</div>
-            <p>성공 사례를 확인하세요.</p>
+            <div class="text-h5">취업 성공 사례</div>
+            <p>
+              너겟의 도움으로 새로운 길을 찾아낸 분들의 이야기를 들어보세요.
+            </p>
           </div>
           <q-input
             v-model="keyword"

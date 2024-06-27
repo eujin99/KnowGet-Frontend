@@ -3,6 +3,7 @@
     <q-card>
       <q-card-section>
         <q-icon name="mail" size="sm"/>
+        <!-- 아래 주석 부분 절대 지우면 안됩니다 -->
         <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
         <q-card-section v-html="formattedContent"></q-card-section>
         <q-card-actions align="right">

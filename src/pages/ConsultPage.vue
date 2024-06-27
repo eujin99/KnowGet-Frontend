@@ -75,7 +75,12 @@ const descriptionText = computed(() => {
 const submitConsultation = async () => {
   try {
     if (!authStore.isLoggedIn) {
-      alert('로그인 후 상담을 신청할 수 있습니다.');
+      Notify.create({
+        message: '로그인 후 상담을 신청할 수 있습니다.',
+        color: 'negative',
+        position: 'top',
+        timeout: 2000,
+      });
       return;
     }
 
@@ -83,10 +88,20 @@ const submitConsultation = async () => {
       category: selectedType.value,
       content: consultationContent.value,
     });
-
-    alert('상담이 성공적으로 신청되었습니다.');
+    Notify.create({
+      message: '상담이 성공적으로 신청되었습니다.',
+      color: 'positive',
+      position: 'bottom',
+      timeout: 2000,
+    });
     consultationContent.value = ''; // 상담 내용 초기화
   } catch (error) {
+    Notify.create({
+      message: '상담 신청에 실패했습니다. 나중에 다시 시도해 주세요.',
+      color: 'negative',
+      position: 'bottom',
+      timeout: 2000,
+    });
     console.error('상담 신청에 실패했습니다:', error);
     alert('상담 신청에 실패했습니다. 나중에 다시 시도해 주세요.');
   }

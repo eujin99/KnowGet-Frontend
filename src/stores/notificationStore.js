@@ -11,7 +11,7 @@ export const useNotificationStore = defineStore('notification', () => {
   const authStore = useAuthStore();
 
   const fetchUnreadCount = async () => {
-    if (!authStore.isLoggedIn) return;
+    if (!authStore.isLoggedIn || authStore.role === 'ADMIN') return;
     try {
       const response = await customApi.get('/notifications/unread-count');
       unreadCount.value = response.data;
@@ -21,7 +21,7 @@ export const useNotificationStore = defineStore('notification', () => {
   };
 
   const fetchNotifications = async () => {
-    if (!authStore.isLoggedIn) return;
+    if (!authStore.isLoggedIn || authStore.role === 'ADMIN') return;
     try {
       const response = await customApi.get('/notifications/all');
       notifications.value = response.data.map(notification => ({
