@@ -2,50 +2,30 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
-        <div class="text-h5">취업 가이드 상세</div>
-        <q-input v-model="title" label="제목" outlined />
-        <q-input
-          v-model="content"
-          label="내용"
-          type="textarea"
-          placeholder="내용을 입력하세요."
-          filled
-          class="content-input"
-          rows="6"
-        />
-        <div class="file-list">
-          <h4>기존 파일</h4>
-          <ul>
-            <li v-for="file in existingFiles" :key="file.url">
-              <template v-if="file.type === 'image/'">
-                <img
-                  :src="file.url"
-                  :alt="file.name"
-                  style="max-width: 100px"
-                />
-              </template>
-              <template v-else>
-                <a :href="file.url" target="_blank">{{ file.name }}</a>
-              </template>
-              <q-btn
-                icon="delete"
-                color="negative"
-                @click="removeFile(file.url)"
-                flat
-              />
-            </li>
-          </ul>
+        <div class="text-h5">{{ jobGuide.title }}</div>
+        <div v-html="jobGuide.content" class="job-guide-content"></div>
+      </q-card-section>
+      <q-card-section v-if="images.length">
+        <div
+          class="image-preview"
+          v-for="(image, index) in images"
+          :key="index"
+        >
+          <img
+            :src="image"
+            alt="Job Guide Image"
+            style="max-width: 100%; height: auto"
+          />
         </div>
-        <q-file
-          v-model="newFiles"
-          label="새 파일 추가"
-          filled
-          multiple
-          class="file-input"
-        />
-        <div class="submit-button">
-          <q-btn label="수정" color="primary" @click="updateJobGuide" />
-          <q-btn label="취소" color="secondary" @click="cancelEdit" />
+      </q-card-section>
+      <q-card-section v-if="documents.length">
+        <div class="text-h6">첨부 문서</div>
+        <div
+          class="document-link"
+          v-for="(document, index) in documents"
+          :key="index"
+        >
+          <a :href="document" target="_blank">문서 링크 {{ index + 1 }}</a>
         </div>
       </q-card-section>
     </q-card>
@@ -54,93 +34,38 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { customApi } from 'boot/axios';
 
+const jobGuide = ref({
+  title: '',
+  content: '',
+});
+const images = ref([]);
+const documents = ref([]);
+
 const route = useRoute();
-const router = useRouter();
-const jobGuideId = route.params.id;
 
-const title = ref('');
-const content = ref('');
-const newFiles = ref([]);
-const existingFiles = ref([]);
-
-const fetchJobGuideDetail = async () => {
+const fetchJobGuide = async () => {
+  const jobGuideId = route.params.id;
   try {
     const response = await customApi.get(`/job-guide/${jobGuideId}`);
-    console.log('Response Data:', response.data); // 응답 데이터 로그 출력
-    title.value = response.data.title;
-    content.value = response.data.content;
+    jobGuide.value = response.data;
 
-    const existingImages = response.data.imageUrls
-      ? response.data.imageUrls.map(url => ({ url, type: 'image/' }))
-      : [];
-    const existingDocuments = response.data.documentUrls
-      ? response.data.documentUrls.map(url => ({ url, type: 'document/' }))
-      : [];
-    existingFiles.value = [...existingImages, ...existingDocuments];
+    const imageResponse = await customApi.get(`/image/${jobGuideId}`);
+    console.log('Image response:', imageResponse.data);
+    images.value = imageResponse.data || [];
+
+    const documentResponse = await customApi.get(`/document/${jobGuideId}`);
+    console.log('Document response:', documentResponse.data);
+    documents.value = documentResponse.data['URLs'] || [];
   } catch (error) {
-    console.error('Failed to fetch job guide detail:', error);
+    console.error('Failed to fetch job guide:', error);
   }
-};
-
-const fetchImageUrls = async () => {
-  try {
-    const response = await customApi.get(`/image/${jobGuideId}`);
-    console.log('Image URLs:', response.data); // 응답 데이터 로그 출력
-    const images = response.data.map(url => ({ url, type: 'image/' }));
-    existingFiles.value = [...existingFiles.value, ...images];
-  } catch (error) {
-    console.error('Failed to fetch image URLs:', error);
-  }
-};
-
-const updateJobGuide = async () => {
-  const formData = new FormData();
-  formData.append('title', title.value);
-  formData.append('content', content.value);
-
-  // Append new files to formData
-  for (let i = 0; i < newFiles.value.length; i++) {
-    formData.append('files', newFiles.value[i]);
-  }
-
-  try {
-    console.log('Sending data to server:', formData);
-    const response = await customApi.put(`/job-guide/${jobGuideId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    console.log('Server response:', response);
-    alert('취업 가이드가 수정되었습니다.');
-    router.push({ path: '/dashboard' });
-  } catch (error) {
-    console.error('Failed to update job guide:', error);
-    alert('수정 중 오류가 발생했습니다.');
-  }
-};
-
-const removeFile = async fileUrl => {
-  try {
-    await customApi.delete(fileUrl);
-    existingFiles.value = existingFiles.value.filter(
-      file => file.url !== fileUrl,
-    );
-  } catch (error) {
-    console.error('Failed to delete file:', error);
-    alert('파일 삭제 중 오류가 발생했습니다.');
-  }
-};
-
-const cancelEdit = () => {
-  router.push({ path: '/dashboard' });
 };
 
 onMounted(() => {
-  fetchJobGuideDetail();
-  fetchImageUrls();
+  fetchJobGuide();
 });
 </script>
 
@@ -161,40 +86,16 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.content-input {
-  width: 100%;
-  min-height: 150px;
+.job-guide-content {
   margin-top: 20px;
+  color: #333;
 }
 
-.file-input {
-  width: 100%;
-  margin-top: 20px;
+.image-preview {
+  margin-top: 10px;
 }
 
-.file-list {
-  margin-top: 20px;
-}
-
-.file-list h4 {
-  margin-bottom: 10px;
-}
-
-.file-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.file-list li {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.submit-button {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
+.document-link {
+  margin-top: 10px;
 }
 </style>

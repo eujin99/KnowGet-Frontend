@@ -6,6 +6,7 @@
       <q-tab name="counselingManagement" label="상담 관리" />
       <q-tab name="jobGuideManagement" label="취업 가이드 관리" />
       <q-tab name="successManagement" label="성공사례 관리" />
+      <q-tab name="blackList" label="블랙리스트" />
       <!-- 새로운 탭 추가 -->
     </q-tabs>
 
@@ -24,6 +25,9 @@
     <div v-if="selectedTab === 'successManagement'">
       <AdminSuccessManagement />
     </div>
+    <div v-if="selectedTab === 'blackList'">
+      <BlackList />
+    </div>
   </q-page>
 </template>
 
@@ -34,6 +38,7 @@ import AdminUserStatistics from 'components/AdminUserStatistics.vue';
 import AdminCounselingManagement from 'components/AdminCounselingManagement.vue';
 import AdminJobGuideManagement from 'components/AdminJobGuideManagement.vue';
 import AdminSuccessManagement from 'components/AdminSuccessManagement.vue';
+import BlackList from 'components/BlackList.vue';
 
 const selectedTab = ref('userManagement');
 </script>

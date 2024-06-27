@@ -3,24 +3,24 @@
     <q-card class="page-card">
       <q-card-section>
         <div class="text-h5">취업 가이드 작성</div>
-        <q-input v-model="username" label="작성자" outlined />
         <q-input v-model="title" label="제목" outlined />
-        <q-input
+        <q-editor
           v-model="content"
-          label="내용"
-          type="textarea"
-          placeholder="내용을 입력하세요."
-          filled
-          class="content-input"
-          rows="6"
+          :toolbar="toolbar"
+          :definitions="editorDefinitions"
         />
-        <q-file
-          v-model="files"
-          label="파일 업로드"
-          filled
-          multiple
-          class="file-input"
-        />
+        <div v-if="selectedFiles.length" class="file-info">
+          선택된 파일:
+          <div v-for="(fileObj, index) in selectedFiles" :key="index">
+            {{ fileObj.file.name }}
+            <img
+              v-if="fileObj.isImage"
+              :src="fileObj.previewUrl"
+              alt="Image Preview"
+              style="max-width: 100%; height: auto"
+            />
+          </div>
+        </div>
         <div class="submit-button">
           <q-btn label="등록" color="primary" @click="createJobGuide" />
           <q-btn label="취소" color="secondary" @click="openCancelDialog" />
@@ -45,27 +45,79 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <input
+      type="file"
+      ref="fileInput"
+      @change="onFileChange"
+      accept="image/*, .pdf , .doc , .hwp , .csv, .ppt"
+      multiple
+      style="display: none"
+    />
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
+import { useAuthStore } from 'stores/authStore';
 
-const username = ref('관리자 계정명'); // 관리자 계정명 초기값 설정
 const title = ref('');
 const content = ref('');
-const files = ref([]);
 const router = useRouter();
-
 const isCancelDialogOpen = ref(false);
+const authStore = useAuthStore();
+const fileInput = ref(null);
+const selectedFiles = ref([]);
+
+const onFileChange = event => {
+  selectedFiles.value = Array.from(event.target.files).map(file => {
+    const isImageFile = isImage(file);
+    const previewUrl = isImageFile ? URL.createObjectURL(file) : null;
+    return { file, isImage: isImageFile, previewUrl };
+  });
+};
+
+const isImage = file => {
+  return file && file.type && file.type.startsWith('image/');
+};
+
+const handleFileUploads = async jobGuideId => {
+  for (const { file, isImage } of selectedFiles.value) {
+    const formData = new FormData();
+    formData.append('files', file);
+    const apiUrl = isImage
+      ? `/image/${jobGuideId}/update`
+      : `/document/${jobGuideId}/update`;
+    try {
+      const response = await customApi.put(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const fileUrl = isImage
+        ? response.data['이미지url']
+        : response.data['문서url'];
+      content.value += isImage
+        ? `<img src="${fileUrl}" style="max-width: 100%; height: auto;" alt="Uploaded Image">`
+        : `<a href="${fileUrl}" target="_blank">Uploaded Document</a>`;
+    } catch (error) {
+      console.error(`${isImage ? 'Image' : 'Document'} upload failed:`, error);
+    }
+  }
+};
 
 const createJobGuide = async () => {
+  // 권한 확인
+  if (authStore.role !== 'ADMIN') {
+    alert('권한이 없습니다.');
+    return;
+  }
+  ``;
+
   try {
-    // Job Guide 생성
     const jobGuideData = {
-      username: username.value,
+      username: authStore.username,
       title: title.value,
       content: content.value,
     };
@@ -73,10 +125,9 @@ const createJobGuide = async () => {
     const jobGuideResponse = await customApi.post('/job-guide', jobGuideData, {
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     });
-
-    console.log(jobGuideResponse.data); // 응답 데이터 확인
 
     const jobGuideId =
       jobGuideResponse.data.guidId || jobGuideResponse.data.guideId;
@@ -85,60 +136,46 @@ const createJobGuide = async () => {
       throw new Error('Invalid job guide ID');
     }
 
-    // 이미지 및 문서 업로드
-    const imageFormData = new FormData();
-    const documentFormData = new FormData();
-    for (const file of files.value) {
-      if (file.type.startsWith('image/')) {
-        imageFormData.append('files', file);
-      } else {
-        documentFormData.append('files', file);
-      }
+    // 파일 업로드
+    if (selectedFiles.value.length > 0) {
+      await handleFileUploads(jobGuideId);
     }
 
-    console.log([...imageFormData]); // 디버깅을 위한 이미지 FormData 항목 로그
-
-    let imageUrls = [];
-    let documentUrls = [];
-
-    if (imageFormData.has('files')) {
-      const imageUploadResponse = await customApi.post(
-        `/image-transfer/${jobGuideId}/uploads`,
-        imageFormData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      console.log('Image Upload Response:', imageUploadResponse.data);
-      // 이미지 URL 저장
-      imageUrls = imageUploadResponse.data.urls;
-    }
-
-    if (documentFormData.has('files')) {
-      const documentUploadResponse = await customApi.post(
-        `/document-transfer/${jobGuideId}/uploads`,
-        documentFormData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      console.log('Document Upload Response:', documentUploadResponse.data);
-      // 문서 URL 저장
-      documentUrls = documentUploadResponse.data.urls;
-    }
-
-    // Update the job guide with URLs if necessary
     alert('취업 가이드가 등록되었습니다.');
-    router.push({ path: `/dashboard` }); // 상세 페이지로 이동
+    router.push({ path: `/dashboard` });
   } catch (error) {
     console.error('Failed to create job guide:', error);
     alert('등록 중 오류가 발생했습니다.');
   }
 };
+
+const toolbar = [
+  ['bold', 'italic', 'strike', 'underline'],
+  ['upload', 'save'],
+];
+
+const editorDefinitions = {
+  upload: {
+    tip: '파일 업로드',
+    icon: 'cloud_upload',
+    label: 'Upload',
+    handler: () => {
+      fileInput.value.click(); // 파일 입력 창을 여는 역할
+    },
+  },
+  save: {
+    tip: '저장하기',
+    icon: 'save',
+    label: 'Save',
+    handler: createJobGuide,
+  },
+};
+
+// authStore 초기화
+onMounted(() => {
+  authStore.initializeAuth();
+  console.log('Auth initialized:', authStore.role); // auth 초기화 후 역할 출력
+});
 
 const openCancelDialog = () => {
   isCancelDialogOpen.value = true;
@@ -171,20 +208,18 @@ const confirmCancel = () => {
   box-sizing: border-box;
 }
 
-.content-input {
-  width: 100%;
-  min-height: 150px;
-  margin-top: 20px;
-}
-
-.file-input {
-  width: 100%;
-  margin-top: 20px;
+.file-info {
+  margin-top: 10px;
+  color: #333;
 }
 
 .submit-button {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+}
+
+#image-upload {
+  display: none;
 }
 </style>
