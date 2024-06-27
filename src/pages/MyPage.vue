@@ -37,9 +37,9 @@ const tabComponents = {
     import('components/MyPageCounseling.vue'),
   ),
   success: defineAsyncComponent(() => import('components/MyPageSuccess.vue')),
-  // bookmarks: defineAsyncComponent(() =>
-  //   import('components/MyPageBookmarks.vue'),
-  // ),
+  bookmarks: defineAsyncComponent(() =>
+    import('components/MyPageBookmarks.vue'),
+  ),
 };
 
 const selectedTab = ref('info');

@@ -56,17 +56,14 @@
                   <div class="guide-author">작성자: 관리자</div>
                 </div>
               </div>
-              <div class="guide-content">
-                {{ truncatedContent(guide.content) }}
-              </div>
               <div class="guide-images">
-                <img
+                <div
                   v-for="image in guide.images"
                   :key="image"
-                  :src="image"
-                  alt="Guide image"
-                  class="guide-image"
-                />
+                  class="guide-image-container"
+                >
+                  <img :src="image" alt="Guide image" class="guide-image" />
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -82,7 +79,6 @@
     </q-card>
   </q-page>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { api } from 'boot/axios';
@@ -144,7 +140,7 @@ const formatDate = dateString => {
 };
 
 const truncatedContent = content => {
-  const maxLength = 100;
+  const maxLength = 50;
   return content.length > maxLength
     ? content.slice(0, maxLength) + '...'
     : content;
@@ -171,7 +167,6 @@ onMounted(() => {
   fetchGuides();
 });
 </script>
-
 <style scoped>
 .page-wrapper {
   display: flex;
@@ -226,7 +221,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  height: 300px;
+  height: 400px;
   padding: 15px;
 }
 
@@ -273,23 +268,32 @@ onMounted(() => {
   margin-top: 8px;
   font-size: 0.9rem;
   color: #555;
-  max-height: 4.2em;
+  max-height: 1.2em;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: pre-wrap;
+  white-space: nowrap;
 }
 
 .guide-images {
   margin-top: 10px;
   display: flex;
-  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.guide-image-container {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .guide-image {
-  max-width: 50px;
-  max-height: 50px;
-  margin-right: 5px;
-  margin-bottom: 5px;
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
 }
 
 .pagination-container {

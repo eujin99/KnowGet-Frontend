@@ -50,19 +50,34 @@
         <q-btn
           label="변경 사항 저장"
           type="submit"
-          color="primary"
+          color="teal-6"
           class="q-mt-md full-width"
+        />
+        <q-btn
+          label="탈퇴하기"
+          class="q-mt-md full-width withdraw-btn"
+          @click="showWithdrawDialog = true"
         />
       </q-form>
     </q-card-section>
-    <q-card-section>
-      <q-btn
-        label="탈퇴하기"
-        color="negative"
-        class="q-mt-md full-width"
-        @click="withdraw"
-      />
-    </q-card-section>
+
+    <q-dialog v-model="showWithdrawDialog" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-icon name="warning" color="warning" />
+          <span class="q-ml-md">정말 탈퇴 하시겠습니까?</span>
+        </q-card-section>
+        <q-card-section>
+          <q-btn label="예" color="primary" @click="confirmWithdraw" />
+          <q-btn
+            label="아니요"
+            color="primary"
+            flat
+            @click="showWithdrawDialog = false"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-card>
 </template>
 
@@ -123,6 +138,8 @@ const jobOptions = [
   {label: '운송, 영업 및 판매', value: '8'},
   {label: '제조 및 기술', value: '9'},
 ];
+
+const showWithdrawDialog = ref(false);
 
 const fetchUserData = async () => {
   try {
@@ -186,6 +203,12 @@ const withdraw = async () => {
   }
 };
 
+const confirmWithdraw = async () => {
+  await withdraw();
+  showWithdrawDialog.value = false;
+  alert('탈퇴되었습니다.');
+};
+
 onMounted(fetchUserData);
 </script>
 
@@ -193,5 +216,11 @@ onMounted(fetchUserData);
 .mypage-card {
   width: 100%;
   max-width: 800px;
+}
+
+.withdraw-btn {
+  border: 1px solid red;
+  background-color: transparent;
+  color: red;
 }
 </style>

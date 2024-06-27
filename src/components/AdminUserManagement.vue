@@ -30,6 +30,20 @@
       </tbody>
     </table>
     <button class="save-button" @click="saveChanges">저장</button>
+
+    <div v-if="showModal" class="modal">
+      <div class="modal-content">
+        <p>비활성화 사유 입력</p>
+        <textarea
+          v-model="deactivationReason"
+          placeholder="사유를 입력하세요"
+        ></textarea>
+        <div class="modal-buttons">
+          <button @click="saveReason" class="modal-button">저장</button>
+          <button @click="closeModal" class="modal-button">취소</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -39,15 +53,10 @@ import { customApi } from 'boot/axios';
 import { useAuthStore } from 'stores/authStore';
 
 const users = ref([]);
-const changedUsers = ref([]); // 변경된 사용자 추적
-
-const columns = [
-  { name: 'userId', label: '회원 ID', align: 'left' },
-  { name: 'userName', label: '회원 이름', align: 'left' },
-  { name: 'prefLocation', label: '희망 근무지', align: 'left' },
-  { name: 'prefJob', label: '희망 직종', align: 'left' },
-  { name: 'isActive', label: '활성 / 비활성', align: 'center' },
-];
+const changedUsers = ref([]);
+const showModal = ref(false);
+const deactivationReason = ref('');
+let userToDeactivate = null;
 
 const jobMappings = [
   { label: '행정 및 사무', value: '0' },
@@ -90,26 +99,74 @@ const fetchUsers = async () => {
 };
 
 const handleToggleChange = user => {
-  // 사용자의 변경 사항을 추적
-  const existingUser = changedUsers.value.find(u => u.userId === user.userId);
-  if (existingUser) {
-    existingUser.isActive = user.isActive;
+  if (!user.isActive) {
+    //사유 적으세욧 !!!!!
+    userToDeactivate = user;
+    showModal.value = true;
   } else {
-    changedUsers.value.push({ ...user });
+    const existingUser = changedUsers.value.find(u => u.userId === user.userId);
+    if (existingUser) {
+      existingUser.isActive = user.isActive;
+    } else {
+      changedUsers.value.push({ ...user });
+    }
+
+    //true 되면 로컬스토리지에서 내려가용
+    const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
+    const updatedBlacklist = blacklist.filter(u => u.userId !== user.userId);
+    localStorage.setItem('blacklist', JSON.stringify(updatedBlacklist));
+  }
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  deactivationReason.value = '';
+  userToDeactivate = null;
+};
+
+const saveReason = async () => {
+  try {
+    if (userToDeactivate) {
+      userToDeactivate.isActive = false;
+      const existingUser = changedUsers.value.find(
+        u => u.userId === userToDeactivate.userId,
+      );
+      if (existingUser) {
+        existingUser.isActive = userToDeactivate.isActive;
+      } else {
+        changedUsers.value.push({ ...userToDeactivate });
+      }
+
+      const blacklist = JSON.parse(localStorage.getItem('blacklist')) || [];
+      if (!blacklist.find(u => u.userId === userToDeactivate.userId)) {
+        blacklist.push({
+          userId: userToDeactivate.userId,
+          userName: userToDeactivate.userName,
+          prefLocation: userToDeactivate.prefLocation,
+          prefJob: userToDeactivate.prefJob,
+          reason: deactivationReason.value,
+        });
+        localStorage.setItem('blacklist', JSON.stringify(blacklist));
+      }
+
+      closeModal();
+    }
+  } catch (error) {
+    console.error('Failed to save reason:', error);
+    alert('사유 저장 중 오류가 발생했습니다.');
   }
 };
 
 const saveChanges = async () => {
   try {
-    // 변경된 모든 사용자의 상태 저장
-    const updatePromises = changedUsers.value.map(user =>
-      customApi.patch(`/admin/user/${user.userId}`, {
+    const updatePromises = changedUsers.value.map(async user => {
+      await customApi.patch(`/admin/user/${user.userId}`, {
         isActive: user.isActive,
-      }),
-    );
+      });
+    });
     await Promise.all(updatePromises);
     alert('변경 사항이 성공적으로 저장되었습니다.');
-    changedUsers.value = []; // 저장 후 변경된 사용자 목록 초기화
+    changedUsers.value = [];
   } catch (error) {
     console.error('Failed to save changes:', error);
     alert('변경 사항 저장 중 오류가 발생했습니다.');
@@ -216,6 +273,58 @@ input:checked + .slider:before {
 }
 
 .save-button:hover {
+  background-color: #007f6a;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 400px;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.modal-content textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-button {
+  background-color: #009879;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.modal-button:hover {
   background-color: #007f6a;
 }
 </style>
