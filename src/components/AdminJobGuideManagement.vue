@@ -12,24 +12,26 @@
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="jobGuide in jobGuides"
-          :key="jobGuide.guideId"
-          @click="goToDetailPage(jobGuide.guideId)"
-        >
-          <td>{{ jobGuide.guideId }}</td>
-          <td>{{ jobGuide.title }}</td>
-          <td>{{ jobGuide.createdDate }}</td>
+        <tr v-for="jobGuide in jobGuides" :key="jobGuide.guideId">
+          <td @click="goToDetailPage(jobGuide.guideId)">
+            {{ jobGuide.guideId }}
+          </td>
+          <td @click="goToDetailPage(jobGuide.guideId)">
+            {{ jobGuide.title }}
+          </td>
+          <td @click="goToDetailPage(jobGuide.guideId)">
+            {{ jobGuide.createdDate }}
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
+import { QIcon, Notify } from 'quasar';
 
 const jobGuides = ref([]);
 const router = useRouter();
@@ -53,7 +55,6 @@ const goToDetailPage = id => {
 
 onMounted(fetchJobGuides);
 </script>
-
 <style scoped>
 .job-guide-management {
   padding: 20px;
@@ -106,5 +107,16 @@ onMounted(fetchJobGuides);
 .job-guide-table tbody tr:hover {
   background-color: #f1f1f1;
   cursor: pointer;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: #ff4c4c;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  color: #e60000;
 }
 </style>
