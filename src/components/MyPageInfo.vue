@@ -11,6 +11,7 @@
           dense
           outlined
           readonly
+          autocomplete="username"
         />
         <q-input
           v-model="formData.password"
@@ -19,6 +20,7 @@
           dense
           outlined
           class="q-mt-md"
+          autocomplete="new-password"
         />
         <q-input
           v-model="formData.passwordConfirm"
@@ -27,6 +29,7 @@
           dense
           outlined
           class="q-mt-md"
+          autocomplete="new-password"
         />
         <q-select
           v-model="formData.location"
@@ -64,10 +67,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useAuthStore } from 'stores/authStore';
-import { customApi } from 'boot/axios';
-import { useRouter } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useAuthStore} from 'stores/authStore';
+import {customApi} from 'boot/axios';
+import {useRouter} from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -106,19 +109,19 @@ const locationOptions = [
   '종로구',
   '중구',
   '중랑구',
-].map(location => ({ label: location, value: location }));
+].map(location => ({label: location, value: location}));
 
 const jobOptions = [
-  { label: '행정 및 사무', value: '0' },
-  { label: '마케팅 및 기획', value: '1' },
-  { label: '교육, 연구 및 개발', value: '2' },
-  { label: '건설 및 시설 관리', value: '3' },
-  { label: '보안, 안전 및 재난', value: '4' },
-  { label: '의료, 복지 및 지원 서비스', value: '5' },
-  { label: '창작 및 미용', value: '6' },
-  { label: '요식업, 조리 및 제과', value: '7' },
-  { label: '운송, 영업 및 판매', value: '8' },
-  { label: '제조 및 기술', value: '9' },
+  {label: '행정 및 사무', value: '0'},
+  {label: '마케팅 및 기획', value: '1'},
+  {label: '교육, 연구 및 개발', value: '2'},
+  {label: '건설 및 시설 관리', value: '3'},
+  {label: '보안, 안전 및 재난', value: '4'},
+  {label: '의료, 복지 및 지원 서비스', value: '5'},
+  {label: '창작 및 미용', value: '6'},
+  {label: '요식업, 조리 및 제과', value: '7'},
+  {label: '운송, 영업 및 판매', value: '8'},
+  {label: '제조 및 기술', value: '9'},
 ];
 
 const fetchUserData = async () => {

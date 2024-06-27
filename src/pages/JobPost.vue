@@ -155,6 +155,10 @@ export default {
     const filteredData = ref([]);
     const page = ref(parseInt(route.query.page) || 1);
     const itemsPerPage = 12;
+    const statusFilters = ref(['전체', '구인 중', '구인 마감']);
+    const selectedJobCategory = ref(null);
+    const selectedLocation = ref(null);
+    const selectedStatus = ref('전체');
     const totalPages = computed(() =>
       Math.ceil(filteredData.value.length / itemsPerPage),
     );
@@ -201,12 +205,6 @@ export default {
       '중랑구',
     ]);
 
-    const statusFilters = ref(['전체', '구인 중', '구인 마감']);
-
-    const selectedJobCategory = ref(null);
-    const selectedLocation = ref(null);
-    const selectedStatus = ref('전체');
-
     const fetchPosts = async () => {
       try {
         const response = await api.get('/posts');
@@ -222,6 +220,8 @@ export default {
         Notify.create({
           type: 'negative',
           message: '일자리 정보를 불러오는 도중 오류가 발생했습니다.',
+          position: 'bottom',
+          timeout: 2000,
         });
       }
     };
@@ -294,23 +294,31 @@ export default {
         Notify.create({
           type: 'negative',
           message: '로그인이 필요합니다',
+          timeout: 2000,
+          position: 'top',
         });
         return;
       }
-      try {
-        await customApi.post(`/bookmark/${post.postId}`);
-        post.isBookmarked = !post.isBookmarked;
-        // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
-        Notify.create({
-          type: 'positive',
-          message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
-        });
-      } catch (error) {
-        console.error('Error toggling bookmark:', error);
-        Notify.create({
-          type: 'negative',
-          message: '북마크를 토글하는 중 오류가 발생했습니다.',
-        });
+      if (localStorage.getItem('role') !== 'ADMIN') {
+        try {
+          await customApi.post(`/bookmark/${post.postId}`);
+          post.isBookmarked = !post.isBookmarked;
+          // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
+          Notify.create({
+            type: 'positive',
+            message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
+            position: 'bottom',
+            timeout: 2000,
+          });
+        } catch (error) {
+          console.error('Error toggling bookmark:', error);
+          Notify.create({
+            type: 'negative',
+            message: '북마크를 토글하는 중 오류가 발생했습니다.',
+            position: 'bottom',
+            timeout: 2000,
+          });
+        }
       }
     };
 

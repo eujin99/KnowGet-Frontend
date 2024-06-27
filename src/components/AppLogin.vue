@@ -1,19 +1,25 @@
 <template>
   <div class="sidebar-login">
     <p>로그인 후 너겟을 마음껏 이용해보세요!</p>
-    <q-input
-      filled
-      v-model="loginData.username"
-      placeholder="아이디"
-      class="q-mt-sm"
-    />
-    <q-input
-      filled
-      v-model="loginData.password"
-      type="password"
-      placeholder="비밀번호"
-      class="q-mt-sm"
-    />
+    <form>
+      <q-input
+        filled
+        v-model="loginData.username"
+        placeholder="아이디"
+        class="q-mt-sm"
+        autocomplete="username"
+        @keyup.enter="login"
+      />
+      <q-input
+        filled
+        v-model="loginData.password"
+        type="password"
+        placeholder="비밀번호"
+        class="q-mt-sm"
+        autocomplete="current-password"
+        @keyup.enter="login"
+      />
+    </form>
     <q-btn
       label="로그인"
       color="primary"
@@ -30,10 +36,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/authStore';
-import { useNotificationStore } from 'stores/notificationStore';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {useAuthStore} from 'stores/authStore';
+import {useNotificationStore} from 'stores/notificationStore';
+import {Notify} from 'quasar';
 
 const loginData = ref({
   username: '',
@@ -52,11 +59,22 @@ async function login() {
       await notificationStore.fetchUnreadCount();
       await notificationStore.fetchNotifications();
       await router.push('/');
+      Notify.create({
+        message: authStore.username + '님, 환영합니다!',
+        color: 'positive',
+        position: 'top-right',
+        timeout: 2000,
+      });
     } else {
       alert('로그인 실패: 서버에서 올바른 응답을 받지 못했습니다.');
     }
   } catch (error) {
-    alert('아이디 혹은 비밀번호를 다시 확인해 주세요!');
+    Notify.create({
+      message: '아이디 혹은 비밀번호를 다시 확인해 주세요!',
+      color: 'negative',
+      position: 'top-right',
+      timeout: 2000,
+    });
   }
 }
 </script>
