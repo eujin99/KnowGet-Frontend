@@ -38,12 +38,11 @@ const fetchSuccessDetail = async () => {
     if (response.data.username === authStore.username) {
       successStory.value = response.data;
     } else {
-      // 다른 사용자의 글일 경우 접근 차단
       router.push({ name: 'MyPageSuccessStories' });
     }
   } catch (error) {
     console.error('Failed to fetch success story detail:', error);
-    router.push({ name: 'MyPageSuccessStories' }); // 에러 발생 시 목록 페이지로 이동
+    router.push({ name: 'MyPageSuccessStories' });
   }
 };
 
