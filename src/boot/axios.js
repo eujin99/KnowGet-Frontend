@@ -1,7 +1,7 @@
-import { boot } from 'quasar/wrappers';
+import {boot} from 'quasar/wrappers';
 import axios from 'axios';
-import { Notify } from 'quasar';
-import { useAuthStore } from 'stores/authStore';
+import {Notify} from 'quasar';
+import {useAuthStore} from 'stores/authStore';
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -9,11 +9,11 @@ import { useAuthStore } from 'stores/authStore';
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: 'http://localhost:8080/api/v1' });
-// http://3.36.148.873.36.148.87:8080   => 이걸로 baseURL 모두 변경 !!!!
+
+const api = axios.create({baseURL: 'http://3.36.148.87:8080/api/v1'});
 
 const customApi = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: 'http://3.36.148.87:8080/api/v1',
 });
 
 customApi.interceptors.request.use(
@@ -44,7 +44,7 @@ customApi.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         const response = await axios.post(
-          'http://localhost:8080/api/v1/user/refresh-token',
+          'http://3.36.148.87:8080/api/v1/user/refresh-token',
           {
             refreshToken: refreshToken,
           },
@@ -52,10 +52,11 @@ customApi.interceptors.response.use(
 
         if (response.status === 200) {
           const newAccessToken = response.data.accessToken;
+          console.log('newAccessToken : ', newAccessToken)
           localStorage.setItem('accessToken', newAccessToken);
           customApi.defaults.headers.common[
             'Authorization'
-          ] = `Bearer ${newAccessToken}`;
+            ] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
@@ -66,6 +67,7 @@ customApi.interceptors.response.use(
           color: 'negative',
           position: 'top',
         });
+        console.log('refresh token expired')
         window.location.href = '/';
       }
     }
@@ -74,11 +76,11 @@ customApi.interceptors.response.use(
   },
 );
 
-export default boot(({ app }) => {
+export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
 });
 
-export { api, customApi };
+export {api, customApi};
