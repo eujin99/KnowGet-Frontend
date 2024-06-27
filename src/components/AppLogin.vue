@@ -36,10 +36,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/authStore';
-import { useNotificationStore } from 'stores/notificationStore';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {useAuthStore} from 'stores/authStore';
+import {useNotificationStore} from 'stores/notificationStore';
+import {Notify} from 'quasar';
 
 const loginData = ref({
   username: '',

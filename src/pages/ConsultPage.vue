@@ -103,7 +103,6 @@ const submitConsultation = async () => {
       timeout: 2000,
     });
     console.error('상담 신청에 실패했습니다:', error);
-    alert('상담 신청에 실패했습니다. 나중에 다시 시도해 주세요.');
   }
 };
 </script>
