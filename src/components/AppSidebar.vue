@@ -22,6 +22,12 @@
             class="q-mt-sm full-width"
             @click="goToMyPage"
           />
+          <q-btn
+            label="로그아웃"
+            flat
+            class="q-mt-sm full-width logout-button"
+            @click="logout"
+          />
           <!-- 알림 아코디언 -->
           <q-expansion-item
             dense
@@ -77,13 +83,13 @@
             class="q-mt-sm full-width"
             @click="goToDashboard"
           />
+          <q-btn
+            label="로그아웃"
+            flat
+            class="q-mt-sm full-width logout-button"
+            @click="logout"
+          />
         </div>
-        <q-btn
-          label="로그아웃"
-          flat
-          class="q-mt-sm full-width logout-button"
-          @click="logout"
-        />
         <NotificationPopup ref="notificationPopup"/>
       </div>
     </div>
