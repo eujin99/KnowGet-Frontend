@@ -3,20 +3,26 @@ import {customApi} from 'boot/axios';
 import {formatDistanceToNow, parseISO} from 'date-fns';
 import {ko} from 'date-fns/locale';
 import {useAuthStore} from 'src/stores/authStore';
-import {ref} from 'vue';
+import {ref, watch} from 'vue';
 
 export const useNotificationStore = defineStore('notification', () => {
   const notifications = ref([]);
   const unreadCount = ref(0);
   const authStore = useAuthStore();
 
+  const resetNotifications = () => {
+    notifications.value = [];
+    unreadCount.value = 0;
+  }
+
   const fetchUnreadCount = async () => {
     if (!authStore.isLoggedIn || authStore.role === 'ADMIN') return;
     try {
       const response = await customApi.get('/notifications/unread-count');
-      unreadCount.value = response.data;
+      unreadCount.value = response.data || 0;
     } catch (error) {
       console.error('Error fetching unread count:', error);
+      unreadCount.value = 0;
     }
   };
 
@@ -24,7 +30,7 @@ export const useNotificationStore = defineStore('notification', () => {
     if (!authStore.isLoggedIn || authStore.role === 'ADMIN') return;
     try {
       const response = await customApi.get('/notifications/all');
-      notifications.value = response.data.map(notification => ({
+      notifications.value = (response.data || []).map(notification => ({
         ...notification,
         formattedDate: formatDistanceToNow(parseISO(notification.sentDate), {
           addSuffix: true,
@@ -33,6 +39,7 @@ export const useNotificationStore = defineStore('notification', () => {
       }));
     } catch (error) {
       console.error('Error fetching notifications:', error);
+      notifications.value = [];
     }
   };
 
@@ -63,6 +70,15 @@ export const useNotificationStore = defineStore('notification', () => {
       console.error('Error deleting notification:', error);
     }
   };
+
+  watch(() => authStore.isLoggedIn, async (isLoggedIn) => {
+    if (!isLoggedIn) {
+      resetNotifications();
+    } else {
+      await fetchUnreadCount();
+      await fetchNotifications();
+    }
+  });
 
   return {
     notifications,

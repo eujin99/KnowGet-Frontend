@@ -36,10 +36,7 @@ customApi.interceptors.response.use(
     const authStore = useAuthStore();
 
     // 토큰 만료 오류 처리
-    if (
-      error.response.status === 401 ||
-      (error.response.status === 400 && !originalRequest._retry)
-    ) {
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
