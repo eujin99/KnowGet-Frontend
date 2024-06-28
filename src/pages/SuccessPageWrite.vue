@@ -65,30 +65,30 @@ const isSubmitDialogOpen = ref(false);
 const isCancelDialogOpen = ref(false);
 
 const createSuccessCase = async () => {
-  try {
-    const successCaseData = {
-      title: title.value,
-      content: content.value,
-      username: authStore.username,
-    };
+    try {
+      const successCaseData = {
+        title: title.value,
+        content: content.value,
+        username: authStore.username,
+      };
 
-    const successCaseResponse = await customApi.post('/success-case', successCaseData);
-    console.log(successCaseResponse.data);
-    await router.push({name: 'SuccessPage'});
-    Notify.create({
-      type: 'positive',
-      message: '글 작성에 성공했습니다. 관리자의 승인 후 게시됩니다.',
-      position: 'top',
-    });
-  } catch (error) {
-    console.error('글 작성 실패:', error);
-    Notify.create({
-      type: 'negative',
-      message: '글 작성에 실패했습니다.',
-      position: 'top',
-    });
+      await customApi.post('/success-case', successCaseData);
+      await router.push({name: 'SuccessPage'});
+      Notify.create({
+        type: 'positive',
+        message: '글 작성에 성공했습니다. 관리자의 승인 후 게시됩니다.',
+        position: 'top',
+      });
+    } catch (error) {
+      console.error('글 작성 실패:', error);
+      Notify.create({
+        type: 'negative',
+        message: '글 작성에 실패했습니다.',
+        position: 'top',
+      });
+    }
   }
-};
+;
 
 const openCancelDialog = () => {
   isCancelDialogOpen.value = true;
