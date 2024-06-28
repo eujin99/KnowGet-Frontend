@@ -82,10 +82,10 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
-import {useAuthStore} from 'stores/authStore';
-import {customApi} from 'boot/axios';
-import {useRouter} from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { useAuthStore } from 'stores/authStore';
+import { customApi } from 'boot/axios';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -124,19 +124,19 @@ const locationOptions = [
   '종로구',
   '중구',
   '중랑구',
-].map(location => ({label: location, value: location}));
+].map(location => ({ label: location, value: location }));
 
 const jobOptions = [
-  {label: '행정 및 사무', value: '0'},
-  {label: '마케팅 및 기획', value: '1'},
-  {label: '교육, 연구 및 개발', value: '2'},
-  {label: '건설 및 시설 관리', value: '3'},
-  {label: '보안, 안전 및 재난', value: '4'},
-  {label: '의료, 복지 및 지원 서비스', value: '5'},
-  {label: '창작 및 미용', value: '6'},
-  {label: '요식업, 조리 및 제과', value: '7'},
-  {label: '운송, 영업 및 판매', value: '8'},
-  {label: '제조 및 기술', value: '9'},
+  { label: '행정 및 사무', value: '0' },
+  { label: '마케팅 및 기획', value: '1' },
+  { label: '교육, 연구 및 개발', value: '2' },
+  { label: '건설 및 시설 관리', value: '3' },
+  { label: '보안, 안전 및 재난', value: '4' },
+  { label: '의료, 복지 및 지원 서비스', value: '5' },
+  { label: '창작 및 미용', value: '6' },
+  { label: '요식업, 조리 및 제과', value: '7' },
+  { label: '운송, 영업 및 판매', value: '8' },
+  { label: '제조 및 기술', value: '9' },
 ];
 
 const showWithdrawDialog = ref(false);
@@ -158,26 +158,43 @@ const fetchUserData = async () => {
 };
 
 const updateInfo = async () => {
-  if (formData.value.password !== formData.value.passwordConfirm) {
+  console.log('Updating info with:', formData.value);
+
+  if (
+    formData.value.password &&
+    formData.value.password !== formData.value.passwordConfirm
+  ) {
+    console.log('Password mismatch');
     alert('비밀번호가 일치하지 않습니다.');
     return;
   }
 
   try {
-    await customApi.patch('/mypage/pref-location', {
-      location: formData.value.location.value,
-    });
+    if (formData.value.location.value) {
+      console.log('Updating location:', formData.value.location.value);
+      const locationResponse = await customApi.patch('/mypage/pref-location', {
+        location: formData.value.location.value,
+      });
+      console.log('Location update response:', locationResponse.data);
+    }
 
-    await customApi.patch('/mypage/pref-job', {
-      job:
+    if (formData.value.job.value) {
+      const jobValue =
         jobOptions.find(option => option.label === formData.value.job.value)
-          ?.value || formData.value.job.value,
-    });
+          ?.value || formData.value.job.value;
+      console.log('Updating job:', jobValue);
+      const jobResponse = await customApi.patch('/mypage/pref-job', {
+        job: jobValue,
+      });
+      console.log('Job update response:', jobResponse.data);
+    }
 
     if (formData.value.password) {
-      await customApi.patch('/mypage/password', {
+      console.log('Updating password');
+      const passwordResponse = await customApi.patch('/mypage/password', {
         password: formData.value.password,
       });
+      console.log('Password update response:', passwordResponse.data);
     }
 
     alert('변경 사항이 저장되었습니다.');
@@ -191,6 +208,7 @@ const withdraw = async () => {
   try {
     const response = await customApi.patch('/mypage/deactivate');
     if (response.status === 200) {
+      console.log('Withdrawal response:', response.data);
       alert(response.data.message);
       authStore.logout();
       router.push('/');
