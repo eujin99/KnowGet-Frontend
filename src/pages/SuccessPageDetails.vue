@@ -24,7 +24,8 @@
             outlined
             dense
             class="comment-input"
-            @keydown.enter="postComment"
+            autofocus
+            @keyup.enter="postComment"
           />
           <q-btn label="등록" color="primary" @click="postComment" :disable="!authStore.isLoggedIn" flat dense/>
         </div>
@@ -50,7 +51,7 @@
                          outlined
                          dense
                          autofocus
-                         @keydown.enter="saveEditComment(comment.commentId)"
+                         @keyup.enter="saveEditComment(comment.commentId)"
                 />
                 <div v-else>{{ comment.content }}</div>
               </div>
@@ -79,7 +80,7 @@
                                outlined
                                dense
                                autofocus
-                               @keydown.enter="saveEditReply(comment.commentId, reply.replyId)"
+                               @keyup.enter="saveEditReply(comment.commentId, reply.replyId)"
                       />
                       <div v-else>{{ reply.content }}</div>
                     </div>
@@ -94,7 +95,7 @@
                   outlined
                   dense
                   class="reply-input"
-                  @keydown.enter="postReply(comment.commentId)"
+                  @keyup.enter="postReply(comment.commentId)"
                 />
                 <q-btn label="등록" color="primary" @click="postReply(comment.commentId)"
                        :disable="!authStore.isLoggedIn" flat dense/>
@@ -173,6 +174,9 @@ const postComment = async () => {
     });
     return;
   }
+  if (!newComment.value.trim()) {
+    return;
+  }
   try {
     await customApi.post(`/success-case/${caseId}/comment`, {content: newComment.value});
     newComment.value = '';
@@ -190,6 +194,10 @@ const postReply = async (commentId) => {
       timeout: 2000,
       position: 'top',
     });
+    return;
+  }
+  const replyContent = newReply.value[commentId]?.trim();
+  if (!replyContent) {
     return;
   }
   try {
