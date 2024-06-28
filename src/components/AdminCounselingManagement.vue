@@ -2,37 +2,37 @@
   <div class="counseling-management">
     <table class="counseling-table">
       <thead>
-        <tr>
-          <th>상담 ID</th>
-          <th>사용자</th>
-          <th>카테고리</th>
-          <th>내용</th>
-          <th>날짜</th>
-          <th>상태</th>
-        </tr>
+      <tr>
+        <th>상담 ID</th>
+        <th>사용자</th>
+        <th>카테고리</th>
+        <th>내용</th>
+        <th>날짜</th>
+        <th>상태</th>
+      </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="counseling in counselings"
-          :key="counseling.counselingId"
-          @click="goToCounselingDetail(counseling.counselingId)"
-        >
-          <td>{{ counseling.counselingId }}</td>
-          <td>{{ counseling.user }}</td>
-          <td>{{ counseling.category }}</td>
-          <td>{{ counseling.content }}</td>
-          <td>{{ counseling.sentDate }}</td>
-          <td>{{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}</td>
-        </tr>
+      <tr
+        v-for="counseling in counselings"
+        :key="counseling.counselingId"
+        @click="goToCounselingDetail(counseling.counselingId)"
+      >
+        <td>{{ counseling.counselingId }}</td>
+        <td>{{ counseling.user }}</td>
+        <td>{{ counseling.category }}</td>
+        <td>{{ counseling.content }}</td>
+        <td>{{ counseling.sentDate }}</td>
+        <td>{{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}</td>
+      </tr>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
 
 const counselings = ref([]);
 const router = useRouter();
@@ -47,7 +47,7 @@ const fetchCounselings = async () => {
 };
 
 const goToCounselingDetail = counselingId => {
-  router.push({ name: 'CounselingDetail', params: { id: counselingId } });
+  router.push({name: 'AdminCounselingDetail', params: {id: counselingId}});
 };
 
 onMounted(fetchCounselings);
