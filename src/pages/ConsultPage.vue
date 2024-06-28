@@ -84,7 +84,15 @@ const submitConsultation = async () => {
       });
       return;
     }
-
+    if (!consultationContent.value) {
+      Notify.create({
+        message: '상담 내용을 입력해주세요.',
+        color: 'negative',
+        position: 'top',
+        timeout: 2000,
+      });
+      return;
+    }
     await customApi.post('/counseling', {
       category: selectedType.value,
       content: consultationContent.value,
