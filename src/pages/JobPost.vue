@@ -315,7 +315,9 @@ export default {
           // 북마크 상태를 `MyPageBookmarks.vue`와 동기화하기 위해 이벤트를 발생시킴
           Notify.create({
             type: 'positive',
-            message: post.isBookmarked ? '북마크에 추가되었습니다.' : '북마크에서 제거되었습니다.',
+            message: post.isBookmarked
+              ? '북마크에 추가되었습니다.'
+              : '북마크에서 제거되었습니다.',
             position: 'bottom',
             timeout: 2000,
           });

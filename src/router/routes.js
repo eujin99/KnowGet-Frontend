@@ -72,9 +72,13 @@ const routes = [
         meta: { title: '너겟. 취업 가이드' },
       },
       {
-        path: 'dashboard',
+        path: '/dashboard',
         component: () => import('pages/AdminDashBoard.vue'),
-        meta: { title: '너겟, 관리자 대시보드' },
+        meta: {
+          title: '너겟, 관리자 대시보드',
+          requiresAuth: true,
+          role: 'ADMIN',
+        },
       },
       {
         path: 'counselingdetail/:id',
