@@ -53,15 +53,17 @@
 import {onMounted, ref} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import {customApi} from 'boot/axios';
+import {Notify} from "quasar";
 
 const route = useRoute();
 const router = useRouter();
 const counseling = ref({});
 const answerContent = ref('');
+const counselingId = ref(route.params.id);
 
 const fetchCounselingDetail = async () => {
   try {
-    const response = await customApi.post(`/counseling/${route.params.id}`);
+    const response = await customApi.post(`/counseling/${counselingId.value}`);
     // console.log('Counseling details:', response.data);
     counseling.value = response.data;
 
@@ -73,9 +75,9 @@ const fetchCounselingDetail = async () => {
   }
 };
 
-const fetchAnswerContent = async counselingId => {
+const fetchAnswerContent = async (counselingId) => {
   try {
-    const answerResponse = await customApi.post(`/answer/${counselingId}`);
+    const answerResponse = await customApi.get(`/answer/${counselingId}`);
     // console.log('답변:', answerResponse.data);
     answerContent.value = answerResponse.data.content;
   } catch (error) {
@@ -84,6 +86,16 @@ const fetchAnswerContent = async counselingId => {
 };
 
 const submitAnswer = async () => {
+  if (!answerContent.value.trim()) {
+    Notify.create({
+      type: 'negative',
+      message: '답변 내용을 입력해주세요.',
+      timeout: 2000,
+      position: 'top',
+    });
+    return;
+  }
+  console.log('Submitting answer:', answerContent.value)
   try {
     const response = await customApi.post('/answer', {
       counselingId: counseling.value.counselingId,
@@ -93,11 +105,21 @@ const submitAnswer = async () => {
     counseling.value.isAnswered = true;
     counseling.value.answerId = response.data.answerId;
 
-    alert('답변이 등록되었습니다.');
-    await router.push({name: 'AdminCounselingDetail'});
+    Notify.create({
+      type: 'positive',
+      message: '답변이 등록되었습니다.',
+      timeout: 2000,
+      position: 'top',
+    });
+    await router.push({name: 'AdminCounselingDetail', params: {id: counseling.value.counselingId}});
   } catch (error) {
     console.error('Failed to submit answer:', error);
-    alert('답변 등록 중 오류가 발생했습니다.');
+    Notify.create({
+      type: 'negative',
+      message: '답변 등록 중 오류가 발생했습니다.',
+      timeout: 2000,
+      position: 'top',
+    });
   }
 };
 
