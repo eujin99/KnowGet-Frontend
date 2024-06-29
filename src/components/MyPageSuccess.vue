@@ -6,9 +6,9 @@
         <q-list>
           <q-item
             v-for="success in successCases"
-            :key="success.caseId"
+            :key="success.successCaseId"
             clickable
-            @click="openSuccessDetail(success.caseId)"
+            @click="openSuccessDetail(success.successCaseId)"
           >
             <q-item-section>
               <q-item-label>{{ success.title }}</q-item-label>
@@ -62,12 +62,9 @@ const getApprovalStatus = status => {
   }
 };
 
-const openSuccessDetail = caseId => {
-  router.push({ name: 'MyPageSuccessDetail', params: { id: caseId } });
+const openSuccessDetail = successCaseId => {
+  router.push({ name: 'MyPageSuccessDetail', params: { id: successCaseId } });
 };
-
-//이 부분이 mypage/success-case api 에는 안담겨 있는 것 같음.
-//그래서 id 값으로 글 매핑하는게 안되는듯.
 
 onMounted(getSuccessCases);
 </script>

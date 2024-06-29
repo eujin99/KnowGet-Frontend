@@ -75,7 +75,7 @@ const deleteSuccessCase = async () => {
       message: '성공사례가 삭제되었습니다.',
       position: 'top',
     });
-    router.push({ name: 'MyPageSuccess' });
+    router.push({ path: '/mypage' });
   } catch (error) {
     console.error('Error deleting success case:', error);
     Notify.create({
