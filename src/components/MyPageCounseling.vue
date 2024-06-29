@@ -95,7 +95,7 @@ onMounted(fetchConsultations);
 }
 
 .mypage-card {
-  width: 100%;
+  width: 1000px;
   max-width: 1400px; /* Increased max-width for a more spacious layout */
   margin: 0 auto;
   padding: 0;

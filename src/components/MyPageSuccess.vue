@@ -78,7 +78,7 @@ onMounted(getSuccessCases);
 }
 
 .page-card {
-  width: 100%;
+  width: 1000px;
   max-width: 1200px;
   margin: 20px auto;
   padding: 20px;
