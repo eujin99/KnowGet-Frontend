@@ -1,77 +1,91 @@
 <template>
-  <q-card class="mypage-card">
-    <q-card-section>
-      <div class="text-h5">취업 성공사례 내역</div>
-      <div v-if="userSuccessStories.length === 0" class="no-stories">
-        아직 작성하신 성공사례 글이 없어요. <br />
-        취업에 성공하셨다면 다른 분들을 위해 성공사례를 남겨주세요!
-      </div>
-      <q-list v-else bordered class="q-mt-md">
-        <q-item
-          v-for="story in userSuccessStories"
-          :key="story.caseId"
-          clickable
-          @click="goToSuccessDetail(story.caseId)"
-        >
-          <q-item-section>
-            <q-item-label>{{ story.title }}</q-item-label>
-            <q-item-label caption>{{ story.createdDate }}</q-item-label>
-            <q-item-label caption>{{
-              story.isApproved === 1
-                ? '승인됨'
-                : story.isApproved === 2
-                ? '거절됨'
-                : '대기 중'
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card-section>
-  </q-card>
+  <q-page class="page-wrapper">
+    <q-card class="page-card">
+      <q-card-section>
+        <div class="text-h5">내 성공사례 목록</div>
+        <q-list>
+          <q-item
+            v-for="success in successCases"
+            :key="success.caseId"
+            clickable
+            @click="openSuccessDetail(success.caseId)"
+          >
+            <q-item-section>
+              <q-item-label>{{ success.title }}</q-item-label>
+              <q-item-label caption>{{ success.createdDate }}</q-item-label>
+              <q-item-label caption>{{
+                getApprovalStatus(success.isApproved)
+              }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+    </q-card>
+  </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+import { customApi } from 'src/boot/axios';
 import { useAuthStore } from 'stores/authStore';
+import { useRouter } from 'vue-router';
+import { Notify } from 'quasar';
 
 const authStore = useAuthStore();
-const userSuccessStories = ref([]);
 const router = useRouter();
+const successCases = ref([]);
 
-const fetchUserSuccessStories = async () => {
+const getSuccessCases = async () => {
   try {
-    const response = await customApi.get('/success-case');
-    // 사용자의 글만 필터링
-    userSuccessStories.value = response.data.filter(
-      successStory => successStory.username === authStore.username,
-    );
+    const response = await customApi.get('/mypage/success-case');
+    successCases.value = response.data;
   } catch (error) {
-    console.error('성공사례 글 불러오기 실패.', error);
+    console.error('Error fetching success cases:', error);
+    Notify.create({
+      type: 'negative',
+      message: '성공사례를 불러오는 데 실패했습니다.',
+      position: 'top',
+    });
   }
 };
 
-const goToSuccessDetail = caseId => {
+const getApprovalStatus = status => {
+  switch (status) {
+    case 0:
+      return '승인 대기';
+    case 1:
+      return '승인됨';
+    case 2:
+      return '거절됨';
+    default:
+      return '알 수 없음';
+  }
+};
+
+const openSuccessDetail = caseId => {
   router.push({ name: 'MyPageSuccessDetail', params: { id: caseId } });
 };
 
-onMounted(() => {
-  authStore.initializeAuth();
-  fetchUserSuccessStories();
-});
+//이 부분이 mypage/success-case api 에는 안담겨 있는 것 같음.
+//그래서 id 값으로 글 매핑하는게 안되는듯.
+
+onMounted(getSuccessCases);
 </script>
 
 <style scoped>
-.mypage-card {
-  width: 100%;
-  max-width: 800px;
-  margin: auto;
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.no-stories {
+.page-card {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
   padding: 20px;
-  text-align: center;
-  color: #888;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 </style>
