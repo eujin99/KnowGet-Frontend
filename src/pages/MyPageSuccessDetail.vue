@@ -1,82 +1,105 @@
 <template>
   <q-page class="page-wrapper">
-    <q-card class="mypage-detail-card">
+    <q-card class="page-card">
       <q-card-section>
-        <div class="text-h5">{{ successStory.title }}</div>
-        <div class="q-mt-md">
-          <p><strong>작성자:</strong> {{ successStory.username }}</p>
-          <p><strong>내용:</strong> {{ successStory.content }}</p>
-          <p>
-            <strong>작성 날짜:</strong>
-            {{ formatDate(successStory.createdDate) }}
-          </p>
-          <p>
-            <strong>상태:</strong>
-            {{ getStatusText(successStory.isApproved) }}
-          </p>
-        </div>
+        <div class="text-h5">성공사례 상세</div>
+        <q-input v-model="successCase.title" label="제목" outlined readonly />
+        <q-input
+          v-model="successCase.content"
+          label="내용"
+          type="textarea"
+          readonly
+          filled
+          class="content-input"
+          rows="6"
+        />
+        <q-btn
+          label="삭제"
+          color="negative"
+          @click="openDeleteDialog"
+          class="delete-button"
+        />
       </q-card-section>
     </q-card>
+
+    <q-dialog v-model="isDeleteDialogOpen">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">삭제 확인</div>
+          <p>정말로 이 글을 삭제하시겠습니까?</p>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="예" color="primary" @click="confirmDelete" />
+          <q-btn
+            flat
+            label="아니요"
+            color="primary"
+            @click="closeDeleteDialog"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
-import { useAuthStore } from 'stores/authStore';
-import { format, parseISO } from 'date-fns';
+import { customApi } from 'src/boot/axios';
+import { useRouter, useRoute } from 'vue-router';
+import { Notify } from 'quasar';
 
-const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
-const successStory = ref({});
+const route = useRoute();
+const successCase = ref({});
+const isDeleteDialogOpen = ref(false);
 
-const fetchSuccessDetail = async () => {
-  const caseId = route.params.caseId;
-  if (!caseId) {
-    console.error('Case ID is undefined');
-    router.push({ name: 'MyPageSuccessStories' });
-    return;
-  }
-
+const getSuccessCaseDetail = async () => {
   try {
-    const response = await customApi.get(
-      `/api/v1/mypage/success-case/${caseId}`,
-    );
-    if (response.data.username === authStore.username) {
-      successStory.value = response.data;
-    } else {
-      router.push({ name: 'MyPageSuccessStories' });
-    }
+    const response = await customApi.get(`/success-case/${route.params.id}`);
+    successCase.value = response.data;
   } catch (error) {
-    console.error('Failed to fetch success story detail:', error);
-    router.push({ name: 'MyPageSuccessStories' });
+    console.error('Error fetching success case detail:', error);
+    Notify.create({
+      type: 'negative',
+      message: '성공사례를 불러오는 데 실패했습니다.',
+      position: 'top',
+    });
   }
 };
 
-const formatDate = date => {
-  if (!date) return 'N/A';
+const deleteSuccessCase = async () => {
   try {
-    return format(parseISO(date), 'yyyy-MM-dd');
+    await customApi.delete(`/success-case/${route.params.id}`);
+    Notify.create({
+      type: 'positive',
+      message: '성공사례가 삭제되었습니다.',
+      position: 'top',
+    });
+    router.push({ name: 'MyPageSuccess' });
   } catch (error) {
-    console.error('Invalid date format:', date);
-    return 'Invalid date';
+    console.error('Error deleting success case:', error);
+    Notify.create({
+      type: 'negative',
+      message: '성공사례 삭제에 실패했습니다.',
+      position: 'top',
+    });
   }
 };
 
-const getStatusText = status => {
-  switch (status) {
-    case 1:
-      return '승인됨';
-    case 2:
-      return '거절됨';
-    default:
-      return '대기 중';
-  }
+const openDeleteDialog = () => {
+  isDeleteDialogOpen.value = true;
 };
 
-onMounted(fetchSuccessDetail);
+const closeDeleteDialog = () => {
+  isDeleteDialogOpen.value = false;
+};
+
+const confirmDelete = () => {
+  isDeleteDialogOpen.value = false;
+  deleteSuccessCase();
+};
+
+onMounted(getSuccessCaseDetail);
 </script>
 
 <style scoped>
@@ -84,35 +107,25 @@ onMounted(fetchSuccessDetail);
   display: flex;
   justify-content: center;
   padding: 20px;
-  background-color: #f9f9f9;
+  box-sizing: border-box;
 }
 
-.mypage-detail-card {
+.page-card {
   width: 100%;
-  max-width: 800px;
-  margin: auto;
+  max-width: 1200px;
+  margin: 20px auto;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
-.q-mt-md {
-  margin-top: 16px;
+.content-input {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 20px;
 }
 
-.text-h5 {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
-p {
-  margin: 0 0 10px;
-}
-
-p strong {
-  display: inline-block;
-  width: 100px;
-  color: #333;
+.delete-button {
+  margin-top: 20px;
 }
 </style>

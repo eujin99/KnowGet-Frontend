@@ -12,12 +12,12 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!authStore.isLoggedIn) {
-      next('/login');
+      next('/otherpage');
     } else if (
       to.matched.some(record => record.meta.role) &&
       authStore.role !== to.meta.role
     ) {
-      next('/OtherPage'); // 권한이 없는 경우
+      next('/otherpage'); // 권한이 없는 경우
     } else {
       next();
     }
