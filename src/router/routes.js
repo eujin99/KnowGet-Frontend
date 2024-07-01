@@ -65,6 +65,36 @@ const routes = [
         path: 'mypage',
         component: () => import('pages/MyPage.vue'),
         meta: { title: '너겟, 마이페이지' },
+        children: [
+          {
+            path: '',
+            redirect: { name: 'MyPage.info' },
+          },
+          {
+            path: 'info',
+            component: () => import('components/MyPageInfo.vue'),
+            meta: { title: '내 정보' },
+            name: 'MyPage.info',
+          },
+          {
+            path: 'counseling',
+            component: () => import('components/MyPageCounseling.vue'),
+            meta: { title: '상담 내역' },
+            name: 'MyPage.counseling',
+          },
+          {
+            path: 'success',
+            component: () => import('components/MyPageSuccess.vue'),
+            meta: { title: '취업 성공사례 내역' },
+            name: 'MyPage.success',
+          },
+          {
+            path: 'bookmarks',
+            component: () => import('components/MyPageBookmarks.vue'),
+            meta: { title: '북마크' },
+            name: 'MyPage.bookmarks',
+          },
+        ],
       },
       {
         path: '/guide/:id',
