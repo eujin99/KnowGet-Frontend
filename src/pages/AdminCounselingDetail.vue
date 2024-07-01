@@ -3,27 +3,37 @@
     <q-card class="page-card">
       <q-card-section>
         <div class="text-h5">상담 내용</div>
-        <div class="consultation-details">
-          <div class="consultation-item">
-            <strong>상담 ID:</strong> {{ counseling.counselingId }}
-          </div>
-          <div class="consultation-item">
-            <strong>사용자:</strong> {{ counseling.user }}
-          </div>
-          <div class="consultation-item">
-            <strong>카테고리:</strong> {{ counseling.category }}
-          </div>
-          <div class="consultation-item">
-            <strong>내용:</strong>
-            <p>{{ counseling.content }}</p>
-          </div>
-          <div class="consultation-item">
-            <strong>날짜:</strong> {{ counseling.sentDate }}
-          </div>
-          <div class="consultation-item">
-            <strong>상태:</strong>
-            {{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}
-          </div>
+        <div class="table-container">
+          <table class="consultation-table">
+            <tbody>
+              <tr>
+                <th>상담 ID</th>
+                <td>{{ counseling.counselingId }}</td>
+              </tr>
+              <tr>
+                <th>사용자</th>
+                <td>{{ counseling.user }}</td>
+              </tr>
+              <tr>
+                <th>카테고리</th>
+                <td>{{ counseling.category }}</td>
+              </tr>
+              <tr>
+                <th>날짜</th>
+                <td>{{ formatDate(counseling.sentDate) }}</td>
+              </tr>
+              <tr>
+                <th>상태</th>
+                <td>
+                  {{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="content-box">
+          <strong>내용:</strong>
+          <p>{{ counseling.content }}</p>
         </div>
       </q-card-section>
       <q-card-section v-if="!counseling.isAnswered">
@@ -37,23 +47,25 @@
           rows="6"
         />
         <div class="submit-button">
-          <q-btn label="답변 등록" color="primary" @click="submitAnswer"/>
+          <q-btn label="답변 등록" color="primary" @click="submitAnswer" />
         </div>
       </q-card-section>
       <q-card-section v-else>
         <div class="text-h5">등록된 답변</div>
-        <p v-if="answerContent">{{ answerContent }}</p>
-        <p v-else>답변이 없습니다.</p>
+        <div class="answer-box">
+          <p v-if="answerContent">{{ answerContent }}</p>
+          <p v-else>답변이 없습니다.</p>
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-import {customApi} from 'boot/axios';
-import {Notify} from "quasar";
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { customApi } from 'boot/axios';
+import { Notify, date } from 'quasar';
 
 const route = useRoute();
 const router = useRouter();
@@ -64,7 +76,6 @@ const counselingId = ref(route.params.id);
 const fetchCounselingDetail = async () => {
   try {
     const response = await customApi.post(`/counseling/${counselingId.value}`);
-    // console.log('Counseling details:', response.data);
     counseling.value = response.data;
 
     if (counseling.value.isAnswered) {
@@ -75,10 +86,9 @@ const fetchCounselingDetail = async () => {
   }
 };
 
-const fetchAnswerContent = async (counselingId) => {
+const fetchAnswerContent = async counselingId => {
   try {
     const answerResponse = await customApi.get(`/answer/${counselingId}`);
-    // console.log('답변:', answerResponse.data);
     answerContent.value = answerResponse.data.content;
   } catch (error) {
     console.error('Failed to fetch answer content:', error);
@@ -95,7 +105,6 @@ const submitAnswer = async () => {
     });
     return;
   }
-  console.log('Submitting answer:', answerContent.value)
   try {
     const response = await customApi.post('/answer', {
       counselingId: counseling.value.counselingId,
@@ -111,7 +120,10 @@ const submitAnswer = async () => {
       timeout: 2000,
       position: 'top',
     });
-    await router.push({name: 'AdminCounselingDetail', params: {id: counseling.value.counselingId}});
+    await router.push({
+      name: 'AdminCounselingDetail',
+      params: { id: counseling.value.counselingId },
+    });
   } catch (error) {
     console.error('Failed to submit answer:', error);
     Notify.create({
@@ -121,6 +133,11 @@ const submitAnswer = async () => {
       position: 'top',
     });
   }
+};
+
+const formatDate = dateString => {
+  const dateObj = new Date(dateString);
+  return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
 };
 
 onMounted(fetchCounselingDetail);
@@ -143,13 +160,35 @@ onMounted(fetchCounselingDetail);
   box-sizing: border-box;
 }
 
-.consultation-details {
-  display: flex;
-  flex-direction: column;
+.table-container {
+  overflow-x: auto;
 }
 
-.consultation-item {
-  margin-bottom: 15px;
+.consultation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+  font-family: sans-serif;
+}
+
+.consultation-table th,
+.consultation-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.consultation-table th {
+  background-color: #f5f5f5;
+}
+
+.content-box,
+.answer-box {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
 }
 
 .content-input {

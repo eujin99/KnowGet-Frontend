@@ -1,24 +1,41 @@
 <template>
   <q-page class="page-wrapper">
-    <q-card class="page-card">
+    <q-card class="mypage-card">
       <q-card-section>
         <div class="text-h5">내 성공사례 목록</div>
-        <q-list>
-          <q-item
-            v-for="success in successCases"
-            :key="success.successCaseId"
-            clickable
-            @click="openSuccessDetail(success.successCaseId)"
+        <div v-if="successCases.length === 0" class="empty-state">
+          <p>아직 작성하신 성공사례가 없네요! 성공사례를 작성해보세요!</p>
+          <q-btn color="primary" @click="goToSuccessWritePage"
+            >성공사례 작성하기</q-btn
           >
-            <q-item-section>
-              <q-item-label>{{ success.title }}</q-item-label>
-              <q-item-label caption>{{ success.createdDate }}</q-item-label>
-              <q-item-label caption>{{
-                getApprovalStatus(success.isApproved)
-              }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
+        </div>
+        <div v-else class="table-wrapper">
+          <table class="success-case-table">
+            <thead>
+              <tr>
+                <th>제목</th>
+                <th class="wide-column">등록일</th>
+                <th>승인 상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="success in successCases"
+                :key="success.successCaseId"
+                @click="openSuccessDetail(success.successCaseId)"
+                class="clickable-row"
+              >
+                <td>{{ success.title }}</td>
+                <td>{{ formatDate(success.createdDate) }}</td>
+                <td>
+                  <span :class="getApprovalClass(success.isApproved)">
+                    {{ getApprovalStatus(success.isApproved) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -29,7 +46,7 @@ import { ref, onMounted } from 'vue';
 import { customApi } from 'src/boot/axios';
 import { useAuthStore } from 'stores/authStore';
 import { useRouter } from 'vue-router';
-import { Notify } from 'quasar';
+import { Notify, date } from 'quasar';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -62,8 +79,30 @@ const getApprovalStatus = status => {
   }
 };
 
+const getApprovalClass = status => {
+  switch (status) {
+    case 0:
+      return 'status-pending';
+    case 1:
+      return 'status-approved';
+    case 2:
+      return 'status-rejected';
+    default:
+      return '';
+  }
+};
+
+const formatDate = dateString => {
+  const dateObj = new Date(dateString);
+  return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
+};
+
 const openSuccessDetail = successCaseId => {
   router.push({ name: 'MyPageSuccessDetail', params: { id: successCaseId } });
+};
+
+const goToSuccessWritePage = () => {
+  router.push({ path: '/success-write' });
 };
 
 onMounted(getSuccessCases);
@@ -74,15 +113,87 @@ onMounted(getSuccessCases);
   display: flex;
   justify-content: center;
   padding: 20px;
-  box-sizing: border-box;
 }
 
-.page-card {
+.mypage-card {
   width: 1000px;
-  max-width: 1200px;
-  margin: 20px auto;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.success-case-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+  font-family: sans-serif;
+  table-layout: fixed;
+}
+
+.success-case-table th,
+.success-case-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.success-case-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+}
+
+.success-case-table tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+.success-case-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wide-column {
+  width: 50%;
+}
+
+.status-approved {
+  color: #4caf50;
+}
+
+.status-pending {
+  color: #000000;
+}
+
+.status-rejected {
+  color: #ff5252;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
+}
+
+.empty-state p {
+  margin-bottom: 20px;
+  font-size: 1.2em;
+}
+
+.empty-state q-btn {
+  font-size: 1em;
 }
 </style>
