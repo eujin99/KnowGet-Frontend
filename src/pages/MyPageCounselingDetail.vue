@@ -66,7 +66,7 @@ const fetchCounselingDetail = async () => {
 
 const fetchAnswerContent = async counselingId => {
   try {
-    const answerResponse = await customApi.post(`/answer/${counselingId}`);
+    const answerResponse = await customApi.get(`/answer/${counselingId}`);
     console.log('Answer content:', answerResponse.content);
     answerContent.value = answerResponse.data.content;
   } catch (error) {
