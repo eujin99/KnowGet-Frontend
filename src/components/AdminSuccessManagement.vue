@@ -2,37 +2,40 @@
   <div class="success-management">
     <table class="success-table">
       <thead>
-        <tr>
-          <th>글 ID</th>
-          <th>작성자</th>
-          <th>제목</th>
-          <th>내용</th>
-          <th>날짜</th>
-          <th>상태</th>
-        </tr>
+      <tr>
+        <th>글 ID</th>
+        <th>작성자</th>
+        <th>제목</th>
+        <th>내용</th>
+        <th>날짜</th>
+        <th>상태</th>
+      </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="success in successList"
-          :key="success.caseId"
-          @click="goToSuccessDetail(success.caseId)"
-        >
-          <td>{{ success.caseId }}</td>
-          <td>{{ success.username }}</td>
-          <td>{{ success.title }}</td>
-          <td>{{ success.content }}</td>
-          <td>{{ success.createdDate }}</td>
-          <td>{{ success.isApproved === 1 ? '승인' : '대기' }}</td>
-        </tr>
+      <tr
+        v-for="success in successList"
+        :key="success.caseId"
+        @click="goToSuccessDetail(success.caseId)"
+      >
+        <td>{{ success.caseId }}</td>
+        <td>{{ success.username }}</td>
+        <td>{{ success.title }}</td>
+        <td v-html="success.content"></td>
+        <td>{{ formatDate(success.createdDate) }}</td>
+        <td :class="getStatusClass(success.isApproved)">{{ getStatusText(success.isApproved) }}</td>
+      </tr>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
+import {format} from 'date-fns';
+import {ko} from 'date-fns/locale';
+
 
 const successList = ref([]);
 const router = useRouter();
@@ -47,7 +50,23 @@ const fetchSuccessList = async () => {
 };
 
 const goToSuccessDetail = caseId => {
-  router.push({ name: 'AdminSuccessDetail', params: { id: caseId } });
+  router.push({name: 'AdminSuccessDetail', params: {id: caseId}});
+};
+
+const getStatusText = (isApproved) => {
+  if (isApproved === 1) return '승인';
+  if (isApproved === 2) return '거절';
+  return '대기';
+};
+
+const getStatusClass = (isApproved) => {
+  if (isApproved === 1) return 'status-approved';
+  if (isApproved === 2) return 'status-rejected';
+  return 'status-pending';
+};
+
+const formatDate = (dateString) => {
+  return format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss', {locale: ko});
 };
 
 onMounted(fetchSuccessList);
@@ -92,5 +111,20 @@ onMounted(fetchSuccessList);
 .success-table tbody tr:hover {
   background-color: #f1f1f1;
   cursor: pointer;
+}
+
+.status-approved {
+  color: green;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: red;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: orange;
+  font-weight: bold;
 }
 </style>
