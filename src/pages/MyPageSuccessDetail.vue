@@ -2,6 +2,14 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
+        <q-btn
+          flat
+          round
+          dense
+          icon="arrow_back"
+          @click="goBack"
+          class="back-btn"
+        />
         <div class="text-h5">성공사례 상세</div>
         <q-input v-model="successCase.title" label="제목" outlined readonly />
         <q-input
@@ -99,6 +107,10 @@ const confirmDelete = () => {
   deleteSuccessCase();
 };
 
+const goBack = () => {
+  router.go(-1);
+};
+
 onMounted(getSuccessCaseDetail);
 </script>
 
@@ -127,5 +139,9 @@ onMounted(getSuccessCaseDetail);
 
 .delete-button {
   margin-top: 20px;
+}
+
+.back-btn {
+  margin-bottom: 20px;
 }
 </style>

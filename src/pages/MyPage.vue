@@ -21,33 +21,21 @@
           >북마크</q-btn
         >
       </div>
-
-      <component :is="currentComponent" />
+      <router-view />
     </div>
   </q-page>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { defineAsyncComponent } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-const tabComponents = {
-  info: defineAsyncComponent(() => import('components/MyPageInfo.vue')),
-  counseling: defineAsyncComponent(() =>
-    import('components/MyPageCounseling.vue'),
-  ),
-  success: defineAsyncComponent(() => import('components/MyPageSuccess.vue')),
-  bookmarks: defineAsyncComponent(() =>
-    import('components/MyPageBookmarks.vue'),
-  ),
-};
-
-const selectedTab = ref('info');
-
-const currentComponent = computed(() => tabComponents[selectedTab.value]);
+const route = useRoute();
+const router = useRouter();
+const selectedTab = ref(route.name.split('.')[1]);
 
 function selectTab(tab) {
-  selectedTab.value = tab;
+  router.push({ name: `MyPage.${tab}` });
 }
 </script>
 

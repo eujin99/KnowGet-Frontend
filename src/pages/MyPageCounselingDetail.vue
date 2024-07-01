@@ -2,6 +2,14 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
+        <q-btn
+          flat
+          round
+          dense
+          icon="arrow_back"
+          @click="goBack"
+          class="back-btn"
+        />
         <div class="text-h5">상담 내용</div>
         <table class="consultation-table">
           <tr>
@@ -43,17 +51,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
 
 const route = useRoute();
+const router = useRouter();
 const counseling = ref({});
 const answerContent = ref('');
 
 const fetchCounselingDetail = async () => {
   try {
     const response = await customApi.post(`/counseling/${route.params.id}`);
-    console.log('Counseling details:', response.data);
     counseling.value = response.data;
 
     if (counseling.value.isAnswered) {
@@ -67,11 +75,14 @@ const fetchCounselingDetail = async () => {
 const fetchAnswerContent = async counselingId => {
   try {
     const answerResponse = await customApi.get(`/answer/${counselingId}`);
-    console.log('Answer content:', answerResponse.content);
     answerContent.value = answerResponse.data.content;
   } catch (error) {
     console.error('Failed to fetch answer content:', error);
   }
+};
+
+const goBack = () => {
+  router.go(-1);
 };
 
 onMounted(fetchCounselingDetail);
@@ -129,5 +140,9 @@ onMounted(fetchCounselingDetail);
   background-color: #f9f9f9;
   border-radius: 4px;
   margin-top: 10px;
+}
+
+.back-btn {
+  margin-bottom: 20px;
 }
 </style>
