@@ -20,7 +20,7 @@
               @keyup.enter="validateSearch"
             >
               <template v-slot:append>
-                <q-icon name="search" />
+                <q-icon name="search"/>
               </template>
             </q-input>
             <transition name="shake">
@@ -97,9 +97,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { api } from 'boot/axios';
-import { date } from 'quasar';
+import {computed, onMounted, ref, watch} from 'vue';
+import {api} from 'boot/axios';
+import {date} from 'quasar';
 import PaginationControl from 'components/PaginationControl.vue';
 
 const courses = ref([]);
@@ -110,14 +110,14 @@ const itemsPerPage = 10;
 const searchWarning = ref(false);
 
 const filterOptions = [
-  { label: '모집 중', value: '모집 중' },
-  { label: '모집 마감', value: '모집 마감' },
-  { label: '모집 마감 임박 순', value: '모집 마감 임박 순' },
+  {label: '모집 중', value: '모집 중'},
+  {label: '모집 마감', value: '모집 마감'},
+  {label: '모집 마감 임박 순', value: '모집 마감 임박 순'},
 ];
 
 const fetchCourses = async () => {
   try {
-    const response = await api.get('/education');
+    const response = await api.get('/education/2');
     courses.value = response.data;
   } catch (error) {
     console.error('Failed to fetch education data:', error);
