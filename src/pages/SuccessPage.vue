@@ -35,7 +35,6 @@
       </q-card-section>
 
       <q-card-section>
-
         <div class="table-container">
           <table class="sc-table">
             <thead>
@@ -60,6 +59,7 @@
               </tr>
             </tbody>
           </table>
+        </div>
         <div class="pagination-container">
           <PaginationControl
             :totalPages="totalPages"
