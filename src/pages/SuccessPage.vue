@@ -4,7 +4,7 @@
       <q-card-section>
         <div class="header">
           <div>
-            <div class="text-h5">취업 성공 사례</div>
+            <div class="text-h5">취업 성공사례</div>
             <p>
               너겟의 도움으로 새로운 길을 찾아낸 분들의 이야기를 들어보세요.
             </p>
@@ -35,7 +35,10 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="sc-container">
+        <div v-if="paginatedSuccessCases.length === 0" class="no-data">
+          “아직 등록된 취업 성공사례 글이 없어요. 혹시 취업에 성공하셨다면, 다른 분들을 위해 취업 성공 사례를 남겨주세요!”
+        </div>
+        <div v-else class="sc-container">
           <q-card
             v-for="sc in paginatedSuccessCases"
             :key="sc.caseId"
@@ -56,8 +59,7 @@
                   <div class="sc-author">작성자: {{ sc.username }}</div>
                 </div>
               </div>
-              <div class="sc-content">
-                {{ truncatedContent(sc.content) }}
+              <div class="sc-content" v-html="truncatedContent(sc.content)">
               </div>
             </q-card-section>
           </q-card>
