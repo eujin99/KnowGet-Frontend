@@ -4,7 +4,7 @@
       <q-card-section>
         <div class="header">
           <div>
-            <div class="text-h5">취업 성공 사례</div>
+            <div class="text-h5">취업 성공사례</div>
             <p>
               너겟의 도움으로 새로운 길을 찾아낸 분들의 이야기를 들어보세요.
             </p>
@@ -35,6 +35,7 @@
       </q-card-section>
 
       <q-card-section>
+
         <div class="table-container">
           <table class="sc-table">
             <thead>
@@ -59,7 +60,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
         <div class="pagination-container">
           <PaginationControl
             :totalPages="totalPages"

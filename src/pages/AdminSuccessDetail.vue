@@ -6,6 +6,7 @@
       </q-card-section>
 
       <q-card-section>
+
         <div class="table-container">
           <table class="success-detail-table">
             <tbody>
@@ -39,17 +40,20 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn color="primary" @click="updateApprovalStatus(1)" label="승인" />
-        <q-btn color="negative" @click="updateApprovalStatus(2)" label="거절" />
+        <q-btn color="primary" @click="updateApprovalStatus(1)" label="승인"/>
+        <q-btn color="negative" @click="updateApprovalStatus(2)" label="거절"/>
       </q-card-actions>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+
+import {computed, onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
+import {format} from 'date-fns';
+import {ko} from 'date-fns/locale';
 import { date } from 'quasar';
 
 const route = useRoute();
@@ -76,20 +80,17 @@ const updateApprovalStatus = async status => {
   }
 };
 
-const formatDate = dateString => {
-  const dateObj = new Date(dateString);
-  return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
-};
 
-const getApprovalClass = status => {
-  switch (status) {
-    case 1:
-      return 'status-approved';
-    case 2:
-      return 'status-rejected';
-    default:
-      return 'status-pending';
-  }
+const formattedDate = computed(() => {
+  return success.value.createdDate
+    ? format(new Date(success.value.createdDate), 'yyyy-MM-dd HH:mm:ss', {locale: ko})
+    : '유효하지 않은 날짜';
+});
+
+const getStatusClass = (isApproved) => {
+  if (isApproved === 1) return 'status-approved';
+  if (isApproved === 2) return 'status-rejected';
+  return 'status-pending';
 };
 
 onMounted(fetchSuccessDetail);
@@ -148,5 +149,20 @@ onMounted(fetchSuccessDetail);
 .q-card-section strong {
   display: block;
   margin-bottom: 5px;
+}
+
+.status-approved {
+  color: green;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: red;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: orange;
+  font-weight: bold;
 }
 </style>
