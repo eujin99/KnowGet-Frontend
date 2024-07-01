@@ -6,20 +6,35 @@
       </q-card-section>
 
       <q-card-section>
-        <div>
-          <p><strong>작성자:</strong> {{ success.username }}</p>
-          <p><strong>내용:</strong> {{ success.content }}</p>
-          <p><strong>작성 날짜:</strong> {{ success.createdDate }}</p>
-          <p>
-            <strong>상태:</strong>
-            {{
-              success.isApproved === 1
-                ? '승인'
-                : success.isApproved === 2
-                ? '거절'
-                : '대기'
-            }}
-          </p>
+        <div class="table-container">
+          <table class="success-detail-table">
+            <tbody>
+              <tr>
+                <th>작성자</th>
+                <td>{{ success.username }}</td>
+              </tr>
+              <tr>
+                <th>내용</th>
+                <td>{{ success.content }}</td>
+              </tr>
+              <tr>
+                <th>작성 날짜</th>
+                <td>{{ formatDate(success.createdDate) }}</td>
+              </tr>
+              <tr>
+                <th>상태</th>
+                <td :class="getApprovalClass(success.isApproved)">
+                  {{
+                    success.isApproved === 1
+                      ? '승인'
+                      : success.isApproved === 2
+                      ? '거절'
+                      : '대기'
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </q-card-section>
 
@@ -35,6 +50,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
+import { date } from 'quasar';
 
 const route = useRoute();
 const router = useRouter();
@@ -60,6 +76,22 @@ const updateApprovalStatus = async status => {
   }
 };
 
+const formatDate = dateString => {
+  const dateObj = new Date(dateString);
+  return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
+};
+
+const getApprovalClass = status => {
+  switch (status) {
+    case 1:
+      return 'status-approved';
+    case 2:
+      return 'status-rejected';
+    default:
+      return 'status-pending';
+  }
+};
+
 onMounted(fetchSuccessDetail);
 </script>
 
@@ -73,6 +105,40 @@ onMounted(fetchSuccessDetail);
 .success-detail-card {
   max-width: 800px;
   width: 100%;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.success-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1em;
+  font-family: sans-serif;
+}
+
+.success-detail-table th,
+.success-detail-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.success-detail-table th {
+  background-color: #f5f5f5;
+}
+
+.status-approved {
+  color: #4caf50;
+}
+
+.status-pending {
+  color: #000000;
+}
+
+.status-rejected {
+  color: #ff5252;
 }
 
 .q-card-section p {

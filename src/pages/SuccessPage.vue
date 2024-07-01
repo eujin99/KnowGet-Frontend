@@ -22,7 +22,7 @@
               @keyup.enter="validateSearch"
             >
               <template v-slot:append>
-                <q-icon name="search"/>
+                <q-icon name="search" />
               </template>
             </q-input>
             <transition name="shake">
@@ -35,32 +35,30 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="sc-container">
-          <q-card
-            v-for="sc in paginatedSuccessCases"
-            :key="sc.caseId"
-            class="sc-card"
-            @click="navigateToDetails(sc.caseId)"
-            flat
-            bordered
-          >
-            <q-card-section>
-              <div class="sc-header">
-                <div class="sc-title" :title="sc.title">
-                  {{ sc.title }}
-                </div>
-                <div class="sc-meta">
-                  <div class="sc-date">
-                    {{ formatDate(sc.createdDate) }}
-                  </div>
-                  <div class="sc-author">작성자: {{ sc.username }}</div>
-                </div>
-              </div>
-              <div class="sc-content">
-                {{ truncatedContent(sc.content) }}
-              </div>
-            </q-card-section>
-          </q-card>
+        <div class="table-container">
+          <table class="sc-table">
+            <thead>
+              <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성일</th>
+                <th>작성자</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="sc in paginatedSuccessCases"
+                :key="sc.caseId"
+                @click="navigateToDetails(sc.caseId)"
+                class="table-row"
+              >
+                <td>{{ sc.index }}</td>
+                <td>{{ sc.title }}</td>
+                <td>{{ formatDate(sc.createdDate) }}</td>
+                <td>{{ sc.username }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div class="pagination-container">
           <PaginationControl
@@ -70,23 +68,31 @@
             @update:model-value="updatePagination"
           />
         </div>
-        <q-btn icon="edit" flat dense label="글쓰기" color="primary" @click="navigateToWritePage" class="write-button"/>
+        <q-btn
+          icon="edit"
+          flat
+          dense
+          label="글쓰기"
+          color="primary"
+          @click="navigateToWritePage"
+          class="write-button"
+        />
       </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script>
-import {computed, onMounted, ref, watch} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-import {date, Notify} from "quasar";
-import {api} from 'boot/axios';
-import {useAuthStore} from 'stores/authStore';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { date, Notify } from 'quasar';
+import { api } from 'boot/axios';
+import { useAuthStore } from 'stores/authStore';
 import PaginationControl from 'components/PaginationControl.vue';
 
 export default {
   components: {
-    PaginationControl
+    PaginationControl,
   },
   setup() {
     const authStore = useAuthStore();
@@ -104,9 +110,7 @@ export default {
     const fetchSuccessCases = async () => {
       try {
         const response = await api.get('/success-case');
-        successCases.value = response.data.filter(
-          sc => sc.isApproved === 1,
-        );
+        successCases.value = response.data.filter(sc => sc.isApproved === 1);
         successCases.value = successCases.value.sort(
           (a, b) => new Date(b.createdDate) - new Date(a.createdDate),
         );
@@ -125,10 +129,12 @@ export default {
     const paginatedSuccessCases = computed(() => {
       const start = (page.value - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      return filteredSuccessCases.value.slice(start, end).map((successCase, index) => ({
-        ...successCase,
-        index: start + index + 1,
-      }));
+      return filteredSuccessCases.value
+        .slice(start, end)
+        .map((successCase, index) => ({
+          ...successCase,
+          index: start + index + 1,
+        }));
     });
 
     const formatDate = dateString => {
@@ -165,14 +171,14 @@ export default {
         });
         return;
       }
-      router.push({name: 'SuccessPageWrite'});
+      router.push({ name: 'SuccessPageWrite' });
     };
 
     const navigateToDetails = caseId => {
       router.push({
         name: 'SuccessPageDetails',
-        params: {caseId: caseId},
-        query: {page: page.value},
+        params: { caseId: caseId },
+        query: { page: page.value },
       });
     };
 
@@ -181,9 +187,8 @@ export default {
       fetchSuccessCases();
     };
 
-    watch(page, (newPage) => {
-      router.push({query: {...route.query, page: newPage}}).catch(() => {
-      });
+    watch(page, newPage => {
+      router.push({ query: { ...route.query, page: newPage } }).catch(() => {});
     });
 
     onMounted(fetchSuccessCases);
@@ -202,9 +207,8 @@ export default {
       validateSearch,
       handleSearch,
       updatePagination: fetchSuccessCases,
-    }
+    };
   },
-  // 페이지가 로드되기 전과 업데이트 될 때 쿼리 파라미터를 이용해 상태를 복원
   beforeRouteEnter(to, from, next) {
     next(vm => {
       if (to.query.page) {
@@ -221,7 +225,6 @@ export default {
     next();
   },
 };
-
 </script>
 
 <style scoped>
@@ -264,71 +267,42 @@ export default {
   animation: shake 0.5s;
 }
 
-.sc-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 20px 0;
+.table-container {
+  overflow-x: auto;
 }
 
-.sc-card {
+.sc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 1em;
+  font-family: sans-serif;
+}
+
+.sc-table th,
+.sc-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.sc-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.sc-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.sc-table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.sc-table tbody tr:hover {
+  background-color: #f1f1f1;
   cursor: pointer;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  height: 200px;
-  padding: 15px;
-}
-
-.sc-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transform: translateY(-5px);
-  background-color: rgba(230, 230, 230, 0.685);
-}
-
-.sc-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.sc-title {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
-  max-width: 65%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sc-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.sc-date {
-  font-size: 0.85rem;
-  color: gray;
-}
-
-.sc-author {
-  margin-top: 5px;
-  font-size: 0.75rem;
-  color: gray;
-}
-
-.sc-content {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #555;
-  max-height: 4.2em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: pre-wrap;
 }
 
 .pagination-container {
