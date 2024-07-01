@@ -3,7 +3,8 @@
     <q-card>
       <q-card-section>
         <div class="text-h6">사용자 통계</div>
-        <canvas ref="chartCanvas" />
+        <canvas ref="dailyChartCanvas" />
+        <canvas ref="monthlyChartCanvas" />
       </q-card-section>
     </q-card>
   </q-page>
@@ -16,10 +17,12 @@ import { useAuthStore } from 'stores/authStore';
 import { Chart } from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 
-const chartCanvas = ref(null);
-const chartInstance = ref(null);
+const dailyChartCanvas = ref(null);
+const monthlyChartCanvas = ref(null);
+const dailyChartInstance = ref(null);
+const monthlyChartInstance = ref(null);
 
-const fetchAndDisplayChart = async () => {
+const fetchAndDisplayCharts = async () => {
   const authStore = useAuthStore();
 
   try {
@@ -28,40 +31,122 @@ const fetchAndDisplayChart = async () => {
       return;
     }
 
-    const response = await customApi.get('/admin/users');
-    const users = response.data;
+    // Fetch user data
+    const userResponse = await customApi.get('/admin/users');
+    const users = userResponse.data;
 
-    // 날짜별 회원 가입 수 집계
-    const signUpCounts = {};
+    // Fetch post data
+    const postResponse = await customApi.get('/success-case');
+    const posts = postResponse.data;
+
+    // 일일 회원 가입 수 집계
+    const dailySignUpCounts = {};
     users.forEach(user => {
-      if (!user.createdDate) return; // createdDate가 없으면 건너뛰기 !
-      const date = user.createdDate.split('T')[0]; // 날짜 부분만 추출
-      if (signUpCounts[date]) {
-        signUpCounts[date]++;
+      if (!user.createdDate) return;
+      const date = user.createdDate.split('T')[0];
+      if (dailySignUpCounts[date]) {
+        dailySignUpCounts[date]++;
       } else {
-        signUpCounts[date] = 1;
+        dailySignUpCounts[date] = 1;
       }
     });
 
-    const labels = Object.keys(signUpCounts).sort();
-    const data = labels.map(label => signUpCounts[label]);
+    // 월별 회원 가입 수 집계
+    const monthlySignUpCounts = {};
+    users.forEach(user => {
+      if (!user.createdDate) return;
+      const month = user.createdDate.split('T')[0].substring(0, 7); // 년도와 월 추출
+      if (monthlySignUpCounts[month]) {
+        monthlySignUpCounts[month]++;
+      } else {
+        monthlySignUpCounts[month] = 1;
+      }
+    });
 
-    if (chartInstance.value) {
-      chartInstance.value.destroy();
+    // 일일 게시글 수 집계
+    const dailyPostCounts = {};
+    posts.forEach(post => {
+      if (!post.createdDate) return;
+      const date = post.createdDate.split('T')[0];
+      if (dailyPostCounts[date]) {
+        dailyPostCounts[date]++;
+      } else {
+        dailyPostCounts[date] = 1;
+      }
+    });
+
+    // 월별 게시글 수 집계
+    const monthlyPostCounts = {};
+    posts.forEach(post => {
+      if (!post.createdDate) return;
+      const month = post.createdDate.split('T')[0].substring(0, 7); // 년도와 월 추출
+      if (monthlyPostCounts[month]) {
+        monthlyPostCounts[month]++;
+      } else {
+        monthlyPostCounts[month] = 1;
+      }
+    });
+
+    // 최근 한 달 데이터만 추출
+    const recentMonth = new Date();
+    recentMonth.setMonth(recentMonth.getMonth() - 1);
+    const recentMonthString = recentMonth.toISOString().substring(0, 7);
+
+    const dailyLabels = [
+      ...new Set([
+        ...Object.keys(dailySignUpCounts),
+        ...Object.keys(dailyPostCounts),
+      ]),
+    ]
+      .filter(date => date.startsWith(recentMonthString))
+      .sort();
+    const dailySignUpData = dailyLabels.map(
+      label => dailySignUpCounts[label] || 0,
+    );
+    const dailyPostData = dailyLabels.map(label => dailyPostCounts[label] || 0);
+
+    const monthlyLabels = [
+      ...new Set([
+        ...Object.keys(monthlySignUpCounts),
+        ...Object.keys(monthlyPostCounts),
+      ]),
+    ].sort();
+    const monthlySignUpData = monthlyLabels.map(
+      label => monthlySignUpCounts[label] || 0,
+    );
+    const monthlyPostData = monthlyLabels.map(
+      label => monthlyPostCounts[label] || 0,
+    );
+
+    if (dailyChartInstance.value) {
+      dailyChartInstance.value.destroy();
     }
 
-    //새로운 차트 생성
-    chartInstance.value = new Chart(chartCanvas.value, {
-      type: 'bar',
+    if (monthlyChartInstance.value) {
+      monthlyChartInstance.value.destroy();
+    }
+
+    // 일일 차트 생성 (최근 한 달 데이터)
+    dailyChartInstance.value = new Chart(dailyChartCanvas.value, {
       data: {
-        labels,
+        labels: dailyLabels,
         datasets: [
           {
+            type: 'bar',
             label: '일일 회원 가입 수',
             backgroundColor: 'rgba(66, 165, 245, 0.6)',
             borderColor: 'rgba(66, 165, 245, 1)',
             borderWidth: 1,
-            data,
+            data: dailySignUpData,
+          },
+          {
+            type: 'line',
+            label: '일일 게시글 수',
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 5,
+            fill: false,
+            data: dailyPostData,
           },
         ],
       },
@@ -74,7 +159,7 @@ const fetchAndDisplayChart = async () => {
           },
           title: {
             display: true,
-            text: '일일 회원 가입 수',
+            text: '최근 한 달 일일 회원 가입 수 및 게시글 수',
           },
         },
         scales: {
@@ -94,12 +179,66 @@ const fetchAndDisplayChart = async () => {
         },
       },
     });
+
+    // 월별 차트 생성
+    monthlyChartInstance.value = new Chart(monthlyChartCanvas.value, {
+      data: {
+        labels: monthlyLabels,
+        datasets: [
+          {
+            type: 'bar',
+            label: '월별 회원 가입 수',
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            data: monthlySignUpData,
+          },
+          {
+            type: 'line',
+            label: '월별 게시글 수',
+            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 5,
+            fill: false,
+            data: monthlyPostData,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: '월별 회원 가입 수 및 게시글 수',
+          },
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'month',
+              tooltipFormat: 'yyyy-MM',
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+            },
+          },
+        },
+      },
+    });
   } catch (error) {
-    console.error('Failed to fetch user statistics:', error);
+    console.error('Failed to fetch user statistics or posts:', error);
   }
 };
 
-onMounted(fetchAndDisplayChart);
+onMounted(fetchAndDisplayCharts);
 </script>
 
 <style scoped>
