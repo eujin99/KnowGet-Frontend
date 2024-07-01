@@ -9,6 +9,7 @@
           <th>가이드 ID</th>
           <th>제목</th>
           <th>작성일</th>
+          <th>삭제</th>
         </tr>
       </thead>
       <tbody>
@@ -22,11 +23,20 @@
           <td @click="goToDetailPage(jobGuide.guideId)">
             {{ jobGuide.createdDate }}
           </td>
+          <td>
+            <button
+              class="delete-button"
+              @click="deleteJobGuide(jobGuide.guideId)"
+            >
+              삭제
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -45,6 +55,25 @@ const fetchJobGuides = async () => {
   }
 };
 
+const deleteJobGuide = async id => {
+  try {
+    await customApi.delete(`/job-guide/${id}`);
+    jobGuides.value = jobGuides.value.filter(
+      jobGuide => jobGuide.guideId !== id,
+    );
+    Notify.create({
+      type: 'positive',
+      message: '가이드가 삭제되었습니다.',
+    });
+  } catch (error) {
+    console.error('Failed to delete job guide:', error);
+    Notify.create({
+      type: 'negative',
+      message: '가이드를 삭제하는데 실패했습니다.',
+    });
+  }
+};
+
 const goToCreatePage = () => {
   router.push({ name: 'AdminJobGuideCreate' });
 };
@@ -55,6 +84,7 @@ const goToDetailPage = id => {
 
 onMounted(fetchJobGuides);
 </script>
+
 <style scoped>
 .job-guide-management {
   padding: 20px;
