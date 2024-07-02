@@ -11,16 +11,9 @@
           class="back-btn"
         />
         <div class="text-h5">성공사례 상세</div>
-        <q-input v-model="successCase.title" label="제목" outlined readonly />
-        <q-input
-          v-model="successCase.content"
-          label="내용"
-          type="textarea"
-          readonly
-          filled
-          class="content-input"
-          rows="6"
-        />
+        <br/>
+        <q-input v-model="successCase.title" label="제목" outlined readonly/>
+        <div v-html="successCase.content" class="content-container"></div>
         <q-btn
           label="삭제"
           color="negative"
@@ -37,7 +30,7 @@
           <p>정말로 이 글을 삭제하시겠습니까?</p>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="예" color="primary" @click="confirmDelete" />
+          <q-btn flat label="예" color="primary" @click="confirmDelete"/>
           <q-btn
             flat
             label="아니요"
@@ -51,10 +44,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { customApi } from 'src/boot/axios';
-import { useRouter, useRoute } from 'vue-router';
-import { Notify } from 'quasar';
+import {onMounted, ref} from 'vue';
+import {customApi} from 'src/boot/axios';
+import {useRoute, useRouter} from 'vue-router';
+import {Notify} from 'quasar';
 
 const router = useRouter();
 const route = useRoute();
@@ -83,7 +76,7 @@ const deleteSuccessCase = async () => {
       message: '성공사례가 삭제되었습니다.',
       position: 'top',
     });
-    router.push({ path: '/mypage' });
+    router.push({path: '/mypage'});
   } catch (error) {
     console.error('Error deleting success case:', error);
     Notify.create({
@@ -135,6 +128,15 @@ onMounted(getSuccessCaseDetail);
   width: 100%;
   min-height: 150px;
   margin-top: 20px;
+}
+
+.content-container {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 20px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 5px;
 }
 
 .delete-button {

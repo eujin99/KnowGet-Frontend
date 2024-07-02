@@ -10,20 +10,21 @@
           @click="goBack"
           class="back-btn"
         />
+        <p/>
         <div class="text-h5">{{ successCase.title }}</div>
       </q-card-section>
 
       <q-card-section>
         <table class="success-case-table">
           <tbody>
-            <tr>
-              <th>작성자</th>
-              <td>{{ successCase.username }}</td>
-            </tr>
-            <tr>
-              <th>등록일</th>
-              <td>{{ formatDate(successCase.createdDate) }}</td>
-            </tr>
+          <tr>
+            <th>작성자</th>
+            <td>{{ successCase.username }}</td>
+          </tr>
+          <tr>
+            <th>등록일</th>
+            <td>{{ formatDate(successCase.createdDate) }}</td>
+          </tr>
           </tbody>
         </table>
         <div class="content-box">
@@ -225,11 +226,11 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from 'stores/authStore';
-import { api, customApi } from 'boot/axios';
-import { date, Notify } from 'quasar';
+import {onMounted, ref, watch} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {useAuthStore} from 'stores/authStore';
+import {api, customApi} from 'boot/axios';
+import {date, Notify} from 'quasar';
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -343,7 +344,7 @@ const deleteSuccessCase = async () => {
       position: 'top',
     });
     const previousPage = route.query.page || 1;
-    await router.push({ path: '/success', query: { page: previousPage } });
+    await router.push({path: '/success', query: {page: previousPage}});
   } catch (error) {
     console.error('취업 성공 사례 삭제 에러', error);
   }
@@ -439,7 +440,7 @@ watch(
 
 const goBack = () => {
   const previousPage = route.query.page || 1;
-  router.push({ name: 'SuccessPage', query: { page: previousPage } });
+  router.push({name: 'SuccessPage', query: {page: previousPage}});
 };
 
 onMounted(async () => {
