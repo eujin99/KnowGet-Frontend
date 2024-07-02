@@ -83,17 +83,19 @@
                 <q-img :src="post.imageUrl" class="job-image" />
                 <div class="job-info">
                   <q-item-label class="job-title">{{ post.joSj }}</q-item-label>
-                  <q-item-label caption>{{ post.cmpnyNm }}</q-item-label>
+                  <q-item-label class="job-company" caption>{{
+                    post.cmpnyNm
+                  }}</q-item-label>
                   <div class="job-details">
-                    <q-item-label caption>
+                    <q-item-label class="job-detail" caption>
                       <q-icon name="place" />
                       {{ post.gu }}
                     </q-item-label>
-                    <q-item-label caption>
+                    <q-item-label class="job-detail" caption>
                       <q-icon name="work" />
                       {{ post.careerCndNm }}
                     </q-item-label>
-                    <q-item-label caption>
+                    <q-item-label class="job-detail" caption>
                       <q-icon name="school" />
                       {{ post.acdmcrNm }}
                     </q-item-label>
@@ -602,7 +604,7 @@ export default {
 }
 
 .job-title {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 5px;
   white-space: nowrap;
@@ -613,10 +615,22 @@ export default {
   box-sizing: border-box;
 }
 
+.job-company {
+  font-size: 1.1rem;
+  color: #000;
+  margin-bottom: 10px;
+}
+
 .job-details {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  margin-top: 5px;
+}
+
+.job-detail {
+  font-size: 0.9rem;
+  color: #000;
 }
 
 .bookmark-icon {
@@ -665,7 +679,15 @@ export default {
   }
 
   .job-title {
-    font-size: 0.9rem;
+    font-size: 1rem;
+  }
+
+  .job-company {
+    font-size: 1rem;
+  }
+
+  .job-detail {
+    font-size: 0.8rem;
   }
 }
 </style>
