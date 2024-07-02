@@ -117,9 +117,19 @@ const routes = [
             meta: { title: '사용자 관리' },
           },
           {
+            path: 'black-list',
+            component: () => import('components/BlackList.vue'),
+            meta: { title: '블랙리스트' },
+          },
+          {
             path: 'user-statistics',
             component: () => import('components/AdminUserStatistics.vue'),
             meta: { title: '이용자 통계' },
+          },
+          {
+            path: 'promotion-history',
+            component: () => import('components/AdminEvent.vue'),
+            meta: { title: '홍보 내역' },
           },
           {
             path: 'counseling-management',
@@ -135,11 +145,6 @@ const routes = [
             path: 'success-management',
             component: () => import('components/AdminSuccessManagement.vue'),
             meta: { title: '성공사례 관리' },
-          },
-          {
-            path: 'black-list',
-            component: () => import('components/BlackList.vue'),
-            meta: { title: '블랙리스트' },
           },
         ],
       },
