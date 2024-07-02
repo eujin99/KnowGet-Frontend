@@ -2,11 +2,11 @@
   <q-page class="success-detail-page">
     <q-card class="success-detail-card">
       <q-card-section>
+        <q-btn flat icon="arrow_back" @click="goBack" />
         <div class="text-h5">{{ success.title }}</div>
       </q-card-section>
 
       <q-card-section>
-
         <div class="table-container">
           <table class="success-detail-table">
             <tbody>
@@ -24,7 +24,7 @@
               </tr>
               <tr>
                 <th>상태</th>
-                <td :class="getApprovalClass(success.isApproved)">
+                <td :class="getStatusClass(success.isApproved)">
                   {{
                     success.isApproved === 1
                       ? '승인'
@@ -40,21 +40,19 @@
       </q-card-section>
 
       <q-card-actions align="right">
-        <q-btn color="primary" @click="updateApprovalStatus(1)" label="승인"/>
-        <q-btn color="negative" @click="updateApprovalStatus(2)" label="거절"/>
+        <q-btn color="primary" @click="updateApprovalStatus(1)" label="승인" />
+        <q-btn color="negative" @click="updateApprovalStatus(2)" label="거절" />
       </q-card-actions>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-
-import {computed, onMounted, ref} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-import {customApi} from 'boot/axios';
-import {format} from 'date-fns';
-import {ko} from 'date-fns/locale';
-import { date } from 'quasar';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { customApi } from 'boot/axios';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 const route = useRoute();
 const router = useRouter();
@@ -80,17 +78,20 @@ const updateApprovalStatus = async status => {
   }
 };
 
-
-const formattedDate = computed(() => {
-  return success.value.createdDate
-    ? format(new Date(success.value.createdDate), 'yyyy-MM-dd HH:mm:ss', {locale: ko})
+const formatDate = dateString => {
+  return dateString
+    ? format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss', { locale: ko })
     : '유효하지 않은 날짜';
-});
+};
 
-const getStatusClass = (isApproved) => {
+const getStatusClass = isApproved => {
   if (isApproved === 1) return 'status-approved';
   if (isApproved === 2) return 'status-rejected';
   return 'status-pending';
+};
+
+const goBack = () => {
+  router.go(-1);
 };
 
 onMounted(fetchSuccessDetail);

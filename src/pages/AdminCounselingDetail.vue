@@ -2,6 +2,7 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
+        <q-btn flat icon="arrow_back" @click="goBack" />
         <div class="text-h5">상담 내용</div>
         <div class="table-container">
           <table class="consultation-table">
@@ -138,6 +139,10 @@ const submitAnswer = async () => {
 const formatDate = dateString => {
   const dateObj = new Date(dateString);
   return isNaN(dateObj) ? '' : date.formatDate(dateObj, 'YYYY-MM-DD');
+};
+
+const goBack = () => {
+  router.go(-1);
 };
 
 onMounted(fetchCounselingDetail);
