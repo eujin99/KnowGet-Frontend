@@ -2,7 +2,8 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
-        <q-btn flat icon="arrow_back" @click="goBack" />
+        <q-btn flat icon="arrow_back" @click="goBack"/>
+        <p/>
         <div class="text-h5">{{ jobGuide.title }}</div>
         <div v-html="jobGuide.content" class="job-guide-content"></div>
       </q-card-section>
@@ -34,9 +35,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
+import {onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
 
 const jobGuide = ref({
   title: '',

@@ -11,16 +11,9 @@
           class="back-btn"
         />
         <div class="text-h5">성공사례 상세</div>
-        <q-input v-model="successCase.title" label="제목" outlined readonly />
-        <q-input
-          v-model="successCase.content"
-          label="내용"
-          type="textarea"
-          readonly
-          filled
-          class="content-input"
-          rows="6"
-        />
+        <br/>
+        <q-input v-model="successCase.title" label="제목" outlined readonly/>
+        <div v-html="successCase.content" class="content-container"></div>
         <q-btn
           label="삭제"
           color="negative"
@@ -135,6 +128,15 @@ onMounted(getSuccessCaseDetail);
   width: 100%;
   min-height: 150px;
   margin-top: 20px;
+}
+
+.content-container {
+  width: 100%;
+  min-height: 150px;
+  margin-top: 20px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 5px;
 }
 
 .delete-button {

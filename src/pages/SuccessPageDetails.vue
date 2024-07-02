@@ -10,6 +10,7 @@
           @click="goBack"
           class="back-btn"
         />
+        <p/>
         <div class="text-h5">{{ successCase.title }}</div>
       </q-card-section>
 
