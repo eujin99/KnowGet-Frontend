@@ -65,7 +65,18 @@
                 접수 방법 : {{ post.rceptMthNm }}<br />
                 제출 서류 : {{ post.presentnPapersNm }}<br />
                 담당자 이름 : {{ post.mngrNm }}<br />
-                담당자 전화번호 : {{ post.mngrPhonNo }}<br />
+                담당자 전화번호 : {{ post.mngrPhonNo }}
+                <q-btn
+                  v-if="post.mngrPhonNo"
+                  flat
+                  dense
+                  icon="call"
+                  @click="callNumber(post.mngrPhonNo)"
+                  class="call-btn"
+                >
+                  바로 전화걸기
+                </q-btn>
+                <br />
                 담당자 소속 : {{ post.mngrInsttNm }}<br />
               </td>
             </tr>
@@ -144,6 +155,10 @@ const formatTextWithLineBreaks = text => {
   if (!text) return '';
   return text.replace(/\n/g, '<br>');
 };
+
+const callNumber = number => {
+  window.location.href = `tel:${number}`;
+};
 </script>
 
 <style scoped>
@@ -190,5 +205,17 @@ const formatTextWithLineBreaks = text => {
 
 .center-align {
   text-align: center;
+}
+
+.call-btn {
+  margin-left: 10px;
+  background-color: #42a5f5;
+  color: white;
+}
+
+@media (min-width: 600px) {
+  .call-btn {
+    display: none;
+  }
 }
 </style>
