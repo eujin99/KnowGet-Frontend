@@ -30,7 +30,7 @@
           <p>정말로 이 글을 삭제하시겠습니까?</p>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="예" color="primary" @click="confirmDelete" />
+          <q-btn flat label="예" color="primary" @click="confirmDelete"/>
           <q-btn
             flat
             label="아니요"
@@ -44,10 +44,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { customApi } from 'src/boot/axios';
-import { useRouter, useRoute } from 'vue-router';
-import { Notify } from 'quasar';
+import {onMounted, ref} from 'vue';
+import {customApi} from 'src/boot/axios';
+import {useRoute, useRouter} from 'vue-router';
+import {Notify} from 'quasar';
 
 const router = useRouter();
 const route = useRoute();
@@ -76,7 +76,7 @@ const deleteSuccessCase = async () => {
       message: '성공사례가 삭제되었습니다.',
       position: 'top',
     });
-    router.push({ path: '/mypage' });
+    router.push({path: '/mypage'});
   } catch (error) {
     console.error('Error deleting success case:', error);
     Notify.create({
