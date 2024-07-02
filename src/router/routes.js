@@ -6,7 +6,7 @@ const routes = [
       {
         path: '',
         component: () => import('pages/IndexPage.vue'),
-        meta: { title: '너겟, 노숙인 일자리 지식통합서비스' },
+        meta: { title: '너겟,' },
       },
       {
         path: 'jobpost',
