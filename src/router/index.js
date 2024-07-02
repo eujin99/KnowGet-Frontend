@@ -9,6 +9,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+  authStore.initializeAuth(); // 새로고침 시 인증 상태 복원
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!authStore.isLoggedIn) {

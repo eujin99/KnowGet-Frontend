@@ -1,46 +1,40 @@
 <template>
   <q-page class="admin-dashboard">
-    <q-tabs v-model="selectedTab" dense>
-      <q-tab name="userManagement" label="사용자 관리" />
-      <q-tab name="userStatistics" label="이용자 통계" />
-      <q-tab name="counselingManagement" label="상담 관리" />
-      <q-tab name="jobGuideManagement" label="취업 가이드 관리" />
-      <q-tab name="successManagement" label="성공사례 관리" />
-      <q-tab name="blackList" label="블랙리스트" />
-      <!-- 새로운 탭 추가 -->
+    <q-tabs v-model="selectedTab" @update:model-value="onTabChange" dense>
+      <q-tab name="user-management" label="사용자 관리" />
+      <q-tab name="user-statistics" label="이용자 통계" />
+      <q-tab name="counseling-management" label="상담 관리" />
+      <q-tab name="job-guide-management" label="취업 가이드 관리" />
+      <q-tab name="success-management" label="성공사례 관리" />
+      <q-tab name="black-list" label="블랙리스트" />
     </q-tabs>
 
-    <div v-if="selectedTab === 'userManagement'">
-      <AdminUserManagement />
-    </div>
-    <div v-if="selectedTab === 'userStatistics'">
-      <AdminUserStatistics />
-    </div>
-    <div v-if="selectedTab === 'counselingManagement'">
-      <AdminCounselingManagement />
-    </div>
-    <div v-if="selectedTab === 'jobGuideManagement'">
-      <AdminJobGuideManagement />
-    </div>
-    <div v-if="selectedTab === 'successManagement'">
-      <AdminSuccessManagement />
-    </div>
-    <div v-if="selectedTab === 'blackList'">
-      <BlackList />
-    </div>
+    <router-view />
   </q-page>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import AdminUserManagement from 'components/AdminUserManagement.vue';
-import AdminUserStatistics from 'components/AdminUserStatistics.vue';
-import AdminCounselingManagement from 'components/AdminCounselingManagement.vue';
-import AdminJobGuideManagement from 'components/AdminJobGuideManagement.vue';
-import AdminSuccessManagement from 'components/AdminSuccessManagement.vue';
-import BlackList from 'components/BlackList.vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from 'stores/authStore';
 
-const selectedTab = ref('userManagement');
+const selectedTab = ref('user-management');
+const authStore = useAuthStore();
+const route = useRoute();
+const router = useRouter();
+
+onMounted(() => {
+  authStore.initializeAuth();
+  selectedTab.value = route.path.split('/').pop() || 'user-management';
+});
+
+watch(route, newRoute => {
+  selectedTab.value = newRoute.path.split('/').pop() || 'user-management';
+});
+
+const onTabChange = newTab => {
+  router.push(`/dashboard/${newTab}`);
+};
 </script>
 
 <style scoped>
