@@ -2,11 +2,12 @@
   <q-page class="admin-dashboard">
     <q-tabs v-model="selectedTab" @update:model-value="onTabChange" dense>
       <q-tab name="user-management" label="사용자 관리" />
+      <q-tab name="black-list" label="블랙리스트" />
       <q-tab name="user-statistics" label="이용자 통계" />
+      <q-tab name="promotion-history" label="홍보 내역" />
       <q-tab name="counseling-management" label="상담 관리" />
       <q-tab name="job-guide-management" label="취업 가이드 관리" />
       <q-tab name="success-management" label="성공사례 관리" />
-      <q-tab name="black-list" label="블랙리스트" />
     </q-tabs>
 
     <router-view />

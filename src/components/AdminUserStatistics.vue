@@ -31,13 +31,14 @@ const fetchAndDisplayCharts = async () => {
       return;
     }
 
-    // Fetch user data
     const userResponse = await customApi.get('/admin/users');
     const users = userResponse.data;
 
-    // Fetch post data
     const postResponse = await customApi.get('/success-case');
     const posts = postResponse.data;
+
+    const promotionRecords =
+      JSON.parse(localStorage.getItem(`promotionRecords_user123`)) || [];
 
     // 일일 회원 가입 수 집계
     const dailySignUpCounts = {};
@@ -55,7 +56,7 @@ const fetchAndDisplayCharts = async () => {
     const monthlySignUpCounts = {};
     users.forEach(user => {
       if (!user.createdDate) return;
-      const month = user.createdDate.split('T')[0].substring(0, 7); // 년도와 월 추출
+      const month = user.createdDate.split('T')[0].substring(0, 7);
       if (monthlySignUpCounts[month]) {
         monthlySignUpCounts[month]++;
       } else {
@@ -63,7 +64,7 @@ const fetchAndDisplayCharts = async () => {
       }
     });
 
-    // 일일 게시글 수 집계
+    // 일일 성공사례 게시글 수 집계
     const dailyPostCounts = {};
     posts.forEach(post => {
       if (!post.createdDate) return;
@@ -75,7 +76,7 @@ const fetchAndDisplayCharts = async () => {
       }
     });
 
-    // 월별 게시글 수 집계
+    // 월별 성공사례 게시글 수 집계
     const monthlyPostCounts = {};
     posts.forEach(post => {
       if (!post.createdDate) return;
@@ -84,6 +85,30 @@ const fetchAndDisplayCharts = async () => {
         monthlyPostCounts[month]++;
       } else {
         monthlyPostCounts[month] = 1;
+      }
+    });
+
+    // 일일 홍보 기록 수 집계
+    const dailyPromotionCounts = {};
+    promotionRecords.forEach(record => {
+      if (!record.date) return;
+      const date = record.date;
+      if (dailyPromotionCounts[date]) {
+        dailyPromotionCounts[date]++;
+      } else {
+        dailyPromotionCounts[date] = 1;
+      }
+    });
+
+    // 월별 홍보 기록 수 집계
+    const monthlyPromotionCounts = {};
+    promotionRecords.forEach(record => {
+      if (!record.date) return;
+      const month = record.date.substring(0, 7); // 년도와 월 추출
+      if (monthlyPromotionCounts[month]) {
+        monthlyPromotionCounts[month]++;
+      } else {
+        monthlyPromotionCounts[month] = 1;
       }
     });
 
@@ -96,6 +121,7 @@ const fetchAndDisplayCharts = async () => {
       ...new Set([
         ...Object.keys(dailySignUpCounts),
         ...Object.keys(dailyPostCounts),
+        ...Object.keys(dailyPromotionCounts),
       ]),
     ]
       .filter(date => date.startsWith(recentMonthString))
@@ -104,11 +130,15 @@ const fetchAndDisplayCharts = async () => {
       label => dailySignUpCounts[label] || 0,
     );
     const dailyPostData = dailyLabels.map(label => dailyPostCounts[label] || 0);
+    const dailyPromotionData = dailyLabels.map(
+      label => dailyPromotionCounts[label] || 0,
+    );
 
     const monthlyLabels = [
       ...new Set([
         ...Object.keys(monthlySignUpCounts),
         ...Object.keys(monthlyPostCounts),
+        ...Object.keys(monthlyPromotionCounts),
       ]),
     ].sort();
     const monthlySignUpData = monthlyLabels.map(
@@ -116,6 +146,9 @@ const fetchAndDisplayCharts = async () => {
     );
     const monthlyPostData = monthlyLabels.map(
       label => monthlyPostCounts[label] || 0,
+    );
+    const monthlyPromotionData = monthlyLabels.map(
+      label => monthlyPromotionCounts[label] || 0,
     );
 
     if (dailyChartInstance.value) {
@@ -148,6 +181,17 @@ const fetchAndDisplayCharts = async () => {
             fill: false,
             data: dailyPostData,
           },
+          {
+            type: 'scatter',
+            label: '일일 홍보 수',
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 5,
+            data: dailyPromotionData.map((value, index) => ({
+              x: dailyLabels[index],
+              y: value,
+            })),
+          },
         ],
       },
       options: {
@@ -159,7 +203,7 @@ const fetchAndDisplayCharts = async () => {
           },
           title: {
             display: true,
-            text: '최근 한 달 일일 회원 가입 수 및 게시글 수',
+            text: '최근 한 달 일일 회원 가입 수, 게시글 수 및 홍보 수',
           },
         },
         scales: {
@@ -202,6 +246,17 @@ const fetchAndDisplayCharts = async () => {
             fill: false,
             data: monthlyPostData,
           },
+          {
+            type: 'scatter',
+            label: '월별 홍보 수',
+            backgroundColor: 'rgba(255, 206, 86, 0.6)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 5,
+            data: monthlyPromotionData.map((value, index) => ({
+              x: monthlyLabels[index],
+              y: value,
+            })),
+          },
         ],
       },
       options: {
@@ -213,7 +268,7 @@ const fetchAndDisplayCharts = async () => {
           },
           title: {
             display: true,
-            text: '월별 회원 가입 수 및 게시글 수',
+            text: '월별 회원 가입 수, 게시글 수 및 홍보 수',
           },
         },
         scales: {
