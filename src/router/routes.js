@@ -73,19 +73,19 @@ const routes = [
           {
             path: 'info',
             component: () => import('components/MyPageInfo.vue'),
-            meta: { title: '내 정보' },
+            meta: { title: '너겟, 내 정보 변경' },
             name: 'MyPage.info',
           },
           {
             path: 'counseling',
             component: () => import('components/MyPageCounseling.vue'),
-            meta: { title: '상담 내역' },
+            meta: { title: '너겟, 상담 내역' },
             name: 'MyPage.counseling',
           },
           {
             path: 'success',
             component: () => import('components/MyPageSuccess.vue'),
-            meta: { title: '취업 성공사례 내역' },
+            meta: { title: '너겟,취업 성공사례 내역' },
             name: 'MyPage.success',
           },
           {
@@ -109,6 +109,39 @@ const routes = [
           requiresAuth: true,
           role: 'ADMIN',
         },
+        redirect: '/dashboard/user-management',
+        children: [
+          {
+            path: 'user-management',
+            component: () => import('components/AdminUserManagement.vue'),
+            meta: { title: '사용자 관리' },
+          },
+          {
+            path: 'user-statistics',
+            component: () => import('components/AdminUserStatistics.vue'),
+            meta: { title: '이용자 통계' },
+          },
+          {
+            path: 'counseling-management',
+            component: () => import('components/AdminCounselingManagement.vue'),
+            meta: { title: '상담 관리' },
+          },
+          {
+            path: 'job-guide-management',
+            component: () => import('components/AdminJobGuideManagement.vue'),
+            meta: { title: '취업 가이드 관리' },
+          },
+          {
+            path: 'success-management',
+            component: () => import('components/AdminSuccessManagement.vue'),
+            meta: { title: '성공사례 관리' },
+          },
+          {
+            path: 'black-list',
+            component: () => import('components/BlackList.vue'),
+            meta: { title: '블랙리스트' },
+          },
+        ],
       },
       {
         path: '/otherpage',
