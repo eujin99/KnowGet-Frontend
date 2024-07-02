@@ -1,6 +1,6 @@
 <template>
   <q-page class="page-wrapper">
-    <q-card class="page-card">
+    <q-card class="mypage-card">
       <q-card-section>
         <div class="header">
           <div>
@@ -262,15 +262,13 @@ export default {
   display: flex;
   justify-content: center;
   padding: 20px;
-  box-sizing: border-box;
 }
 
-.page-card {
+.mypage-card {
   width: 1000px;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .header {
@@ -379,16 +377,17 @@ export default {
 }
 
 @media (max-width: 600px) {
-  .filters {
-    flex-direction: column;
+  .mypage-card {
+    width: 100%;
+    padding: 10px;
   }
 
-  .filter-btn {
-    width: 100%;
+  .job-listings {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
   }
 
-  .job-card {
-    width: 100%;
+  .job-info {
+    padding: 5px;
   }
 
   .job-title {

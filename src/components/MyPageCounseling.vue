@@ -96,7 +96,7 @@ onMounted(fetchConsultations);
 
 .mypage-card {
   width: 1000px;
-  max-width: 1400px; /* Increased max-width for a more spacious layout */
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0;
 }
@@ -110,17 +110,17 @@ onMounted(fetchConsultations);
   border-collapse: collapse;
   font-size: 1em;
   font-family: sans-serif;
-  table-layout: fixed; /* Fixed layout to handle ellipsis */
+  table-layout: fixed;
 }
 
 .counseling-table th,
 .counseling-table td {
   padding: 12px 15px;
   border: 1px solid #ddd;
-  text-align: center; /* Center-align all table fields */
-  white-space: nowrap; /* Prevents vertical overflow */
-  overflow: hidden; /* Ensures overflow is hidden */
-  text-overflow: ellipsis; /* Adds ellipsis for overflow */
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .counseling-table thead tr {
@@ -143,15 +143,15 @@ onMounted(fetchConsultations);
 }
 
 .wide-column {
-  width: 50%; /* Make the content column wider */
+  width: 50%;
 }
 
 .status-answered {
-  color: #4caf50; /* Green for answered */
+  color: #4caf50;
 }
 
 .status-pending {
-  color: #ff5252; /* Red for pending */
+  color: #ff5252;
 }
 
 .clickable-row {
@@ -170,5 +170,30 @@ onMounted(fetchConsultations);
 
 .empty-state q-btn {
   font-size: 1em;
+}
+
+@media (max-width: 600px) {
+  .mypage-card {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .counseling-table th,
+  .counseling-table td {
+    padding: 8px;
+    font-size: 0.8em;
+  }
+
+  .wide-column {
+    width: 40%;
+  }
+
+  .empty-state p {
+    font-size: 1em;
+  }
+
+  .empty-state q-btn {
+    font-size: 0.9em;
+  }
 }
 </style>

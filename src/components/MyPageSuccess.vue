@@ -196,4 +196,29 @@ onMounted(getSuccessCases);
 .empty-state q-btn {
   font-size: 1em;
 }
+
+@media (max-width: 600px) {
+  .mypage-card {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .success-case-table th,
+  .success-case-table td {
+    padding: 8px;
+    font-size: 0.8em;
+  }
+
+  .wide-column {
+    width: 40%;
+  }
+
+  .empty-state p {
+    font-size: 1em;
+  }
+
+  .empty-state q-btn {
+    font-size: 0.9em;
+  }
+}
 </style>
