@@ -4,7 +4,18 @@
       <q-card-section>
         <div class="text-h6">사용자 통계</div>
         <canvas ref="dailyChartCanvas" />
+        <div class="stat-message" v-if="weeklyPromotionSignUpCount !== null">
+          홍보일로부터 일주일 동안 평균 가입자수가
+          {{ weeklyPromotionSignUpCount }}명 증가했습니다.
+          <br />
+          <br />
+          <br />
+        </div>
         <canvas ref="monthlyChartCanvas" />
+        <div class="stat-message" v-if="averageDaysToPost !== null">
+          가입 후 평균 {{ averageDaysToPost }}일 이후 취업 성공사례 게시글이
+          게시되었습니다.
+        </div>
       </q-card-section>
     </q-card>
   </q-page>
@@ -14,13 +25,18 @@
 import { ref, onMounted } from 'vue';
 import { customApi } from 'boot/axios';
 import { useAuthStore } from 'stores/authStore';
-import { Chart } from 'chart.js/auto';
+import { Chart, registerables } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-date-fns';
+
+Chart.register(...registerables, zoomPlugin);
 
 const dailyChartCanvas = ref(null);
 const monthlyChartCanvas = ref(null);
 const dailyChartInstance = ref(null);
 const monthlyChartInstance = ref(null);
+const weeklyPromotionSignUpCount = ref(null);
+const averageDaysToPost = ref(null);
 
 const fetchAndDisplayCharts = async () => {
   const authStore = useAuthStore();
@@ -38,7 +54,9 @@ const fetchAndDisplayCharts = async () => {
     const posts = postResponse.data;
 
     const promotionRecords =
-      JSON.parse(localStorage.getItem(`promotionRecords_user123`)) || [];
+      JSON.parse(
+        localStorage.getItem(`promotionRecords_${authStore.username}`),
+      ) || [];
 
     // 일일 회원 가입 수 집계
     const dailySignUpCounts = {};
@@ -64,7 +82,7 @@ const fetchAndDisplayCharts = async () => {
       }
     });
 
-    // 일일 성공사례 게시글 수 집계
+    // 일일 게시글 수 집계
     const dailyPostCounts = {};
     posts.forEach(post => {
       if (!post.createdDate) return;
@@ -76,11 +94,11 @@ const fetchAndDisplayCharts = async () => {
       }
     });
 
-    // 월별 성공사례 게시글 수 집계
+    // 월별 게시글 수 집계
     const monthlyPostCounts = {};
     posts.forEach(post => {
       if (!post.createdDate) return;
-      const month = post.createdDate.split('T')[0].substring(0, 7); // 년도와 월 추출
+      const month = post.createdDate.split('T')[0].substring(0, 7);
       if (monthlyPostCounts[month]) {
         monthlyPostCounts[month]++;
       } else {
@@ -104,7 +122,7 @@ const fetchAndDisplayCharts = async () => {
     const monthlyPromotionCounts = {};
     promotionRecords.forEach(record => {
       if (!record.date) return;
-      const month = record.date.substring(0, 7); // 년도와 월 추출
+      const month = record.date.substring(0, 7);
       if (monthlyPromotionCounts[month]) {
         monthlyPromotionCounts[month]++;
       } else {
@@ -112,33 +130,62 @@ const fetchAndDisplayCharts = async () => {
       }
     });
 
-    // 최근 한 달 데이터만 추출
-    const recentMonth = new Date();
-    recentMonth.setMonth(recentMonth.getMonth() - 1);
-    const recentMonthString = recentMonth.toISOString().substring(0, 7);
+    // 홍보일로부터 일주일 동안 평균 가입자 수 계산
+    let totalSignUps = 0;
+    let count = 0;
+    Object.keys(dailyPromotionCounts).forEach(promoDate => {
+      const promoDateObj = new Date(promoDate);
+      for (let i = 0; i < 7; i++) {
+        const targetDate = new Date(promoDateObj);
+        targetDate.setDate(targetDate.getDate() + i);
+        const targetDateString = targetDate.toISOString().split('T')[0];
+        if (dailySignUpCounts[targetDateString]) {
+          totalSignUps += dailySignUpCounts[targetDateString];
+          count++;
+        }
+      }
+    });
+    weeklyPromotionSignUpCount.value =
+      count > 0 ? Math.round(totalSignUps / count) : 0;
+
+    // 회원 가입 후 평균 성공사례 게시일 계산
+    let totalDays = 0;
+    let totalCount = 0;
+    users.forEach(user => {
+      const userDate = new Date(user.createdDate);
+      posts.forEach(post => {
+        const postDate = new Date(post.createdDate);
+        if (postDate > userDate) {
+          const diffTime = Math.abs(postDate - userDate);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          totalDays += diffDays;
+          totalCount++;
+        }
+      });
+    });
+    averageDaysToPost.value =
+      totalCount > 0 ? Math.round(totalDays / totalCount) : 0;
 
     const dailyLabels = [
       ...new Set([
         ...Object.keys(dailySignUpCounts),
-        ...Object.keys(dailyPostCounts),
         ...Object.keys(dailyPromotionCounts),
       ]),
-    ]
-      .filter(date => date.startsWith(recentMonthString))
-      .sort();
+    ].sort();
     const dailySignUpData = dailyLabels.map(
       label => dailySignUpCounts[label] || 0,
     );
-    const dailyPostData = dailyLabels.map(label => dailyPostCounts[label] || 0);
-    const dailyPromotionData = dailyLabels.map(
-      label => dailyPromotionCounts[label] || 0,
-    );
+    const dailyPromotionData = dailyLabels
+      .map(label => dailyPromotionCounts[label] || 0)
+      .map((value, index) =>
+        value > 0 ? { x: dailyLabels[index], y: value } : null,
+      )
+      .filter(item => item !== null);
 
     const monthlyLabels = [
       ...new Set([
         ...Object.keys(monthlySignUpCounts),
         ...Object.keys(monthlyPostCounts),
-        ...Object.keys(monthlyPromotionCounts),
       ]),
     ].sort();
     const monthlySignUpData = monthlyLabels.map(
@@ -146,9 +193,6 @@ const fetchAndDisplayCharts = async () => {
     );
     const monthlyPostData = monthlyLabels.map(
       label => monthlyPostCounts[label] || 0,
-    );
-    const monthlyPromotionData = monthlyLabels.map(
-      label => monthlyPromotionCounts[label] || 0,
     );
 
     if (dailyChartInstance.value) {
@@ -159,7 +203,7 @@ const fetchAndDisplayCharts = async () => {
       monthlyChartInstance.value.destroy();
     }
 
-    // 일일 차트 생성 (최근 한 달 데이터)
+    // 일일 차트 생성
     dailyChartInstance.value = new Chart(dailyChartCanvas.value, {
       data: {
         labels: dailyLabels,
@@ -173,24 +217,12 @@ const fetchAndDisplayCharts = async () => {
             data: dailySignUpData,
           },
           {
-            type: 'line',
-            label: '일일 게시글 수',
-            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 5,
-            fill: false,
-            data: dailyPostData,
-          },
-          {
             type: 'scatter',
             label: '일일 홍보 수',
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 5,
-            data: dailyPromotionData.map((value, index) => ({
-              x: dailyLabels[index],
-              y: value,
-            })),
+            data: dailyPromotionData,
           },
         ],
       },
@@ -203,7 +235,22 @@ const fetchAndDisplayCharts = async () => {
           },
           title: {
             display: true,
-            text: '최근 한 달 일일 회원 가입 수, 게시글 수 및 홍보 수',
+            text: '일일 회원 가입 수 및 홍보 수',
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+            },
+            zoom: {
+              wheel: {
+                enabled: false,
+              },
+              pinch: {
+                enabled: false,
+              },
+              mode: 'x',
+            },
           },
         },
         scales: {
@@ -213,6 +260,10 @@ const fetchAndDisplayCharts = async () => {
               unit: 'day',
               tooltipFormat: 'yyyy-MM-dd',
             },
+            min: new Date(new Date().setDate(new Date().getDate() - 30))
+              .toISOString()
+              .split('T')[0],
+            max: new Date().toISOString().split('T')[0],
           },
           y: {
             beginAtZero: true,
@@ -239,23 +290,12 @@ const fetchAndDisplayCharts = async () => {
           },
           {
             type: 'line',
-            label: '월별 게시글 수',
+            label: '월별 성공사례 게시글 수',
             backgroundColor: 'rgba(153, 102, 255, 0.6)',
             borderColor: 'rgba(153, 102, 255, 1)',
             borderWidth: 5,
             fill: false,
             data: monthlyPostData,
-          },
-          {
-            type: 'scatter',
-            label: '월별 홍보 수',
-            backgroundColor: 'rgba(255, 206, 86, 0.6)',
-            borderColor: 'rgba(255, 206, 86, 1)',
-            borderWidth: 5,
-            data: monthlyPromotionData.map((value, index) => ({
-              x: monthlyLabels[index],
-              y: value,
-            })),
           },
         ],
       },
@@ -268,7 +308,22 @@ const fetchAndDisplayCharts = async () => {
           },
           title: {
             display: true,
-            text: '월별 회원 가입 수, 게시글 수 및 홍보 수',
+            text: '월별 회원 가입 수 및 성공사례 게시글 수',
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+            },
+            zoom: {
+              wheel: {
+                enabled: false,
+              },
+              pinch: {
+                enabled: false,
+              },
+              mode: 'x',
+            },
           },
         },
         scales: {
@@ -278,6 +333,10 @@ const fetchAndDisplayCharts = async () => {
               unit: 'month',
               tooltipFormat: 'yyyy-MM',
             },
+            min: new Date(new Date().setMonth(new Date().getMonth() - 12))
+              .toISOString()
+              .split('T')[0],
+            max: new Date().toISOString().split('T')[0],
           },
           y: {
             beginAtZero: true,
@@ -299,5 +358,11 @@ onMounted(fetchAndDisplayCharts);
 <style scoped>
 .user-statistics {
   padding: 20px;
+}
+.stat-message {
+  text-align: center;
+  font-size: 1.2em;
+  margin-top: 10px;
+  font-weight: bold;
 }
 </style>
