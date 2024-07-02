@@ -1,8 +1,11 @@
 <template>
   <q-page class="page-wrapper">
     <q-card class="page-card">
-      <q-card-section>
+      <q-card-section class="card-header">
+        <q-btn flat icon="arrow_back" @click="goBack" />
         <div class="text-h5">{{ jobGuide.title }}</div>
+      </q-card-section>
+      <q-card-section>
         <q-card-section v-if="images.length">
           <div
             class="image-preview"
@@ -34,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { customApi } from 'boot/axios';
 
 const jobGuide = ref({
@@ -45,6 +48,7 @@ const images = ref([]);
 const documents = ref([]);
 
 const route = useRoute();
+const router = useRouter();
 
 const fetchJobGuide = async () => {
   const jobGuideId = route.params.id;
@@ -62,6 +66,10 @@ const fetchJobGuide = async () => {
   } catch (error) {
     console.error('Failed to fetch job guide:', error);
   }
+};
+
+const goBack = () => {
+  router.go(-1);
 };
 
 onMounted(() => {
@@ -84,6 +92,15 @@ onMounted(() => {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+}
+
+.card-header .q-btn {
+  margin-right: 16px;
 }
 
 .job-guide-content {
