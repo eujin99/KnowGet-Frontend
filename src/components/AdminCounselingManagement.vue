@@ -21,8 +21,8 @@
         <td>{{ counseling.user }}</td>
         <td>{{ counseling.category }}</td>
         <td>{{ counseling.content }}</td>
-        <td>{{ counseling.sentDate }}</td>
-        <td>{{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}</td>
+        <td>{{ formatDate(counseling.sentDate) }}</td>
+        <td :class="getStatusClass(counseling.isAnswered)">{{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}</td>
       </tr>
       </tbody>
     </table>
@@ -33,6 +33,8 @@
 import {onMounted, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {customApi} from 'boot/axios';
+import {format} from "date-fns";
+import {ko} from "date-fns/locale";
 
 const counselings = ref([]);
 const router = useRouter();
@@ -48,6 +50,17 @@ const fetchCounselings = async () => {
 
 const goToCounselingDetail = counselingId => {
   router.push({name: 'AdminCounselingDetail', params: {id: counselingId}});
+};
+
+const formatDate = dateString => {
+  return dateString
+    ? format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss', {locale: ko})
+    : '유효하지 않은 날짜';
+};
+
+const getStatusClass = isApproved => {
+  if (isApproved === true) return 'status-answered';
+  if (isApproved === false) return 'status-not-answered';
 };
 
 onMounted(fetchCounselings);
@@ -92,5 +105,15 @@ onMounted(fetchCounselings);
 .counseling-table tbody tr:hover {
   background-color: #f1f1f1;
   cursor: pointer;
+}
+
+.status-answered {
+  color: green;
+  font-weight: bold;
+}
+
+.status-not-answered {
+  color: orangered;
+  font-weight: bold;
 }
 </style>

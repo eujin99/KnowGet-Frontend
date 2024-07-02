@@ -2,33 +2,35 @@
   <q-page class="page-wrapper">
     <q-card class="page-card">
       <q-card-section>
-        <q-btn flat icon="arrow_back" @click="goBack" />
+        <q-btn flat icon="arrow_back" @click="goBack"/>
+        <p/>
         <div class="text-h5">상담 내용</div>
+        <p/>
         <div class="table-container">
           <table class="consultation-table">
             <tbody>
-              <tr>
-                <th>상담 ID</th>
-                <td>{{ counseling.counselingId }}</td>
-              </tr>
-              <tr>
-                <th>사용자</th>
-                <td>{{ counseling.user }}</td>
-              </tr>
-              <tr>
-                <th>카테고리</th>
-                <td>{{ counseling.category }}</td>
-              </tr>
-              <tr>
-                <th>날짜</th>
-                <td>{{ formatDate(counseling.sentDate) }}</td>
-              </tr>
-              <tr>
-                <th>상태</th>
-                <td>
-                  {{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}
-                </td>
-              </tr>
+            <tr>
+              <th>상담 ID</th>
+              <td>{{ counseling.counselingId }}</td>
+            </tr>
+            <tr>
+              <th>사용자</th>
+              <td>{{ counseling.user }}</td>
+            </tr>
+            <tr>
+              <th>카테고리</th>
+              <td>{{ counseling.category }}</td>
+            </tr>
+            <tr>
+              <th>날짜</th>
+              <td>{{ formatDate(counseling.sentDate) }}</td>
+            </tr>
+            <tr>
+              <th>상태</th>
+              <td>
+                {{ counseling.isAnswered ? '답변 완료' : '답변 대기' }}
+              </td>
+            </tr>
             </tbody>
           </table>
         </div>
@@ -48,7 +50,7 @@
           rows="6"
         />
         <div class="submit-button">
-          <q-btn label="답변 등록" color="primary" @click="submitAnswer" />
+          <q-btn label="답변 등록" color="primary" @click="submitAnswer"/>
         </div>
       </q-card-section>
       <q-card-section v-else>
@@ -63,10 +65,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
-import { Notify, date } from 'quasar';
+import {onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
+import {date, Notify} from 'quasar';
 
 const route = useRoute();
 const router = useRouter();
@@ -123,7 +125,7 @@ const submitAnswer = async () => {
     });
     await router.push({
       name: 'AdminCounselingDetail',
-      params: { id: counseling.value.counselingId },
+      params: {id: counseling.value.counselingId},
     });
   } catch (error) {
     console.error('Failed to submit answer:', error);

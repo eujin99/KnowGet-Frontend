@@ -5,43 +5,45 @@
     </button>
     <table class="job-guide-table">
       <thead>
-        <tr>
-          <th>가이드 ID</th>
-          <th>제목</th>
-          <th>작성일</th>
-          <th>삭제</th>
-        </tr>
+      <tr>
+        <th>가이드 ID</th>
+        <th>제목</th>
+        <th>작성일</th>
+        <th>삭제</th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="jobGuide in jobGuides" :key="jobGuide.guideId">
-          <td @click="goToDetailPage(jobGuide.guideId)">
-            {{ jobGuide.guideId }}
-          </td>
-          <td @click="goToDetailPage(jobGuide.guideId)">
-            {{ jobGuide.title }}
-          </td>
-          <td @click="goToDetailPage(jobGuide.guideId)">
-            {{ jobGuide.createdDate }}
-          </td>
-          <td>
-            <button
-              class="delete-button"
-              @click="deleteJobGuide(jobGuide.guideId)"
-            >
-              삭제
-            </button>
-          </td>
-        </tr>
+      <tr v-for="jobGuide in jobGuides" :key="jobGuide.guideId">
+        <td @click="goToDetailPage(jobGuide.guideId)">
+          {{ jobGuide.guideId }}
+        </td>
+        <td @click="goToDetailPage(jobGuide.guideId)">
+          {{ jobGuide.title }}
+        </td>
+        <td @click="goToDetailPage(jobGuide.guideId)">
+          {{ formatDate(jobGuide.createdDate) }}
+        </td>
+        <td>
+          <button
+            class="delete-button"
+            @click="deleteJobGuide(jobGuide.guideId)"
+          >
+            삭제
+          </button>
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { customApi } from 'boot/axios';
-import { QIcon, Notify } from 'quasar';
+import {onMounted, ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {customApi} from 'boot/axios';
+import {Notify} from 'quasar';
+import {format} from "date-fns";
+import {ko} from "date-fns/locale";
 
 const jobGuides = ref([]);
 const router = useRouter();
@@ -75,11 +77,17 @@ const deleteJobGuide = async id => {
 };
 
 const goToCreatePage = () => {
-  router.push({ name: 'AdminJobGuideCreate' });
+  router.push({name: 'AdminJobGuideCreate'});
 };
 
 const goToDetailPage = id => {
-  router.push({ name: 'AdminJobGuideDetail', params: { id } });
+  router.push({name: 'AdminJobGuideDetail', params: {id}});
+};
+
+const formatDate = dateString => {
+  return dateString
+    ? format(new Date(dateString), 'yyyy-MM-dd HH:mm:ss', {locale: ko})
+    : '유효하지 않은 날짜';
 };
 
 onMounted(fetchJobGuides);
