@@ -112,6 +112,8 @@
 ---
 
 
+
+
 <details>
   
   <summary>화면</summary>
@@ -120,12 +122,14 @@
   
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 21 39" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/b38d08bf-1fcd-43d2-ae45-2efee172beca">
 
+[회원가입]
  <img width="1920" alt="스크린샷 2024-06-27 오후 6 09 01" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/4e883af0-a974-4980-b689-cfe629b956a2">
 
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 09 27" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/5bee7eb3-366d-402e-89f5-2c9b6e61556a">
 
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 09 37" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/8634b781-4077-4d13-9694-06a900bedcda">
 
+[로그인 및 알림]
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 09 49" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/8c3ce67e-c833-4181-846c-9455b9afb865">
 
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 09 59" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/7581478a-553f-4128-a7a1-91322b398d33">
@@ -147,25 +151,31 @@
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 12 09" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/a3a5dc9a-9a6b-4747-83d3-d76a7209fcd2">
 
 [취업 가이드]
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 18 15" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/99e0d52e-15b5-4391-8ad2-15d9fed9b6b5">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/64d5c049-28fe-4be2-82e6-1d08a6d7a59c">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 18 22" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/05902415-d68b-41de-9e82-809b6d4933eb">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/37ff80a1-a338-4043-a175-7a005dbe9e1a">
 
 
 [성공 사례]
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 12 24" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/faa81423-acb6-4aac-bc62-52c520b7fffd">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/7461e266-2f21-4241-96ca-91a8c9c6d6e1">
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/9b31a6b0-9bca-4fe7-9d1a-e5df02048052">
 
 [상담하기]
 <img width="1920" alt="스크린샷 2024-06-27 오후 6 12 30" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/0c146bf7-697a-4826-917e-6132ee65cd3e">
 
 [회원 마이페이지]
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/72907aed-6991-4541-a441-913a6f700a53">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 12 38" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/aa5b9802-11d6-4975-82d1-2d32b78b6738">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/813d2734-8659-439e-aab7-f75a5d94674c">
 
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/20d7d65a-81c9-4c80-ab9c-09d928955ba7">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 12 49" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/3a3e7be0-ddf3-4496-8c34-836d46bae4c5">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/274004c8-e464-4d8d-8a66-a6329ace5d45">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 13 01" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/b8331d01-0707-4753-beef-9e6b548d9711">
+<img width="1918" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/4915cd83-07ee-4ff9-87a7-4a4f1ccf8499">
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/b59938d8-fed9-44a0-9ef4-6d7c5d428d3c">
 
 
 [관리자 로그인]
@@ -176,20 +186,41 @@
 
 [관리자 페이지]
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 13 29" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/a15cb6b5-7490-4ef3-9c9a-b74c461fccf2">
+사용자 관리
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 13 47" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/574202fd-32f0-4aa4-8c68-d9acb911cb2e">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/fdcaca22-e53b-4000-8901-f65524bbca0f">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 13 57" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/9abd4c11-0c59-491a-90fb-5401d068334e">
+블랙리스트
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 14 07" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/fa960f00-d880-42aa-9554-d6417f4503ba">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/0d6f268e-663a-414f-adae-186b31d6f173">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 17 20" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/099e69eb-cf9c-4d7a-a51e-e48b1e4ff6d6">
+이용자 통계
 
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/a4619f7f-ae13-47d6-a01b-fde9fc02e8e1">
 
- <img width="1920" alt="스크린샷 2024-06-27 오후 6 17 32" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/3142d725-294e-4b47-a44f-3ec12035bcfd">
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/ab6ea36b-9d04-4086-a58b-f69e092271ab">
 
-<img width="1920" alt="스크린샷 2024-06-27 오후 6 17 50" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend-1/assets/155924495/95699fff-86ae-44ef-889f-2e1a3b02cdd7">
+홍보 기록
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/ef46721e-c324-4b48-9ecd-0e747b6f325b">
+
+상담 관리
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/7f3c5dc3-553b-43f7-917a-ada55d0fcf09">
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/1f957c4d-434a-4672-a4c0-83550ef55174">
+
+취업 가이드
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/a31d1a74-921d-4ec9-a442-653082c42904">
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/e27b3a6f-c851-419e-8056-8f984e9e3019">
+
+성공사례 노출 승인/거절
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/2c404b2c-f184-4911-9eaf-8d3f44083594">
+
+<img width="1920" alt="image" src="https://github.com/beyond-sw-camp/be05-fin-5team-KnowGet-Frontend/assets/155924495/3e67783a-0385-4f2b-8f34-880c949df84a">
+
 
 
 </details>
