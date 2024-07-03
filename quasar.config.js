@@ -69,7 +69,7 @@ module.exports = configure(function (/* ctx */) {
 
     devServer: {
       open: true, // opens browser window automatically
-      port: 9000, // 포트를 9000으로 설정
+      // port: 9000, // 포트를 9000으로 설정
     },
 
     framework: {
