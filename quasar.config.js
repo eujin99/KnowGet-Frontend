@@ -23,35 +23,14 @@ module.exports = configure(function (/* ctx */) {
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
 
-      vite: {
-        css: {
-          preprocessorOptions: {
-            scss: {
-              additionalData: `
-              @import "@/css/app.scss";
-            `,
-            },
+      // Ensure the template path is correctly set
+      htmlVariables: {
+        ctx: {
+          mode: {
+            pwa: true,
           },
         },
       },
-
-      vitePlugins: [
-        [
-          '@intlify/vite-plugin-vue-i18n',
-          {
-            include: path.resolve(__dirname, './src/i18n/**'),
-          },
-        ],
-        [
-          'vite-plugin-checker',
-          {
-            eslint: {
-              lintCommand: 'eslint "./**/*.{js,mjs,cjs,vue}"',
-            },
-          },
-          { server: false },
-        ],
-      ],
     },
 
     boot: ['i18n', 'axios', 'notify'],
