@@ -16,7 +16,13 @@ module.exports = configure(function (/* ctx */) {
     cssAddon: true,
 
     build: {
-      // Quasar와 Vite 통합 설정
+      target: {
+        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+        node: 'node20',
+      },
+
+      vueRouterMode: 'hash', // available values: 'hash', 'history'
+
       vite: {
         css: {
           preprocessorOptions: {
@@ -28,25 +34,6 @@ module.exports = configure(function (/* ctx */) {
           },
         },
       },
-    },
-    boot: ['i18n', 'axios', 'notify'],
-
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ['app.scss'],
-
-    // https://github.com/quasarframework/quasar/tree/dev/extras
-    extras: [
-      'roboto-font', // optional, you are not bound to it
-      'material-icons', // optional, you are not bound to it
-    ],
-
-    build: {
-      target: {
-        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
-        node: 'node20',
-      },
-
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
 
       vitePlugins: [
         [
@@ -66,6 +53,17 @@ module.exports = configure(function (/* ctx */) {
         ],
       ],
     },
+
+    boot: ['i18n', 'axios', 'notify'],
+
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
+    css: ['app.scss'],
+
+    // https://github.com/quasarframework/quasar/tree/dev/extras
+    extras: [
+      'roboto-font', // optional, you are not bound to it
+      'material-icons', // optional, you are not bound to it
+    ],
 
     devServer: {
       open: true, // opens browser window automatically
