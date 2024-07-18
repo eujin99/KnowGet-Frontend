@@ -3,23 +3,12 @@ import axios from 'axios';
 import { Notify } from 'quasar';
 import { useAuthStore } from 'stores/authStore';
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-
-// const api = axios.create({baseURL: 'http://3.36.148.87:8080/api/v1'});
-
-const api = axios.create({ baseURL: 'http://3.36.148.87:8080/api/v1' });
-
-// const customApi = axios.create({
-//   baseURL: 'http://3.36.148.87:8080/api/v1',
-// });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+});
 
 const customApi = axios.create({
-  baseURL: 'http://3.36.148.87:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 customApi.interceptors.request.use(
@@ -47,7 +36,7 @@ customApi.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         const response = await axios.post(
-          'http://3.36.148.87:8080/api/v1/user/refresh-token',
+          `${import.meta.env.VITE_API_BASE_URL}/user/refresh-token`,
           {
             refreshToken: refreshToken,
           },
@@ -59,7 +48,7 @@ customApi.interceptors.response.use(
           localStorage.setItem('accessToken', newAccessToken);
           customApi.defaults.headers.common[
             'Authorization'
-          ] = `Bearer ${newAccessToken}`;
+            ] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return customApi(originalRequest);
         }
@@ -80,8 +69,6 @@ customApi.interceptors.response.use(
 );
 
 export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
 });
